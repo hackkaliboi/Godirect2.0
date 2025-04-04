@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { properties, agents, formatPriceWithCommas } from "@/utils/data";
 import PropertyGallery from "@/components/properties/PropertyGallery";
 import PropertyCard from "@/components/properties/PropertyCard";
+import PropertyPurchase from "@/components/properties/PropertyPurchase";
 import { Helmet } from "react-helmet-async";
 
 const PropertyDetails = () => {
@@ -304,6 +305,21 @@ const PropertyDetails = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Purchase Property */}
+              <div className="bg-white dark:bg-realty-800 rounded-xl shadow p-6">
+                <h3 className="text-lg font-heading font-semibold mb-4 text-realty-900 dark:text-white">
+                  Purchase This Property
+                </h3>
+                <p className="text-sm text-realty-600 dark:text-realty-400 mb-4">
+                  Ready to make this property yours? Submit a purchase request and our team will guide you through the process.
+                </p>
+                <PropertyPurchase 
+                  propertyId={property.id}
+                  propertyTitle={property.title}
+                  propertyPrice={property.price}
+                />
+              </div>
               
               {/* Mortgage Calculator */}
               <div className="bg-white dark:bg-realty-800 rounded-xl shadow p-6">
