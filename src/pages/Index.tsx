@@ -1,13 +1,29 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import HeroSearch from "@/components/home/HeroSearch";
+import FeaturedListings from "@/components/home/FeaturedListings";
+import MarketTrends from "@/components/home/MarketTrends";
+import Testimonials from "@/components/home/Testimonials";
+import Newsletter from "@/components/home/Newsletter";
+import { Helmet } from "react-helmet-async";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <>
+      <Helmet>
+        <title>HomePulse Realty | Find Your Dream Home</title>
+        <meta name="description" content="Find your dream home with HomePulse Realty. Browse thousands of properties for sale and rent across the country." />
+      </Helmet>
+      
+      <HeroSearch />
+      
+      <FeaturedListings />
+      
+      <MarketTrends />
+      
+      <Testimonials />
+      
+      <Newsletter />
+    </>
   );
 };
 
