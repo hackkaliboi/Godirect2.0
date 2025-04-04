@@ -4,6 +4,13 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Moon, Sun, User } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -67,14 +74,28 @@ const Header = () => {
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
-            <Button variant="outline" size="sm" className="rounded-full">
-              <User className="h-4 w-4 mr-2" />
-              Login
-            </Button>
-
-            <Button size="sm" className="rounded-full bg-realty-800 hover:bg-realty-900 text-white">
-              Sign Up
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-full">
+                  <User className="h-4 w-4 mr-2" />
+                  Account
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/admin-dashboard">Admin Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/agent-dashboard">Agent Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/user-dashboard">User Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Login</DropdownMenuItem>
+                <DropdownMenuItem>Sign Up</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Mobile Menu Button */}
@@ -121,6 +142,27 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
+              <Link
+                to="/user-dashboard"
+                className="px-2 py-2 text-sm font-medium rounded-md text-realty-600 dark:text-realty-400"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                User Dashboard
+              </Link>
+              <Link
+                to="/agent-dashboard"
+                className="px-2 py-2 text-sm font-medium rounded-md text-realty-600 dark:text-realty-400"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Agent Dashboard
+              </Link>
+              <Link
+                to="/admin-dashboard"
+                className="px-2 py-2 text-sm font-medium rounded-md text-realty-600 dark:text-realty-400"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Admin Dashboard
+              </Link>
             </nav>
             <div className="pt-4 border-t border-gray-200 dark:border-realty-800 flex flex-col space-y-3">
               <Button variant="outline" className="justify-center">
