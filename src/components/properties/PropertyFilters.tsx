@@ -53,6 +53,27 @@ const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
   const formatPrice = (value: number) => 
     `$${value.toLocaleString('en-US')}`;
 
+  // Fixed type conversion for bedrooms and bathrooms
+  const handleBedroomSelection = (value: string | number | null) => {
+    if (value === "5+") {
+      setBedrooms(5);
+    } else if (typeof value === "number") {
+      setBedrooms(value);
+    } else {
+      setBedrooms(null);
+    }
+  };
+
+  const handleBathroomSelection = (value: string | number | null) => {
+    if (value === "4+") {
+      setBathrooms(4);
+    } else if (typeof value === "number") {
+      setBathrooms(value);
+    } else {
+      setBathrooms(null);
+    }
+  };
+
   return (
     <div className="mb-8">
       {/* Search bar and filter button */}
@@ -148,10 +169,10 @@ const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
                       key={index}
                       variant="outline"
                       size="sm"
-                      onClick={() => setBedrooms(num === "5+" ? 5 : num)}
+                      onClick={() => handleBedroomSelection(num)}
                       className={cn(
                         "rounded-full min-w-[40px]",
-                        bedrooms === (num === "5+" ? 5 : num)
+                        (bedrooms === num || (num === "5+" && bedrooms === 5))
                           ? "bg-realty-800 text-white hover:bg-realty-700 border-realty-800"
                           : "bg-transparent hover:bg-realty-50 dark:hover:bg-realty-700"
                       )}
@@ -170,10 +191,10 @@ const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
                       key={index}
                       variant="outline"
                       size="sm"
-                      onClick={() => setBathrooms(num === "4+" ? 4 : num)}
+                      onClick={() => handleBathroomSelection(num)}
                       className={cn(
                         "rounded-full min-w-[40px]",
-                        bathrooms === (num === "4+" ? 4 : num)
+                        (bathrooms === num || (num === "4+" && bathrooms === 4))
                           ? "bg-realty-800 text-white hover:bg-realty-700 border-realty-800"
                           : "bg-transparent hover:bg-realty-50 dark:hover:bg-realty-700"
                       )}
