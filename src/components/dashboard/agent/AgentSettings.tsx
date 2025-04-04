@@ -2,179 +2,160 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
 
 export default function AgentSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Agent Settings</h1>
         <p className="text-muted-foreground">
-          Manage your account preferences and notification settings
+          Manage your agent account settings and preferences
         </p>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Notification Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Email Notifications</p>
-                <p className="text-sm text-muted-foreground">Receive email notifications for important events</p>
+              <div className="space-y-0.5">
+                <Label htmlFor="email-notifications">Email Notifications</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receive email notifications for new inquiries and messages
+                </p>
               </div>
-              <Switch defaultChecked />
+              <Switch id="email-notifications" defaultChecked />
             </div>
             
-            <Separator />
-            
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">New Client Inquiries</p>
-                <p className="text-sm text-muted-foreground">Be notified immediately when clients contact you</p>
+              <div className="space-y-0.5">
+                <Label htmlFor="sms-notifications">SMS Notifications</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receive SMS notifications for urgent matters
+                </p>
               </div>
-              <Switch defaultChecked />
+              <Switch id="sms-notifications" defaultChecked />
             </div>
             
-            <Separator />
-            
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Showing Appointments</p>
-                <p className="text-sm text-muted-foreground">Get reminders about upcoming property showings</p>
+              <div className="space-y-0.5">
+                <Label htmlFor="app-notifications">In-App Notifications</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receive notifications within the app
+                </p>
               </div>
-              <Switch defaultChecked />
+              <Switch id="app-notifications" defaultChecked />
             </div>
             
-            <Separator />
-            
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Offer Updates</p>
-                <p className="text-sm text-muted-foreground">Be notified when offers are submitted or updated</p>
+              <div className="space-y-0.5">
+                <Label htmlFor="marketing-emails">Marketing Emails</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receive promotional emails and market updates
+                </p>
               </div>
-              <Switch defaultChecked />
+              <Switch id="marketing-emails" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Privacy Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="profile-public">Public Profile</Label>
+                <p className="text-sm text-muted-foreground">
+                  Make your agent profile visible on the platform
+                </p>
+              </div>
+              <Switch id="profile-public" defaultChecked />
             </div>
             
-            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="contact-info-visible">Show Contact Information</Label>
+                <p className="text-sm text-muted-foreground">
+                  Allow users to see your contact information
+                </p>
+              </div>
+              <Switch id="contact-info-visible" defaultChecked />
+            </div>
             
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Market Reports</p>
-                <p className="text-sm text-muted-foreground">Receive weekly market trend updates</p>
+              <div className="space-y-0.5">
+                <Label htmlFor="listing-stats">Share Listing Analytics</Label>
+                <p className="text-sm text-muted-foreground">
+                  Share your listing performance statistics
+                </p>
               </div>
-              <Switch />
+              <Switch id="listing-stats" />
             </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Calendar Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Display Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="dark-mode">Dark Mode</Label>
+                <p className="text-sm text-muted-foreground">
+                  Use dark mode for the dashboard interface
+                </p>
+              </div>
+              <Switch id="dark-mode" />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="compact-view">Compact View</Label>
+                <p className="text-sm text-muted-foreground">
+                  Show more content with less spacing
+                </p>
+              </div>
+              <Switch id="compact-view" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Bio</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="availability">Default Daily Availability</Label>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="start-time" className="text-xs text-muted-foreground">Start Time</Label>
-                  <Select defaultValue="9">
-                    <SelectTrigger id="start-time">
-                      <SelectValue placeholder="Start time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[...Array(12)].map((_, i) => (
-                        <SelectItem key={i} value={`${i + 8}`}>{i + 8}:00 AM</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="end-time" className="text-xs text-muted-foreground">End Time</Label>
-                  <Select defaultValue="17">
-                    <SelectTrigger id="end-time">
-                      <SelectValue placeholder="End time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[...Array(8)].map((_, i) => (
-                        <SelectItem key={i} value={`${i + 12}`}>{i + 12}:00 PM</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <Label htmlFor="short-bio">Short Bio</Label>
+              <Textarea 
+                id="short-bio" 
+                placeholder="Brief introduction (shown in listings)"
+                defaultValue="I'm a dedicated real estate professional with over 10 years of experience in the downtown area."
+                rows={2}
+              />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="calendar-sync">Calendar Synchronization</Label>
-              <Select defaultValue="google">
-                <SelectTrigger>
-                  <SelectValue placeholder="Select calendar" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="google">Google Calendar</SelectItem>
-                  <SelectItem value="outlook">Microsoft Outlook</SelectItem>
-                  <SelectItem value="apple">Apple Calendar</SelectItem>
-                  <SelectItem value="none">None</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="full-bio">Full Bio</Label>
+              <Textarea 
+                id="full-bio" 
+                placeholder="Your complete professional profile"
+                defaultValue="With a decade of experience serving clients in the downtown metropolitan area, I specialize in luxury apartments and commercial real estate. I hold certifications in property valuation and negotiation, allowing me to secure the best deals for my clients in any market condition."
+                rows={5}
+              />
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="buffer-time">Buffer Time Between Appointments</Label>
-            <Select defaultValue="15">
-              <SelectTrigger>
-                <SelectValue placeholder="Select buffer time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0">No buffer</SelectItem>
-                <SelectItem value="15">15 minutes</SelectItem>
-                <SelectItem value="30">30 minutes</SelectItem>
-                <SelectItem value="60">1 hour</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Communication Preferences</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email-signature">Email Signature</Label>
-            <Textarea 
-              id="email-signature" 
-              rows={4}
-              placeholder="Create your email signature..."
-              defaultValue="Sarah Johnson\nLicensed Real Estate Agent\nHomePulse Realty\n(555) 123-4567 | sarah.j@homepulse.com"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="auto-responder">Auto-Responder Message</Label>
-            <Textarea 
-              id="auto-responder" 
-              rows={3}
-              placeholder="Message for when you're unavailable..."
-              defaultValue="Thank you for your message. I'll respond within 24 hours. For urgent matters, please call my office at (555) 123-4567."
-            />
-          </div>
-          
-          <div className="pt-4">
-            <Button>Save Communication Preferences</Button>
-          </div>
-        </CardContent>
-      </Card>
+            
+            <Button className="w-full">Save Bio</Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
