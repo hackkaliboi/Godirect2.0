@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -12,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 import { 
   Home, 
   Heart, 
@@ -22,7 +24,14 @@ import {
   Calendar,
   ArrowUpRight,
   Eye,
-  MapPin
+  MapPin,
+  ArrowUp,
+  ArrowDown,
+  ShoppingBag,
+  SearchCheck,
+  Bell,
+  History as HistoryIcon,
+  TrendingUp
 } from "lucide-react";
 
 const UserDashboard = () => {
@@ -259,7 +268,7 @@ const UserDashboard = () => {
                     <Card className="shadow-md hover:shadow-lg transition-shadow">
                       <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                         <CardTitle className="text-xl font-semibold">Recent Views</CardTitle>
-                        <History className="h-5 w-5 text-purple-500" />
+                        <HistoryIcon className="h-5 w-5 text-purple-500" />
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold">12</div>
