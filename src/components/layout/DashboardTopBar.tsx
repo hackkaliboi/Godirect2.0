@@ -159,7 +159,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
   };
 
   return (
-    <div className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="sticky top-0 z-30 w-full border-b bg-background shadow-sm">
       <div className="flex h-16 items-center px-4 md:px-6">
         {/* Mobile menu toggle */}
         <Button 
@@ -176,7 +176,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
         <div className="flex items-center md:hidden">
           <Link to={`/${userType}-dashboard`} className="flex items-center gap-2 font-semibold">
             <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-white text-xs font-bold">GD</span>
+              <span className="text-primary-foreground text-xs font-bold">GD</span>
             </div>
             <span>GODIRECT</span>
           </Link>
@@ -203,7 +203,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
 
         {/* Mobile search dropdown */}
         {searchOpen && (
-          <div className="absolute left-0 right-0 top-16 p-4 bg-background border-b md:hidden">
+          <div className="absolute left-0 right-0 top-16 p-4 bg-background border-b md:hidden z-30">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -227,7 +227,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
                 <span className="sr-only">Notifications</span>
               </Button>
             </DrawerTrigger>
-            <DrawerContent>
+            <DrawerContent className="bg-background">
               <DrawerHeader>
                 <DrawerTitle>Notifications</DrawerTitle>
                 <DrawerDescription>Stay updated with your recent activity.</DrawerDescription>
@@ -278,7 +278,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 bg-card">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{userInfo.name}</p>

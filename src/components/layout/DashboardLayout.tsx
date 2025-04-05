@@ -157,14 +157,14 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen w-full overflow-hidden bg-muted/10">
+      <div className="flex h-screen w-full overflow-hidden bg-background">
         {/* Sidebar - with proper background color */}
         <Sidebar 
           variant="sidebar" 
           collapsible="icon" 
           className="z-10 bg-card border-r border-border"
         >
-          <SidebarHeader className="border-b pb-2">
+          <SidebarHeader className="border-b border-border pb-2">
             <div className="flex items-center justify-between px-4">
               <Link to="/" className="flex items-center gap-2 font-semibold">
                 <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
@@ -224,7 +224,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
             </ScrollArea>
           </SidebarContent>
           
-          <SidebarFooter className="border-t bg-card">
+          <SidebarFooter className="border-t border-border bg-card">
             <div className="p-4">
               <Button 
                 variant="outline" 
@@ -240,13 +240,13 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
           </SidebarFooter>
         </Sidebar>
         
-        {/* Main content area - adjusted z-index to be higher than sidebar */}
+        {/* Main content area */}
         <div className="flex flex-col flex-1 overflow-hidden relative z-20 bg-background">
           <DashboardTopBar userType={userType} />
           
           <div className="flex-1 overflow-auto">
             <div className="container mx-auto p-4 max-w-full">
-              <div className="bg-background rounded-lg shadow-sm">
+              <div className="bg-background rounded-lg">
                 {children}
               </div>
             </div>
