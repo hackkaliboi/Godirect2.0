@@ -8,6 +8,7 @@ import AgentSettings from "@/components/dashboard/agent/AgentSettings";
 import AgentCommissions from "@/components/dashboard/agent/AgentCommissions";
 import AgentLeads from "@/components/dashboard/agent/AgentLeads";
 import { Helmet } from "react-helmet-async";
+import { Badge } from "@/components/ui/badge";
 import { 
   Home, 
   Users2, 

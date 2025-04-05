@@ -1,28 +1,29 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import UserProfile from "@/components/dashboard/user/UserProfile";
+import UserSettings from "@/components/dashboard/user/UserSettings";
 import UserFavorites from "@/components/dashboard/user/UserFavorites";
 import UserMessages from "@/components/dashboard/user/UserMessages";
-import UserSettings from "@/components/dashboard/user/UserSettings";
 import UserPurchases from "@/components/dashboard/user/UserPurchases";
-import { Helmet } from "react-helmet-async";
-import { 
-  Heart, 
-  MessageSquare, 
-  ShoppingBag, 
-  SearchCheck, 
-  Bell, 
-  History, 
-  TrendingUp, 
-  MapPin, 
-  Calendar, 
-  ArrowUp, 
-  ArrowDown 
-} from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  Home, 
+  Heart, 
+  Search, 
+  Building, 
+  MessageSquare, 
+  Clock,
+  Calendar,
+  ArrowUpRight,
+  Eye,
+  MapPin
+} from "lucide-react";
 
 const UserDashboard = () => {
   return (
