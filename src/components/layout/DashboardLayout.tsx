@@ -158,8 +158,8 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen w-full overflow-hidden bg-muted/10">
-        {/* Sidebar */}
-        <Sidebar variant="sidebar" collapsible="icon">
+        {/* Sidebar - adjusted z-index to be lower than content */}
+        <Sidebar variant="sidebar" collapsible="icon" className="z-10">
           <SidebarHeader className="border-b pb-2">
             <div className="flex items-center justify-between px-4">
               <Link to="/" className="flex items-center gap-2 font-semibold">
@@ -236,8 +236,8 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
           </SidebarFooter>
         </Sidebar>
         
-        {/* Main content area */}
-        <div className="flex flex-col flex-1 overflow-hidden">
+        {/* Main content area - adjusted z-index to be higher than sidebar */}
+        <div className="flex flex-col flex-1 overflow-hidden relative z-20 bg-background">
           <DashboardTopBar userType={userType} />
           
           <div className="flex-1 overflow-auto">
