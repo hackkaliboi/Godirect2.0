@@ -1,7 +1,10 @@
 
 import HeroSearch from "@/components/home/HeroSearch";
 import FeaturedListings from "@/components/home/FeaturedListings";
+import PropertyTypes from "@/components/home/PropertyTypes";
+import PropertyStatistics from "@/components/home/PropertyStatistics";
 import MarketTrends from "@/components/home/MarketTrends";
+import HowItWorks from "@/components/home/HowItWorks";
 import Testimonials from "@/components/home/Testimonials";
 import Newsletter from "@/components/home/Newsletter";
 import { Helmet } from "react-helmet-async";
@@ -16,9 +19,15 @@ const Index = () => {
       
       <HeroSearch />
       
+      <PropertyStatistics />
+      
       <FeaturedListings />
       
+      <PropertyTypes />
+      
       <MarketTrends />
+      
+      <HowItWorks />
       
       <Testimonials />
       

@@ -2,6 +2,7 @@
 import { ArrowUpCircle, ArrowDownCircle, CircleDot } from "lucide-react";
 import { marketTrends } from "@/utils/data";
 import { cn } from "@/lib/utils";
+import { LineChart, Line, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const MarketTrends = () => {
   const getTrendIcon = (trend: string) => {
@@ -38,6 +39,49 @@ const MarketTrends = () => {
     }
   };
 
+  const getTrendData = (trend: string) => {
+    // Generate sample chart data based on trend direction
+    if (trend === 'up') {
+      return [
+        { month: 'Jan', value: 40 },
+        { month: 'Feb', value: 45 },
+        { month: 'Mar', value: 42 },
+        { month: 'Apr', value: 48 },
+        { month: 'May', value: 50 },
+        { month: 'Jun', value: 55 }
+      ];
+    } else if (trend === 'down') {
+      return [
+        { month: 'Jan', value: 55 },
+        { month: 'Feb', value: 50 },
+        { month: 'Mar', value: 48 },
+        { month: 'Apr', value: 45 },
+        { month: 'May', value: 42 },
+        { month: 'Jun', value: 40 }
+      ];
+    } else {
+      return [
+        { month: 'Jan', value: 45 },
+        { month: 'Feb', value: 48 },
+        { month: 'Mar', value: 45 },
+        { month: 'Apr', value: 47 },
+        { month: 'May', value: 45 },
+        { month: 'Jun', value: 48 }
+      ];
+    }
+  };
+
+  const getTrendColor = (trend: string) => {
+    switch (trend) {
+      case 'up':
+        return '#22c55e'; // green-500
+      case 'down':
+        return '#ef4444'; // red-500
+      default:
+        return '#3b82f6'; // blue-500
+    }
+  };
+
   return (
     <section className="section-padding bg-realty-50 dark:bg-realty-800/30">
       <div className="container-custom">
@@ -69,9 +113,36 @@ const MarketTrends = () => {
                 </span>
               </div>
               
-              <p className="text-sm text-realty-600 dark:text-realty-400">
+              <p className="text-sm text-realty-600 dark:text-realty-400 mb-4">
                 {item.description}
               </p>
+              
+              {/* Mini chart */}
+              <div className="h-16 mt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={getTrendData(item.trend)}>
+                    <XAxis dataKey="month" hide />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        border: 'none'
+                      }}
+                      formatter={(value) => [`${value}`, 'Value']}
+                      labelFormatter={(label) => label}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke={getTrendColor(item.trend)} 
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           ))}
         </div>
