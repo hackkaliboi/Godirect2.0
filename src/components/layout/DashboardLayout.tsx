@@ -1,6 +1,6 @@
 
 import { ReactNode, useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Sidebar, 
   SidebarContent, 
@@ -13,10 +13,35 @@ import {
   SidebarMenuItem, 
   SidebarMenuButton,
   SidebarProvider, 
-  SidebarTrigger 
+  SidebarTrigger,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Home, User, Users, Building, Settings, LogOut, Menu, X } from "lucide-react";
+import { 
+  Home, 
+  User, 
+  Users, 
+  Building, 
+  Settings, 
+  LogOut, 
+  Menu, 
+  X, 
+  BarChart3,
+  DollarSign,
+  FileText,
+  BellRing,
+  MessageSquare,
+  Heart,
+  ShoppingBag,
+  SearchCheck,
+  Bell,
+  History,
+  Calendar
+} from "lucide-react";
+import DashboardTopBar from "./DashboardTopBar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -25,22 +50,7 @@ type DashboardLayoutProps = {
 
 export default function DashboardLayout({ children, userType }: DashboardLayoutProps) {
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Add a check for mobile devices
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-    };
-  }, []);
+  const navigate = useNavigate();
   
   // Define navigation items by user type
   const getNavItems = () => {
@@ -53,12 +63,32 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
     if (userType === "admin") {
       return [
         ...commonItems,
-        { title: "Users", path: "/admin-dashboard/users", icon: Users },
-        { title: "Agents", path: "/admin-dashboard/agents", icon: Users },
-        { title: "Properties", path: "/admin-dashboard/properties", icon: Building },
-        { title: "Sales", path: "/admin-dashboard/sales", icon: Building },
-        { title: "Reports", path: "/admin-dashboard/reports", icon: Building },
-        { title: "Notifications", path: "/admin-dashboard/notifications", icon: Building },
+        { 
+          title: "User Management", 
+          icon: Users, 
+          subItems: [
+            { title: "Users", path: "/admin-dashboard/users" },
+            { title: "Agents", path: "/admin-dashboard/agents" },
+          ]
+        },
+        { 
+          title: "Properties", 
+          path: "/admin-dashboard/properties", 
+          icon: Building 
+        },
+        { 
+          title: "Analytics", 
+          icon: BarChart3,
+          subItems: [
+            { title: "Sales", path: "/admin-dashboard/sales" },
+            { title: "Reports", path: "/admin-dashboard/reports" },
+          ]
+        },
+        { 
+          title: "Notifications", 
+          path: "/admin-dashboard/notifications", 
+          icon: BellRing 
+        },
       ];
     }
     
@@ -66,139 +96,135 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
       return [
         ...commonItems,
         { title: "My Listings", path: "/agent-dashboard/listings", icon: Building },
-        { title: "Clients", path: "/agent-dashboard/clients", icon: Users },
-        { title: "Leads", path: "/agent-dashboard/leads", icon: Users },
-        { title: "Commissions", path: "/agent-dashboard/commissions", icon: Building },
-        { title: "Performance", path: "/agent-dashboard/performance", icon: Building },
-        { title: "Calendar", path: "/agent-dashboard/calendar", icon: Building },
+        { 
+          title: "Client Management", 
+          icon: Users,
+          subItems: [
+            { title: "Clients", path: "/agent-dashboard/clients" },
+            { title: "Leads", path: "/agent-dashboard/leads" },
+          ]
+        },
+        { title: "Commissions", path: "/agent-dashboard/commissions", icon: DollarSign },
+        { title: "Performance", path: "/agent-dashboard/performance", icon: BarChart3 },
+        { title: "Calendar", path: "/agent-dashboard/calendar", icon: Calendar },
       ];
     }
     
     // User type
     return [
       ...commonItems,
-      { title: "Favorites", path: "/user-dashboard/favorites", icon: Building },
-      { title: "Messages", path: "/user-dashboard/messages", icon: Users },
-      { title: "Purchases", path: "/user-dashboard/purchases", icon: Building },
-      { title: "Saved Searches", path: "/user-dashboard/saved-searches", icon: Building },
-      { title: "Property Alerts", path: "/user-dashboard/property-alerts", icon: Building },
-      { title: "Viewing History", path: "/user-dashboard/viewing-history", icon: Building },
+      { title: "Favorites", path: "/user-dashboard/favorites", icon: Heart },
+      { title: "Messages", path: "/user-dashboard/messages", icon: MessageSquare },
+      { 
+        title: "Properties", 
+        icon: Building,
+        subItems: [
+          { title: "Saved Searches", path: "/user-dashboard/saved-searches" },
+          { title: "Property Alerts", path: "/user-dashboard/property-alerts" },
+          { title: "Viewing History", path: "/user-dashboard/viewing-history" },
+        ]
+      },
+      { title: "Purchases", path: "/user-dashboard/purchases", icon: ShoppingBag },
     ];
   };
   
   const navItems = getNavItems();
   
-  // Capitalize first letter of user type for display
-  const userTypeDisplay = userType.charAt(0).toUpperCase() + userType.slice(1);
-  
-  const toggleMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
+  const handleLogout = () => {
+    // In a real app, you would clear auth state here
+    navigate("/");
   };
 
   return (
-    <SidebarProvider defaultOpen={!isMobile}>
-      <div className="flex min-h-screen w-full">
-        {/* Mobile menu button - always visible on mobile */}
-        <div className="fixed top-4 left-4 z-50 md:hidden">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={toggleMenu}
-            className="bg-white dark:bg-gray-800 shadow-md"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
-        
-        {/* Mobile menu - fullscreen overlay for small screens */}
-        {isMobile && mobileMenuOpen && (
-          <div className="fixed inset-0 z-40 bg-background flex flex-col px-4 pt-16 pb-6">
-            <div className="overflow-y-auto flex-1">
-              <div className="py-6">
-                <div className="font-bold text-xl mb-6">GODIRECT {userTypeDisplay}</div>
-                <ul className="space-y-2">
-                  {navItems.map((item) => (
-                    <li key={item.path}>
-                      <Link 
-                        to={item.path} 
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-3 rounded-md ${
-                          location.pathname === item.path || 
-                          (item.title === "Dashboard" && location.pathname === `/${userType}-dashboard`) ? 
-                          "bg-primary/10 text-primary font-medium" : 
-                          "text-foreground/70 hover:bg-muted"
-                        }`}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex h-screen w-full overflow-hidden bg-muted/10">
+        {/* Sidebar */}
+        <Sidebar variant="sidebar" collapsible="icon">
+          <SidebarHeader className="border-b pb-2">
+            <div className="flex items-center justify-between px-4">
+              <Link to="/" className="flex items-center gap-2 font-semibold">
+                <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground text-xs font-bold">GD</span>
+                </div>
+                <span>GODIRECT</span>
+              </Link>
+              <SidebarTrigger />
             </div>
-            <div className="border-t pt-4">
-              <Button variant="outline" className="w-full flex items-center gap-2">
-                <LogOut size={16} /> Logout
-              </Button>
-              <div className="mt-4 text-xs text-center text-muted-foreground">
-                GODIRECT - Enugu & Calabar, Nigeria
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Desktop sidebar */}
-        <div className={`${isMobile ? 'hidden' : 'block'} md:block`}>
-          <Sidebar>
-            <SidebarHeader>
-              <div className="flex items-center justify-between p-2">
-                <div className="font-bold text-lg">GODIRECT {userTypeDisplay}</div>
-                <SidebarTrigger />
-              </div>
-            </SidebarHeader>
-            <SidebarContent>
+          </SidebarHeader>
+          
+          <SidebarContent>
+            <ScrollArea className="h-[calc(100vh-10rem)]">
               <SidebarGroup>
                 <SidebarGroupLabel>Navigation</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {navItems.map((item) => (
-                      <SidebarMenuItem key={item.path}>
-                        <SidebarMenuButton 
-                          asChild 
-                          isActive={location.pathname === item.path || 
-                                   (item.title === "Dashboard" && location.pathname === `/${userType}-dashboard`)}
-                          tooltip={item.title}
-                        >
-                          <Link to={item.path}>
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
+                    {navItems.map((item, index) => (
+                      <SidebarMenuItem key={index}>
+                        {!item.subItems ? (
+                          <SidebarMenuButton 
+                            asChild
+                            isActive={location.pathname === item.path || 
+                                    (item.title === "Dashboard" && location.pathname === `/${userType}-dashboard`)}
+                            tooltip={item.title}
+                          >
+                            <Link to={item.path}>
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        ) : (
+                          <>
+                            <SidebarMenuButton tooltip={item.title}>
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </SidebarMenuButton>
+                            <SidebarMenuSub>
+                              {item.subItems.map((subItem, subIndex) => (
+                                <SidebarMenuSubItem key={subIndex}>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={location.pathname === subItem.path}
+                                  >
+                                    <Link to={subItem.path}>{subItem.title}</Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </>
+                        )}
                       </SidebarMenuItem>
                     ))}
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
-            </SidebarContent>
-            <SidebarFooter>
-              <div className="p-4">
-                <Button variant="outline" className="w-full flex items-center gap-2">
-                  <LogOut size={16} /> Logout
-                </Button>
-                <div className="mt-3 text-xs text-center text-muted-foreground">
-                  GODIRECT - Enugu & Calabar, Nigeria
-                </div>
+            </ScrollArea>
+          </SidebarContent>
+          
+          <SidebarFooter className="border-t">
+            <div className="p-4">
+              <Button 
+                variant="outline" 
+                className="w-full flex items-center gap-2"
+                onClick={handleLogout}
+              >
+                <LogOut size={16} /> Logout
+              </Button>
+              <div className="mt-3 text-xs text-center text-muted-foreground">
+                GODIRECT - Enugu & Calabar, Nigeria
               </div>
-            </SidebarFooter>
-          </Sidebar>
-        </div>
+            </div>
+          </SidebarFooter>
+        </Sidebar>
         
         {/* Main content area */}
-        <div className="flex-1 overflow-auto">
-          <div className="container mx-auto p-4 max-w-full">
-            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm">
-              {children}
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <DashboardTopBar userType={userType} />
+          
+          <div className="flex-1 overflow-auto">
+            <div className="container mx-auto p-4 max-w-full">
+              <div className="bg-background rounded-lg shadow-sm">
+                {children}
+              </div>
             </div>
           </div>
         </div>
