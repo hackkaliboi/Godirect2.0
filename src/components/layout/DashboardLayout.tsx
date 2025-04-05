@@ -15,8 +15,8 @@ import {
   SidebarProvider, 
   SidebarTrigger 
 } from "@/components/ui/sidebar";
-import { Home, User, Users, Building, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Home, User, Users, Building, Settings, LogOut } from "lucide-react";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -30,7 +30,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
   const getNavItems = () => {
     const commonItems = [
       { title: "Dashboard", path: `/${userType}-dashboard`, icon: Home },
-      { title: "Profile", path: `/${userType}-dashboard/profile`, icon: User },
+      { title: "Profile", path: `/${userType}-dashboard`, icon: User },
       { title: "Settings", path: `/${userType}-dashboard/settings`, icon: Settings },
     ];
     
@@ -40,6 +40,9 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
         { title: "Users", path: "/admin-dashboard/users", icon: Users },
         { title: "Agents", path: "/admin-dashboard/agents", icon: Users },
         { title: "Properties", path: "/admin-dashboard/properties", icon: Building },
+        { title: "Sales", path: "/admin-dashboard/sales", icon: Building },
+        { title: "Reports", path: "/admin-dashboard/reports", icon: Building },
+        { title: "Notifications", path: "/admin-dashboard/notifications", icon: Building },
       ];
     }
     
@@ -48,6 +51,10 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
         ...commonItems,
         { title: "My Listings", path: "/agent-dashboard/listings", icon: Building },
         { title: "Clients", path: "/agent-dashboard/clients", icon: Users },
+        { title: "Leads", path: "/agent-dashboard/leads", icon: Users },
+        { title: "Commissions", path: "/agent-dashboard/commissions", icon: Building },
+        { title: "Performance", path: "/agent-dashboard/performance", icon: Building },
+        { title: "Calendar", path: "/agent-dashboard/calendar", icon: Building },
       ];
     }
     
@@ -56,6 +63,10 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
       ...commonItems,
       { title: "Favorites", path: "/user-dashboard/favorites", icon: Building },
       { title: "Messages", path: "/user-dashboard/messages", icon: Users },
+      { title: "Purchases", path: "/user-dashboard/purchases", icon: Building },
+      { title: "Saved Searches", path: "/user-dashboard/saved-searches", icon: Building },
+      { title: "Property Alerts", path: "/user-dashboard/property-alerts", icon: Building },
+      { title: "Viewing History", path: "/user-dashboard/viewing-history", icon: Building },
     ];
   };
   
@@ -87,7 +98,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                         tooltip={item.title}
                       >
                         <Link to={item.path}>
-                          <item.icon />
+                          <item.icon className="h-4 w-4" />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -105,8 +116,12 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
             </div>
           </SidebarFooter>
         </Sidebar>
-        <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
-          {children}
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto p-4 max-w-full">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm">
+              {children}
+            </div>
+          </div>
         </div>
       </div>
     </SidebarProvider>
