@@ -16,7 +16,47 @@ const UserDashboard = () => {
       </Helmet>
       <DashboardLayout userType="user">
         <Routes>
-          <Route index element={<UserProfile />} />
+          <Route index element={
+            <div className="p-6 space-y-6">
+              <h1 className="text-3xl font-bold tracking-tight">User Dashboard</h1>
+              <p className="text-muted-foreground">
+                Manage your property search, favorites, and account settings
+              </p>
+              
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-medium mb-2">Favorites</h3>
+                  <p className="text-muted-foreground mb-4">Your saved properties</p>
+                  <div className="text-3xl font-bold">8</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-medium mb-2">Messages</h3>
+                  <p className="text-muted-foreground mb-4">Unread messages</p>
+                  <div className="text-3xl font-bold">3</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-medium mb-2">Purchases</h3>
+                  <p className="text-muted-foreground mb-4">Your property transactions</p>
+                  <div className="text-3xl font-bold">1</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-medium mb-2">Saved Searches</h3>
+                  <p className="text-muted-foreground mb-4">Your saved search criteria</p>
+                  <div className="text-3xl font-bold">4</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-medium mb-2">Alerts</h3>
+                  <p className="text-muted-foreground mb-4">New property alerts</p>
+                  <div className="text-3xl font-bold">2</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border shadow-sm">
+                  <h3 className="text-lg font-medium mb-2">Recent Views</h3>
+                  <p className="text-muted-foreground mb-4">Recently viewed properties</p>
+                  <div className="text-3xl font-bold">12</div>
+                </div>
+              </div>
+            </div>
+          } />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/favorites" element={<UserFavorites />} />
           <Route path="/messages" element={<UserMessages />} />
