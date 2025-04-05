@@ -7,26 +7,17 @@ import UserMessages from "@/components/dashboard/user/UserMessages";
 import UserSettings from "@/components/dashboard/user/UserSettings";
 import UserPurchases from "@/components/dashboard/user/UserPurchases";
 import { Helmet } from "react-helmet-async";
-import {
-  LayoutDashboard,
-  Heart,
-  MessageSquare,
-  Settings,
-  ShoppingCart,
-  Search,
-  Home,
-  History
-} from "lucide-react";
 
 const UserDashboard = () => {
   return (
     <>
       <Helmet>
-        <title>User Dashboard | HomePulse Realty</title>
+        <title>User Dashboard | GODIRECT</title>
       </Helmet>
       <DashboardLayout userType="user">
         <Routes>
-          <Route path="/" element={<UserProfile />} />
+          <Route index element={<UserProfile />} />
+          <Route path="/profile" element={<UserProfile />} />
           <Route path="/favorites" element={<UserFavorites />} />
           <Route path="/messages" element={<UserMessages />} />
           <Route path="/settings" element={<UserSettings />} />

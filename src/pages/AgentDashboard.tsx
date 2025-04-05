@@ -8,26 +8,17 @@ import AgentSettings from "@/components/dashboard/agent/AgentSettings";
 import AgentCommissions from "@/components/dashboard/agent/AgentCommissions";
 import AgentLeads from "@/components/dashboard/agent/AgentLeads";
 import { Helmet } from "react-helmet-async";
-import {
-  LayoutDashboard,
-  Home,
-  Users,
-  Settings,
-  DollarSign,
-  Target,
-  Calendar,
-  BarChart
-} from "lucide-react";
 
 const AgentDashboard = () => {
   return (
     <>
       <Helmet>
-        <title>Agent Dashboard | HomePulse Realty</title>
+        <title>Agent Dashboard | GODIRECT</title>
       </Helmet>
       <DashboardLayout userType="agent">
         <Routes>
-          <Route path="/" element={<AgentProfile />} />
+          <Route index element={<AgentProfile />} />
+          <Route path="/profile" element={<AgentProfile />} />
           <Route path="/listings" element={<AgentListings />} />
           <Route path="/clients" element={<AgentClients />} />
           <Route path="/settings" element={<AgentSettings />} />

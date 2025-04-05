@@ -46,7 +46,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
   const getNavItems = () => {
     const commonItems = [
       { title: "Dashboard", path: `/${userType}-dashboard`, icon: Home },
-      { title: "Profile", path: `/${userType}-dashboard`, icon: User },
+      { title: "Profile", path: `/${userType}-dashboard/profile`, icon: User },
       { title: "Settings", path: `/${userType}-dashboard/settings`, icon: Settings },
     ];
     
@@ -123,7 +123,8 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                         to={item.path} 
                         onClick={() => setMobileMenuOpen(false)}
                         className={`flex items-center gap-3 px-3 py-3 rounded-md ${
-                          location.pathname === item.path ? 
+                          location.pathname === item.path || 
+                          (item.title === "Dashboard" && location.pathname === `/${userType}-dashboard`) ? 
                           "bg-primary/10 text-primary font-medium" : 
                           "text-foreground/70 hover:bg-muted"
                         }`}
@@ -165,7 +166,8 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                       <SidebarMenuItem key={item.path}>
                         <SidebarMenuButton 
                           asChild 
-                          isActive={location.pathname === item.path}
+                          isActive={location.pathname === item.path || 
+                                   (item.title === "Dashboard" && location.pathname === `/${userType}-dashboard`)}
                           tooltip={item.title}
                         >
                           <Link to={item.path}>

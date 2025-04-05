@@ -8,26 +8,17 @@ import AdminUsers from "@/components/dashboard/admin/AdminUsers";
 import AdminSettings from "@/components/dashboard/admin/AdminSettings";
 import AdminSales from "@/components/dashboard/admin/AdminSales";
 import { Helmet } from "react-helmet-async";
-import {
-  LayoutDashboard,
-  Home,
-  Users,
-  UserCheck,
-  Settings,
-  BarChart,
-  FileText,
-  Bell
-} from "lucide-react";
 
 const AdminDashboard = () => {
   return (
     <>
       <Helmet>
-        <title>Admin Dashboard | HomePulse Realty</title>
+        <title>Admin Dashboard | GODIRECT</title>
       </Helmet>
       <DashboardLayout userType="admin">
         <Routes>
-          <Route path="/" element={<AdminProfile />} />
+          <Route index element={<AdminProfile />} />
+          <Route path="/profile" element={<AdminProfile />} />
           <Route path="/properties" element={<AdminProperties />} />
           <Route path="/agents" element={<AdminAgents />} />
           <Route path="/users" element={<AdminUsers />} />
