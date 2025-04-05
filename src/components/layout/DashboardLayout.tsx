@@ -165,21 +165,21 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
           className="z-10 bg-card border-r border-border"
         >
           <SidebarHeader className="border-b border-border pb-2 bg-card">
-            <div className="flex items-center justify-between px-4">
+            <div className="flex items-center justify-between px-4 py-3">
               <Link to="/" className="flex items-center gap-2 font-semibold">
-                <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">
+                <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
                   <span className="text-primary-foreground text-xs font-bold">GD</span>
                 </div>
-                <span>GODIRECT</span>
+                <span className="text-foreground text-lg">GODIRECT</span>
               </Link>
-              <SidebarTrigger />
+              <SidebarTrigger className="focus:outline-none" />
             </div>
           </SidebarHeader>
           
           <SidebarContent className="bg-card">
             <ScrollArea className="h-[calc(100vh-10rem)]">
               <SidebarGroup>
-                <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+                <SidebarGroupLabel className="font-semibold text-muted-foreground">Navigation</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {navItems.map((item, index) => (
@@ -190,6 +190,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                             isActive={location.pathname === item.path || 
                                     (item.title === "Dashboard" && location.pathname === `/${userType}-dashboard`)}
                             tooltip={item.title}
+                            className="hover:bg-muted transition-colors duration-200"
                           >
                             <Link to={item.path}>
                               <item.icon className="h-4 w-4" />
@@ -198,7 +199,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                           </SidebarMenuButton>
                         ) : (
                           <>
-                            <SidebarMenuButton tooltip={item.title}>
+                            <SidebarMenuButton tooltip={item.title} className="hover:bg-muted transition-colors duration-200">
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </SidebarMenuButton>
@@ -208,6 +209,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                                   <SidebarMenuSubButton
                                     asChild
                                     isActive={location.pathname === subItem.path}
+                                    className="hover:bg-muted transition-colors duration-200"
                                   >
                                     <Link to={subItem.path}>{subItem.title}</Link>
                                   </SidebarMenuSubButton>
@@ -224,16 +226,16 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
             </ScrollArea>
           </SidebarContent>
           
-          <SidebarFooter className="border-t border-border bg-card">
-            <div className="p-4">
+          <SidebarFooter className="border-t border-border bg-card p-4">
+            <div className="space-y-4">
               <Button 
                 variant="outline" 
-                className="w-full flex items-center gap-2"
+                className="w-full flex items-center gap-2 justify-center"
                 onClick={handleLogout}
               >
                 <LogOut size={16} /> Logout
               </Button>
-              <div className="mt-3 text-xs text-center text-muted-foreground">
+              <div className="text-xs text-center text-muted-foreground">
                 GODIRECT - Enugu & Calabar, Nigeria
               </div>
             </div>

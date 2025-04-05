@@ -1,521 +1,586 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-  LineChart,
-  Line,
-} from "recharts";
-
-const mockSalesData = [
-  { month: "Jan", sales: 4, value: 1250000 },
-  { month: "Feb", sales: 6, value: 2100000 },
-  { month: "Mar", sales: 8, value: 2850000 },
-  { month: "Apr", sales: 10, value: 3500000 },
-  { month: "May", sales: 7, value: 2450000 },
-  { month: "Jun", sales: 9, value: 3200000 },
-  { month: "Jul", sales: 11, value: 3900000 },
-  { month: "Aug", sales: 8, value: 2800000 },
-  { month: "Sep", sales: 12, value: 4250000 },
-  { month: "Oct", sales: 10, value: 3600000 },
-  { month: "Nov", sales: 9, value: 3100000 },
-  { month: "Dec", sales: 14, value: 4950000 },
-];
-
-const mockDailyData = [
-  { day: "Mon", sales: 3, value: 125000 },
-  { day: "Tue", sales: 5, value: 175000 },
-  { day: "Wed", sales: 7, value: 250000 },
-  { day: "Thu", sales: 9, value: 320000 },
-  { day: "Fri", sales: 12, value: 420000 },
-  { day: "Sat", sales: 8, value: 280000 },
-  { day: "Sun", sales: 4, value: 140000 },
-];
-
-const mockYearlyData = [
-  { year: "2020", sales: 82, value: 28500000 },
-  { year: "2021", sales: 96, value: 33600000 },
-  { year: "2022", sales: 104, value: 36400000 },
-  { year: "2023", sales: 115, value: 40250000 },
-  { year: "2024", sales: 108, value: 37950000 },
-];
-
-const propertyTypeData = [
-  { name: "House", value: 35, fill: "#8884d8" },
-  { name: "Apartment", value: 25, fill: "#83a6ed" },
-  { name: "Condo", value: 20, fill: "#8dd1e1" },
-  { name: "Townhouse", value: 15, fill: "#82ca9d" },
-  { name: "Land", value: 5, fill: "#ffc658" },
-];
-
-const locationData = [
-  { name: "Urban", value: 45, fill: "#8884d8" },
-  { name: "Suburban", value: 35, fill: "#83a6ed" },
-  { name: "Rural", value: 20, fill: "#82ca9d" },
-];
-
-const priceRangeData = [
-  { name: "Under $300k", value: 15, fill: "#8884d8" },
-  { name: "$300k-$500k", value: 25, fill: "#83a6ed" },
-  { name: "$500k-$750k", value: 30, fill: "#8dd1e1" },
-  { name: "$750k-$1M", value: 20, fill: "#82ca9d" },
-  { name: "Over $1M", value: 10, fill: "#ffc658" },
-];
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-};
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { 
+  BarChart3, 
+  Calendar, 
+  TrendingUp, 
+  DollarSign, 
+  FileText, 
+  Download, 
+  Filter, 
+  ArrowUpRight, 
+  ArrowDownRight,
+  BadgePercent
+} from "lucide-react";
 
 const AdminSales = () => {
+  const [periodFilter, setPeriodFilter] = useState("all");
+  const [regionFilter, setRegionFilter] = useState("all");
+
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Sales Analytics</CardTitle>
-        <CardDescription>
-          Track property sales statistics and trends
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="overview">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="daily">Daily</TabsTrigger>
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            <TabsTrigger value="yearly">Yearly</TabsTrigger>
-            <TabsTrigger value="property-type">Property Type</TabsTrigger>
-            <TabsTrigger value="location">Location</TabsTrigger>
-            <TabsTrigger value="price-range">Price Range</TabsTrigger>
-          </TabsList>
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Sales & Revenue</h2>
+          <p className="text-muted-foreground mt-1">
+            Comprehensive overview of all sales and revenue metrics
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Select value={periodFilter} onValueChange={setPeriodFilter}>
+            <SelectTrigger className="w-[120px]">
+              <Calendar className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="year">This Year</SelectItem>
+              <SelectItem value="quarter">This Quarter</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+            </SelectContent>
+          </Select>
           
-          <TabsContent value="overview" className="space-y-4">
-            <div className="mt-6 h-[400px]">
-              <h3 className="text-lg font-medium mb-4">Monthly Sales</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  width={500}
-                  height={300}
-                  data={mockSalesData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    stroke="#82ca9d"
-                    tickFormatter={(value) => `$${value / 1000000}M`}
-                  />
-                  <Tooltip
-                    formatter={(value, name) => {
-                      if (name === "sales") return [`${value} properties`, "Sales"];
-                      return [formatCurrency(value as number), "Value"];
-                    }}
-                  />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="sales" fill="#8884d8" name="Sales" />
-                  <Bar yAxisId="right" dataKey="value" fill="#82ca9d" name="Value" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">108</div>
-                  <p className="text-xs text-muted-foreground">
-                    +12% from previous year
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">$37.95M</div>
-                  <p className="text-xs text-muted-foreground">
-                    +8% from previous year
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Avg. Sale Price</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">$351,400</div>
-                  <p className="text-xs text-muted-foreground">
-                    +5% from previous year
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+          <Select value={regionFilter} onValueChange={setRegionFilter}>
+            <SelectTrigger className="w-[120px]">
+              <Filter className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Region" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Regions</SelectItem>
+              <SelectItem value="enugu">Enugu</SelectItem>
+              <SelectItem value="calabar">Calabar</SelectItem>
+              <SelectItem value="lagos">Lagos</SelectItem>
+              <SelectItem value="abuja">Abuja</SelectItem>
+            </SelectContent>
+          </Select>
           
-          <TabsContent value="daily" className="space-y-4">
-            <div className="mt-6 h-[400px]">
-              <h3 className="text-lg font-medium mb-4">Daily Sales (Current Week)</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  width={500}
-                  height={300}
-                  data={mockDailyData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    stroke="#82ca9d"
-                    tickFormatter={(value) => `$${value / 1000}k`}
-                  />
-                  <Tooltip
-                    formatter={(value, name) => {
-                      if (name === "sales") return [`${value} properties`, "Sales"];
-                      return [formatCurrency(value as number), "Value"];
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="sales"
-                    stroke="#8884d8"
-                    name="Sales"
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#82ca9d"
-                    name="Value"
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+          <Button className="gap-2">
+            <FileText className="h-4 w-4" />
+            <span>Export Report</span>
+          </Button>
+        </div>
+      </div>
+      
+      {/* Revenue Summary */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="bg-card shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Total Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-3xl font-bold">$37.95M</div>
+              <div className="flex items-center text-green-500 text-sm font-medium">
+                <ArrowUpRight className="mr-1 h-4 w-4" />
+                18.2%
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Today's Sales</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">4</div>
-                  <p className="text-xs text-muted-foreground">
-                    +1 from yesterday
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Today's Revenue</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">$140K</div>
-                  <p className="text-xs text-muted-foreground">
-                    +15% from yesterday
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Week's Best Day</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">Friday</div>
-                  <p className="text-xs text-muted-foreground">
-                    12 sales ($420K)
-                  </p>
-                </CardContent>
-              </Card>
+            <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-card shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Properties Sold</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-3xl font-bold">482</div>
+              <div className="flex items-center text-green-500 text-sm font-medium">
+                <ArrowUpRight className="mr-1 h-4 w-4" />
+                7.3%
+              </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="monthly" className="space-y-4">
-            <div className="mt-6 h-[400px]">
-              <h3 className="text-lg font-medium mb-4">Monthly Sales (Current Year)</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  width={500}
-                  height={300}
-                  data={mockSalesData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    stroke="#82ca9d"
-                    tickFormatter={(value) => `$${value / 1000000}M`}
-                  />
-                  <Tooltip
-                    formatter={(value, name) => {
-                      if (name === "sales") return [`${value} properties`, "Sales"];
-                      return [formatCurrency(value as number), "Value"];
-                    }}
-                  />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="sales" fill="#8884d8" name="Sales" />
-                  <Bar yAxisId="right" dataKey="value" fill="#82ca9d" name="Value" />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-card shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Avg. Sale Price</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-3xl font-bold">$398K</div>
+              <div className="flex items-center text-red-500 text-sm font-medium">
+                <ArrowDownRight className="mr-1 h-4 w-4" />
+                2.1%
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Best Month</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">December</div>
-                  <p className="text-xs text-muted-foreground">
-                    14 sales ($4.95M)
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Current Month</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">8 sales</div>
-                  <p className="text-xs text-muted-foreground">
-                    $2.8M in revenue
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Month-over-Month</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+12.5%</div>
-                  <p className="text-xs text-muted-foreground">
-                    Compared to last month
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="yearly" className="space-y-4">
-            <div className="mt-6 h-[400px]">
-              <h3 className="text-lg font-medium mb-4">Yearly Performance</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  width={500}
-                  height={300}
-                  data={mockYearlyData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="year" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    stroke="#82ca9d"
-                    tickFormatter={(value) => `$${value / 1000000}M`}
-                  />
-                  <Tooltip
-                    formatter={(value, name) => {
-                      if (name === "sales") return [`${value} properties`, "Sales"];
-                      return [formatCurrency(value as number), "Value"];
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="sales"
-                    stroke="#8884d8"
-                    name="Sales"
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#82ca9d"
-                    name="Value"
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Current Year</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">108 sales</div>
-                  <p className="text-xs text-muted-foreground">
-                    $37.95M total revenue
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Year-over-Year</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">-6.1%</div>
-                  <p className="text-xs text-muted-foreground">
-                    Compared to 2023
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">Growth Rate</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+7.1%</div>
-                  <p className="text-xs text-muted-foreground">
-                    Average annual growth
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="property-type">
-            <div className="mt-6 h-[400px]">
-              <h3 className="text-lg font-medium mb-4">Sales by Property Type</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={propertyTypeData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={true}
-                    outerRadius={120}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {propertyTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="location">
-            <div className="mt-6 h-[400px]">
-              <h3 className="text-lg font-medium mb-4">Sales by Location</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={locationData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={true}
-                    outerRadius={120}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {locationData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="price-range">
-            <div className="mt-6 h-[400px]">
-              <h3 className="text-lg font-medium mb-4">Sales by Price Range</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={priceRangeData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={true}
-                    outerRadius={120}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {priceRangeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, 'Percentage']} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+            <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Tabs defaultValue="revenue" className="w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-4">
+          <TabsTrigger value="revenue">Revenue</TabsTrigger>
+          <TabsTrigger value="daily">Daily</TabsTrigger>
+          <TabsTrigger value="monthly">Monthly</TabsTrigger>
+          <TabsTrigger value="yearly">Yearly</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="revenue">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle>Revenue Breakdown</CardTitle>
+              <CardDescription>Analysis of revenue sources and trends</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full flex items-center justify-center bg-muted/20 rounded-md mb-6">
+                <BarChart3 className="h-10 w-10 text-muted" />
+                <span className="ml-2 text-muted-foreground">Revenue chart visualization</span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Revenue by Property Type</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Residential</span>
+                      <span>$21.2M (55.9%)</span>
+                    </div>
+                    <Progress value={55.9} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Commercial</span>
+                      <span>$12.8M (33.7%)</span>
+                    </div>
+                    <Progress value={33.7} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Land/Plots</span>
+                      <span>$3.2M (8.4%)</span>
+                    </div>
+                    <Progress value={8.4} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Industrial</span>
+                      <span>$0.75M (2.0%)</span>
+                    </div>
+                    <Progress value={2} className="h-2" />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Revenue by Region</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Enugu</span>
+                      <span>$16.4M (43.2%)</span>
+                    </div>
+                    <Progress value={43.2} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Calabar</span>
+                      <span>$12.5M (32.9%)</span>
+                    </div>
+                    <Progress value={32.9} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Lagos</span>
+                      <span>$5.8M (15.3%)</span>
+                    </div>
+                    <Progress value={15.3} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Abuja</span>
+                      <span>$3.25M (8.6%)</span>
+                    </div>
+                    <Progress value={8.6} className="h-2" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-muted/30 p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground">Highest Sale</div>
+                  <div className="text-lg font-bold mt-1">$2.8M</div>
+                  <div className="text-xs text-muted-foreground">Commercial property in Lagos</div>
+                </div>
+                
+                <div className="bg-muted/30 p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground">Lowest Sale</div>
+                  <div className="text-lg font-bold mt-1">$68K</div>
+                  <div className="text-xs text-muted-foreground">Land plot in Enugu</div>
+                </div>
+                
+                <div className="bg-muted/30 p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground">Total Commission</div>
+                  <div className="text-lg font-bold mt-1">$3.16M</div>
+                  <div className="text-xs text-muted-foreground">8.3% of total revenue</div>
+                </div>
+                
+                <div className="bg-muted/30 p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground">Top Agent</div>
+                  <div className="text-lg font-bold mt-1">$1.2M</div>
+                  <div className="text-xs text-muted-foreground">Sarah Johnson</div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="w-full">
+                <Download className="mr-2 h-4 w-4" />
+                Download Detailed Report
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="daily">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle>Daily Revenue Report</CardTitle>
+              <CardDescription>Tracking sales performance on a daily basis</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full flex items-center justify-center bg-muted/20 rounded-md mb-6">
+                <BarChart3 className="h-10 w-10 text-muted" />
+                <span className="ml-2 text-muted-foreground">Daily revenue chart</span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Today's Revenue</h4>
+                  <div className="bg-muted/30 p-4 rounded-lg">
+                    <div className="text-3xl font-bold">$140,000</div>
+                    <div className="flex items-center mt-1">
+                      <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
+                      <span className="text-sm text-green-500">+15% from yesterday</span>
+                    </div>
+                    <div className="mt-4 text-sm text-muted-foreground">24 properties sold today</div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-sm">
+                      <span>Morning (6AM-12PM)</span>
+                      <span>$42,000 (30%)</span>
+                    </div>
+                    <Progress value={30} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Afternoon (12PM-5PM)</span>
+                      <span>$70,000 (50%)</span>
+                    </div>
+                    <Progress value={50} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Evening (5PM-11PM)</span>
+                      <span>$28,000 (20%)</span>
+                    </div>
+                    <Progress value={20} className="h-2" />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Daily Sales Breakdown</h4>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Avg. Transaction</div>
+                      <div className="text-lg font-bold mt-1">$5,833</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Listings Viewed</div>
+                      <div className="text-lg font-bold mt-1">864</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Conversion Rate</div>
+                      <div className="text-lg font-bold mt-1">2.8%</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Agent Commission</div>
+                      <div className="text-lg font-bold mt-1">$14,000</div>
+                    </div>
+                  </div>
+                  
+                  <h4 className="text-sm font-medium mt-4">Top 3 Properties Sold Today</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center border-b pb-2">
+                      <div>
+                        <div className="font-medium">42 Oakwood Avenue</div>
+                        <div className="text-xs text-muted-foreground">Residential</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">$420,000</div>
+                        <div className="text-xs text-muted-foreground">John Davis (Agent)</div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center border-b pb-2">
+                      <div>
+                        <div className="font-medium">125 Market Street</div>
+                        <div className="text-xs text-muted-foreground">Commercial</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">$380,000</div>
+                        <div className="text-xs text-muted-foreground">Sarah Johnson (Agent)</div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">78 River Road</div>
+                        <div className="text-xs text-muted-foreground">Residential</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">$325,000</div>
+                        <div className="text-xs text-muted-foreground">Mark Williams (Agent)</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="w-full">View Daily Transaction Log</Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="monthly">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle>Monthly Revenue Report</CardTitle>
+              <CardDescription>Tracking sales performance by month</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full flex items-center justify-center bg-muted/20 rounded-md mb-6">
+                <BarChart3 className="h-10 w-10 text-muted" />
+                <span className="ml-2 text-muted-foreground">Monthly revenue chart</span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">This Month's Revenue</h4>
+                  <div className="bg-muted/30 p-4 rounded-lg">
+                    <div className="text-3xl font-bold">$2.8M</div>
+                    <div className="flex items-center mt-1">
+                      <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
+                      <span className="text-sm text-green-500">+12.5% from last month</span>
+                    </div>
+                    <div className="mt-4 text-sm text-muted-foreground">48 properties sold this month</div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-sm">
+                      <span>Week 1</span>
+                      <span>$560,000 (20%)</span>
+                    </div>
+                    <Progress value={20} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Week 2</span>
+                      <span>$840,000 (30%)</span>
+                    </div>
+                    <Progress value={30} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Week 3</span>
+                      <span>$700,000 (25%)</span>
+                    </div>
+                    <Progress value={25} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Week 4</span>
+                      <span>$700,000 (25%)</span>
+                    </div>
+                    <Progress value={25} className="h-2" />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Monthly Metrics</h4>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Avg. Property Value</div>
+                      <div className="text-lg font-bold mt-1">$385K</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Days on Market</div>
+                      <div className="text-lg font-bold mt-1">32 days</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Total Commission</div>
+                      <div className="text-lg font-bold mt-1">$280K</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">New Listings</div>
+                      <div className="text-lg font-bold mt-1">37</div>
+                    </div>
+                  </div>
+                  
+                  <h4 className="text-sm font-medium mt-4">Monthly Growth</h4>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Revenue Growth</span>
+                        <span className="text-green-500">+12.5%</span>
+                      </div>
+                      <Progress value={12.5} className="h-2 bg-muted" />
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Property Sales Growth</span>
+                        <span className="text-green-500">+8.3%</span>
+                      </div>
+                      <Progress value={8.3} className="h-2 bg-muted" />
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Customer Growth</span>
+                        <span className="text-green-500">+15.2%</span>
+                      </div>
+                      <Progress value={15.2} className="h-2 bg-muted" />
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Profit Margin</span>
+                        <span className="text-red-500">-2.1%</span>
+                      </div>
+                      <Progress value={2.1} className="h-2 bg-muted" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="w-full">Generate Monthly Report</Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="yearly">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle>Yearly Revenue Report</CardTitle>
+              <CardDescription>Annual performance and trends</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full flex items-center justify-center bg-muted/20 rounded-md mb-6">
+                <BarChart3 className="h-10 w-10 text-muted" />
+                <span className="ml-2 text-muted-foreground">Yearly revenue chart</span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Annual Revenue</h4>
+                  <div className="bg-muted/30 p-4 rounded-lg">
+                    <div className="text-3xl font-bold">$37.95M</div>
+                    <div className="flex items-center mt-1">
+                      <ArrowDownRight className="mr-1 h-4 w-4 text-red-500" />
+                      <span className="text-sm text-red-500">-6.1% from last year</span>
+                    </div>
+                    <div className="mt-4 text-sm text-muted-foreground">482 properties sold this year</div>
+                  </div>
+                  
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-sm">
+                      <span>Q1 (Jan-Mar)</span>
+                      <span>$8.5M (22.4%)</span>
+                    </div>
+                    <Progress value={22.4} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Q2 (Apr-Jun)</span>
+                      <span>$10.2M (26.9%)</span>
+                    </div>
+                    <Progress value={26.9} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Q3 (Jul-Sep)</span>
+                      <span>$11.5M (30.3%)</span>
+                    </div>
+                    <Progress value={30.3} className="h-2" />
+                    
+                    <div className="flex justify-between text-sm">
+                      <span>Q4 (Oct-Dec)</span>
+                      <span>$7.75M (20.4%)</span>
+                    </div>
+                    <Progress value={20.4} className="h-2" />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Annual Metrics</h4>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">YTD Target</div>
+                      <div className="text-lg font-bold mt-1">$40M</div>
+                      <div className="text-xs text-muted-foreground">94.9% achieved</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Market Share</div>
+                      <div className="text-lg font-bold mt-1">23.8%</div>
+                      <div className="text-xs text-green-500">+1.2% YoY</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Profit</div>
+                      <div className="text-lg font-bold mt-1">$10.8M</div>
+                      <div className="text-xs text-muted-foreground">28.4% margin</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Growth Rate</div>
+                      <div className="text-lg font-bold mt-1">-6.1%</div>
+                      <div className="text-xs text-red-500">Below target of +5%</div>
+                    </div>
+                  </div>
+                  
+                  <h4 className="text-sm font-medium mt-4">Annual Trends</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center border-b pb-2">
+                      <div>
+                        <div className="font-medium">Top-Performing Month</div>
+                        <div className="text-xs text-muted-foreground">August</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">$4.2M</div>
+                        <div className="text-xs text-muted-foreground">58 properties sold</div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center border-b pb-2">
+                      <div>
+                        <div className="font-medium">Most Active Region</div>
+                        <div className="text-xs text-muted-foreground">Enugu</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">$16.4M</div>
+                        <div className="text-xs text-muted-foreground">43.2% of revenue</div>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Highest-Growth Segment</div>
+                        <div className="text-xs text-muted-foreground">Commercial Properties</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">+18.7%</div>
+                        <div className="text-xs text-muted-foreground">Year-over-year</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="w-full">
+                <Download className="mr-2 h-4 w-4" />
+                Download Annual Report
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
