@@ -1,4 +1,3 @@
-
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Routes, Route, Navigate } from "react-router-dom";
 import UserProfile from "@/components/dashboard/user/UserProfile";
@@ -7,7 +6,7 @@ import UserMessages from "@/components/dashboard/user/UserMessages";
 import UserSettings from "@/components/dashboard/user/UserSettings";
 import UserPurchases from "@/components/dashboard/user/UserPurchases";
 import { Helmet } from "react-helmet-async";
-import { Heart, MessageSquare, ShoppingBag, SearchCheck, Bell, ClockRewind } from "lucide-react";
+import { Heart, MessageSquare, ShoppingBag, SearchCheck, Bell, History } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const UserDashboard = () => {
@@ -167,7 +166,7 @@ const UserDashboard = () => {
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                     <CardTitle className="text-xl font-semibold">Recent Views</CardTitle>
-                    <ClockRewind className="h-5 w-5 text-purple-500" />
+                    <History className="h-5 w-5 text-purple-500" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">12</div>
