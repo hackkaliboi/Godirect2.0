@@ -164,7 +164,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
           collapsible="icon" 
           className="z-10 bg-card border-r border-border"
         >
-          <SidebarHeader className="border-b border-border pb-2">
+          <SidebarHeader className="border-b border-border pb-2 bg-card">
             <div className="flex items-center justify-between px-4">
               <Link to="/" className="flex items-center gap-2 font-semibold">
                 <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center">

@@ -8,7 +8,7 @@ import AdminUsers from "@/components/dashboard/admin/AdminUsers";
 import AdminSettings from "@/components/dashboard/admin/AdminSettings";
 import AdminSales from "@/components/dashboard/admin/AdminSales";
 import { Helmet } from "react-helmet-async";
-import { BarChart3, Building2, Users, DollarSign, FileText, BellRing } from "lucide-react";
+import { BarChart3, Building2, Users, DollarSign, FileText, BellRing, TrendingUp, Calendar, ArrowUp, ArrowDown } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const AdminDashboard = () => {
@@ -33,6 +33,66 @@ const AdminDashboard = () => {
                     Generate Report
                   </button>
                 </div>
+              </div>
+              
+              {/* Revenue Report Cards */}
+              <div className="grid gap-6 md:grid-cols-3">
+                <Card className="shadow-md hover:shadow-lg transition-shadow">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xl font-semibold">Daily Revenue</CardTitle>
+                    <Calendar className="h-5 w-5 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">$140,000</div>
+                    <div className="flex items-center mt-1">
+                      <ArrowUp className="mr-1 h-4 w-4 text-green-500" />
+                      <CardDescription className="text-sm text-green-500">
+                        +15% from yesterday
+                      </CardDescription>
+                    </div>
+                    <div className="mt-4 h-1 w-full bg-muted overflow-hidden rounded-full">
+                      <div className="bg-green-500 h-full w-3/4 rounded-full" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-md hover:shadow-lg transition-shadow">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xl font-semibold">Monthly Revenue</CardTitle>
+                    <BarChart3 className="h-5 w-5 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">$2.8M</div>
+                    <div className="flex items-center mt-1">
+                      <ArrowUp className="mr-1 h-4 w-4 text-green-500" />
+                      <CardDescription className="text-sm text-green-500">
+                        +12.5% from last month
+                      </CardDescription>
+                    </div>
+                    <div className="mt-4 h-1 w-full bg-muted overflow-hidden rounded-full">
+                      <div className="bg-primary h-full w-2/3 rounded-full" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-md hover:shadow-lg transition-shadow">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xl font-semibold">Yearly Revenue</CardTitle>
+                    <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">$37.95M</div>
+                    <div className="flex items-center mt-1">
+                      <ArrowDown className="mr-1 h-4 w-4 text-red-500" />
+                      <CardDescription className="text-sm text-red-500">
+                        -6.1% from last year
+                      </CardDescription>
+                    </div>
+                    <div className="mt-4 h-1 w-full bg-muted overflow-hidden rounded-full">
+                      <div className="bg-amber-500 h-full w-1/2 rounded-full" />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
               
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
