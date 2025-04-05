@@ -34,23 +34,96 @@ const App = () => {
             <Route path="/agent-dashboard/*" element={<AgentDashboard />} />
             
             {/* Public routes with header/footer */}
-            <Route path="/" element={
-              <div className="flex min-h-screen flex-col">
-                <Header />
-                <main className="flex-1">
-                  <Routes>
-                    <Route index element={<Index />} />
-                    <Route path="/properties" element={<PropertyListings />} />
-                    <Route path="/properties/:id" element={<PropertyDetails />} />
-                    <Route path="/agents" element={<Agents />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </main>
-                <Footer />
-              </div>
-            } />
+            <Route
+              path="/"
+              element={
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main className="flex-1">
+                    <Index />
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
+            
+            <Route
+              path="/properties"
+              element={
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main className="flex-1">
+                    <PropertyListings />
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
+            
+            <Route
+              path="/properties/:id"
+              element={
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main className="flex-1">
+                    <PropertyDetails />
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
+            
+            <Route
+              path="/agents"
+              element={
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main className="flex-1">
+                    <Agents />
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
+            
+            <Route
+              path="/about"
+              element={
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main className="flex-1">
+                    <About />
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
+            
+            <Route
+              path="/contact"
+              element={
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main className="flex-1">
+                    <Contact />
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
+            
+            <Route
+              path="*"
+              element={
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main className="flex-1">
+                    <NotFound />
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
