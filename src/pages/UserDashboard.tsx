@@ -19,55 +19,12 @@ import {
 } from "lucide-react";
 
 const UserDashboard = () => {
-  const navItems = [
-    {
-      title: "Dashboard",
-      href: "/user-dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-    },
-    {
-      title: "My Favorites",
-      href: "/user-dashboard/favorites",
-      icon: <Heart className="h-5 w-5" />,
-    },
-    {
-      title: "Messages",
-      href: "/user-dashboard/messages",
-      icon: <MessageSquare className="h-5 w-5" />,
-    },
-    {
-      title: "My Purchases",
-      href: "/user-dashboard/purchases",
-      icon: <ShoppingCart className="h-5 w-5" />,
-    },
-    {
-      title: "Saved Searches",
-      href: "/user-dashboard/saved-searches",
-      icon: <Search className="h-5 w-5" />,
-    },
-    {
-      title: "Property Alerts",
-      href: "/user-dashboard/property-alerts",
-      icon: <Home className="h-5 w-5" />,
-    },
-    {
-      title: "Viewing History",
-      href: "/user-dashboard/viewing-history",
-      icon: <History className="h-5 w-5" />,
-    },
-    {
-      title: "Settings",
-      href: "/user-dashboard/settings",
-      icon: <Settings className="h-5 w-5" />,
-    },
-  ];
-
   return (
     <>
       <Helmet>
         <title>User Dashboard | HomePulse Realty</title>
       </Helmet>
-      <DashboardLayout navItems={navItems} userRole="user">
+      <DashboardLayout userType="user">
         <Routes>
           <Route path="/" element={<UserProfile />} />
           <Route path="/favorites" element={<UserFavorites />} />

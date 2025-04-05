@@ -20,55 +20,12 @@ import {
 } from "lucide-react";
 
 const AgentDashboard = () => {
-  const navItems = [
-    {
-      title: "Dashboard",
-      href: "/agent-dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-    },
-    {
-      title: "My Listings",
-      href: "/agent-dashboard/listings",
-      icon: <Home className="h-5 w-5" />,
-    },
-    {
-      title: "My Clients",
-      href: "/agent-dashboard/clients",
-      icon: <Users className="h-5 w-5" />,
-    },
-    {
-      title: "Lead Management",
-      href: "/agent-dashboard/leads",
-      icon: <Target className="h-5 w-5" />,
-    },
-    {
-      title: "Commissions",
-      href: "/agent-dashboard/commissions",
-      icon: <DollarSign className="h-5 w-5" />,
-    },
-    {
-      title: "Performance",
-      href: "/agent-dashboard/performance",
-      icon: <BarChart className="h-5 w-5" />,
-    },
-    {
-      title: "Calendar",
-      href: "/agent-dashboard/calendar",
-      icon: <Calendar className="h-5 w-5" />,
-    },
-    {
-      title: "Settings",
-      href: "/agent-dashboard/settings",
-      icon: <Settings className="h-5 w-5" />,
-    },
-  ];
-
   return (
     <>
       <Helmet>
         <title>Agent Dashboard | HomePulse Realty</title>
       </Helmet>
-      <DashboardLayout navItems={navItems} userRole="agent">
+      <DashboardLayout userType="agent">
         <Routes>
           <Route path="/" element={<AgentProfile />} />
           <Route path="/listings" element={<AgentListings />} />

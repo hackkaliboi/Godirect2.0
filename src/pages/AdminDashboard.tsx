@@ -20,55 +20,12 @@ import {
 } from "lucide-react";
 
 const AdminDashboard = () => {
-  const navItems = [
-    {
-      title: "Dashboard",
-      href: "/admin-dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-    },
-    {
-      title: "Properties",
-      href: "/admin-dashboard/properties",
-      icon: <Home className="h-5 w-5" />,
-    },
-    {
-      title: "Agents",
-      href: "/admin-dashboard/agents",
-      icon: <UserCheck className="h-5 w-5" />,
-    },
-    {
-      title: "Users",
-      href: "/admin-dashboard/users",
-      icon: <Users className="h-5 w-5" />,
-    },
-    {
-      title: "Sales Analytics",
-      href: "/admin-dashboard/sales",
-      icon: <BarChart className="h-5 w-5" />,
-    },
-    {
-      title: "Reports",
-      href: "/admin-dashboard/reports",
-      icon: <FileText className="h-5 w-5" />,
-    },
-    {
-      title: "Notifications",
-      href: "/admin-dashboard/notifications",
-      icon: <Bell className="h-5 w-5" />,
-    },
-    {
-      title: "Settings",
-      href: "/admin-dashboard/settings",
-      icon: <Settings className="h-5 w-5" />,
-    },
-  ];
-
   return (
     <>
       <Helmet>
         <title>Admin Dashboard | HomePulse Realty</title>
       </Helmet>
-      <DashboardLayout navItems={navItems} userRole="admin">
+      <DashboardLayout userType="admin">
         <Routes>
           <Route path="/" element={<AdminProfile />} />
           <Route path="/properties" element={<AdminProperties />} />
