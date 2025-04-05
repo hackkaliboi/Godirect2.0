@@ -19,6 +19,7 @@ import {
   SidebarMenuSubButton
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
   Home, 
   User, 
@@ -48,13 +49,27 @@ type DashboardLayoutProps = {
   userType: "admin" | "agent" | "user";
 };
 
+type NavItemWithPath = {
+  title: string;
+  path: string;
+  icon: React.ComponentType<any>;
+};
+
+type NavItemWithSubItems = {
+  title: string;
+  icon: React.ComponentType<any>;
+  subItems: { title: string; path: string }[];
+};
+
+type NavItem = NavItemWithPath | NavItemWithSubItems;
+
 export default function DashboardLayout({ children, userType }: DashboardLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   
   // Define navigation items by user type
-  const getNavItems = () => {
-    const commonItems = [
+  const getNavItems = (): NavItem[] => {
+    const commonItems: NavItem[] = [
       { title: "Dashboard", path: `/${userType}-dashboard`, icon: Home },
       { title: "Profile", path: `/${userType}-dashboard/profile`, icon: User },
       { title: "Settings", path: `/${userType}-dashboard/settings`, icon: Settings },
@@ -135,6 +150,11 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
     navigate("/");
   };
 
+  // Helper function to check if an item has subItems
+  const hasSubItems = (item: NavItem): item is NavItemWithSubItems => {
+    return 'subItems' in item;
+  };
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen w-full overflow-hidden bg-muted/10">
@@ -160,7 +180,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                   <SidebarMenu>
                     {navItems.map((item, index) => (
                       <SidebarMenuItem key={index}>
-                        {!item.subItems ? (
+                        {!hasSubItems(item) ? (
                           <SidebarMenuButton 
                             asChild
                             isActive={location.pathname === item.path || 
