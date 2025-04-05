@@ -1,5 +1,5 @@
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   Sidebar, 
@@ -26,6 +26,21 @@ type DashboardLayoutProps = {
 export default function DashboardLayout({ children, userType }: DashboardLayoutProps) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Add a check for mobile devices
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
   
   // Define navigation items by user type
   const getNavItems = () => {
@@ -76,28 +91,64 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
   // Capitalize first letter of user type for display
   const userTypeDisplay = userType.charAt(0).toUpperCase() + userType.slice(1);
   
+  const toggleMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="flex min-h-screen w-full">
-        {/* Mobile menu button - visible only on mobile */}
+        {/* Mobile menu button - always visible on mobile */}
         <div className="fixed top-4 left-4 z-50 md:hidden">
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="bg-white dark:bg-gray-800"
+            onClick={toggleMenu}
+            className="bg-white dark:bg-gray-800 shadow-md"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
         
-        {/* Mobile menu - overlay for small screens */}
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setMobileMenuOpen(false)} />
+        {/* Mobile menu - fullscreen overlay for small screens */}
+        {isMobile && mobileMenuOpen && (
+          <div className="fixed inset-0 z-40 bg-background flex flex-col px-4 pt-16 pb-6">
+            <div className="overflow-y-auto flex-1">
+              <div className="py-6">
+                <div className="font-bold text-xl mb-6">GODIRECT {userTypeDisplay}</div>
+                <ul className="space-y-2">
+                  {navItems.map((item) => (
+                    <li key={item.path}>
+                      <Link 
+                        to={item.path} 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-3 py-3 rounded-md ${
+                          location.pathname === item.path ? 
+                          "bg-primary/10 text-primary font-medium" : 
+                          "text-foreground/70 hover:bg-muted"
+                        }`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="border-t pt-4">
+              <Button variant="outline" className="w-full flex items-center gap-2">
+                <LogOut size={16} /> Logout
+              </Button>
+              <div className="mt-4 text-xs text-center text-muted-foreground">
+                GODIRECT - Enugu & Calabar, Nigeria
+              </div>
+            </div>
+          </div>
         )}
         
-        {/* Sidebar - shown based on screen size and menu state */}
-        <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:relative z-40 transition-transform duration-300 ease-in-out`}>
+        {/* Desktop sidebar */}
+        <div className={`${isMobile ? 'hidden' : 'block'} md:block`}>
           <Sidebar>
             <SidebarHeader>
               <div className="flex items-center justify-between p-2">
@@ -117,7 +168,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                           isActive={location.pathname === item.path}
                           tooltip={item.title}
                         >
-                          <Link to={item.path} onClick={() => setMobileMenuOpen(false)}>
+                          <Link to={item.path}>
                             <item.icon className="h-4 w-4" />
                             <span>{item.title}</span>
                           </Link>
@@ -133,10 +184,15 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
                 <Button variant="outline" className="w-full flex items-center gap-2">
                   <LogOut size={16} /> Logout
                 </Button>
+                <div className="mt-3 text-xs text-center text-muted-foreground">
+                  GODIRECT - Enugu & Calabar, Nigeria
+                </div>
               </div>
             </SidebarFooter>
           </Sidebar>
         </div>
+        
+        {/* Main content area */}
         <div className="flex-1 overflow-auto">
           <div className="container mx-auto p-4 max-w-full">
             <div className="bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm">
