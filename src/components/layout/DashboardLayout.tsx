@@ -158,8 +158,12 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen w-full overflow-hidden bg-muted/10">
-        {/* Sidebar - adjusted z-index to be lower than content */}
-        <Sidebar variant="sidebar" collapsible="icon" className="z-10">
+        {/* Sidebar - with proper background color */}
+        <Sidebar 
+          variant="sidebar" 
+          collapsible="icon" 
+          className="z-10 bg-card border-r border-border"
+        >
           <SidebarHeader className="border-b pb-2">
             <div className="flex items-center justify-between px-4">
               <Link to="/" className="flex items-center gap-2 font-semibold">
@@ -172,7 +176,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
             </div>
           </SidebarHeader>
           
-          <SidebarContent>
+          <SidebarContent className="bg-card">
             <ScrollArea className="h-[calc(100vh-10rem)]">
               <SidebarGroup>
                 <SidebarGroupLabel>Navigation</SidebarGroupLabel>
@@ -220,7 +224,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
             </ScrollArea>
           </SidebarContent>
           
-          <SidebarFooter className="border-t">
+          <SidebarFooter className="border-t bg-card">
             <div className="p-4">
               <Button 
                 variant="outline" 
