@@ -37,10 +37,10 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="h-8 w-8 bg-realty-900 dark:bg-realty-gold rounded-md flex items-center justify-center">
-              <span className="text-white dark:text-realty-900 font-bold">HP</span>
+              <span className="text-white dark:text-realty-900 font-bold">GD</span>
             </div>
             <span className="text-xl font-heading font-semibold text-realty-900 dark:text-white">
-              HomePulse
+              GODIRECT
             </span>
           </Link>
 
