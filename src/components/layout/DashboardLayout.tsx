@@ -1,5 +1,5 @@
 
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Sidebar, 
@@ -27,8 +27,7 @@ import {
   Building, 
   Settings, 
   LogOut, 
-  Menu, 
-  X, 
+  Calendar, 
   BarChart3,
   DollarSign,
   FileText,
@@ -39,111 +38,20 @@ import {
   SearchCheck,
   Bell,
   History,
-  Calendar
 } from "lucide-react";
 import DashboardTopBar from "./DashboardTopBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavItems } from "@/hooks/useNavItems";
 
 type DashboardLayoutProps = {
   children: ReactNode;
   userType: "admin" | "agent" | "user";
 };
 
-type NavItemWithPath = {
-  title: string;
-  path: string;
-  icon: React.ComponentType<any>;
-};
-
-type NavItemWithSubItems = {
-  title: string;
-  icon: React.ComponentType<any>;
-  subItems: { title: string; path: string }[];
-};
-
-type NavItem = NavItemWithPath | NavItemWithSubItems;
-
 export default function DashboardLayout({ children, userType }: DashboardLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  
-  // Define navigation items by user type
-  const getNavItems = (): NavItem[] => {
-    const commonItems: NavItem[] = [
-      { title: "Dashboard", path: `/${userType}-dashboard`, icon: Home },
-      { title: "Profile", path: `/${userType}-dashboard/profile`, icon: User },
-      { title: "Settings", path: `/${userType}-dashboard/settings`, icon: Settings },
-    ];
-    
-    if (userType === "admin") {
-      return [
-        ...commonItems,
-        { 
-          title: "User Management", 
-          icon: Users, 
-          subItems: [
-            { title: "Users", path: "/admin-dashboard/users" },
-            { title: "Agents", path: "/admin-dashboard/agents" },
-          ]
-        },
-        { 
-          title: "Properties", 
-          path: "/admin-dashboard/properties", 
-          icon: Building 
-        },
-        { 
-          title: "Analytics", 
-          icon: BarChart3,
-          subItems: [
-            { title: "Sales", path: "/admin-dashboard/sales" },
-            { title: "Reports", path: "/admin-dashboard/reports" },
-          ]
-        },
-        { 
-          title: "Notifications", 
-          path: "/admin-dashboard/notifications", 
-          icon: BellRing 
-        },
-      ];
-    }
-    
-    if (userType === "agent") {
-      return [
-        ...commonItems,
-        { title: "My Listings", path: "/agent-dashboard/listings", icon: Building },
-        { 
-          title: "Client Management", 
-          icon: Users,
-          subItems: [
-            { title: "Clients", path: "/agent-dashboard/clients" },
-            { title: "Leads", path: "/agent-dashboard/leads" },
-          ]
-        },
-        { title: "Commissions", path: "/agent-dashboard/commissions", icon: DollarSign },
-        { title: "Performance", path: "/agent-dashboard/performance", icon: BarChart3 },
-        { title: "Calendar", path: "/agent-dashboard/calendar", icon: Calendar },
-      ];
-    }
-    
-    // User type
-    return [
-      ...commonItems,
-      { title: "Favorites", path: "/user-dashboard/favorites", icon: Heart },
-      { title: "Messages", path: "/user-dashboard/messages", icon: MessageSquare },
-      { 
-        title: "Properties", 
-        icon: Building,
-        subItems: [
-          { title: "Saved Searches", path: "/user-dashboard/saved-searches" },
-          { title: "Property Alerts", path: "/user-dashboard/property-alerts" },
-          { title: "Viewing History", path: "/user-dashboard/viewing-history" },
-        ]
-      },
-      { title: "Purchases", path: "/user-dashboard/purchases", icon: ShoppingBag },
-    ];
-  };
-  
-  const navItems = getNavItems();
+  const navItems = useNavItems(userType);
   
   const handleLogout = () => {
     // In a real app, you would clear auth state here
@@ -151,7 +59,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
   };
 
   // Helper function to check if an item has subItems
-  const hasSubItems = (item: NavItem): item is NavItemWithSubItems => {
+  const hasSubItems = (item: any): item is { title: string; icon: React.ComponentType<any>; subItems: { title: string; path: string }[] } => {
     return 'subItems' in item;
   };
 

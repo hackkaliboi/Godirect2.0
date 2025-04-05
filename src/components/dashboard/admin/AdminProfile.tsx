@@ -5,16 +5,15 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export default function AdminProfile() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Admin Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your personal information and preferences
-        </p>
-      </div>
+    <div className="space-y-6 p-6">
+      <DashboardHeader
+        title="Admin Profile"
+        subtitle="Manage your personal information and preferences"
+      />
       
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -22,7 +21,7 @@ export default function AdminProfile() {
             <CardTitle>Personal Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center space-x-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
               <Avatar className="h-24 w-24">
                 <AvatarImage src="/placeholder.svg" alt="Admin" />
                 <AvatarFallback>AD</AvatarFallback>
@@ -31,7 +30,7 @@ export default function AdminProfile() {
             </div>
             
             <div className="grid gap-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
                   <Input id="firstName" defaultValue="Admin" />
