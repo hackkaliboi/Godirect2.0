@@ -60,11 +60,13 @@ export function DashboardTabs({
         ))}
       </TabsList>
       
-      {tabs.map((tab) => (
-        <TabsContent key={tab.value} value={tab.value}>
-          {tab.content}
-        </TabsContent>
-      ))}
+      <div className="mt-6">
+        {tabs.map((tab) => (
+          <TabsContent key={tab.value} value={tab.value} className="pt-4">
+            {tab.content}
+          </TabsContent>
+        ))}
+      </div>
     </Tabs>
   );
 }
