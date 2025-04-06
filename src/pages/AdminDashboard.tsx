@@ -1,3 +1,4 @@
+
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminProfile from "@/components/dashboard/admin/AdminProfile";
@@ -7,6 +8,8 @@ import AdminUsers from "@/components/dashboard/admin/AdminUsers";
 import AdminSettings from "@/components/dashboard/admin/AdminSettings";
 import AdminSales from "@/components/dashboard/admin/AdminSales";
 import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
+import { FinancialManagement } from "@/components/dashboard/financial/FinancialManagement";
+import { LegalCompliance } from "@/components/dashboard/legal/LegalCompliance";
 import { Helmet } from "react-helmet-async";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
@@ -464,6 +467,8 @@ const AdminDashboard = () => {
           <Route path="/users" element={<AdminUsers />} />
           <Route path="/settings" element={<AdminSettings />} />
           <Route path="/sales" element={<AdminSales />} />
+          <Route path="/financial" element={<FinancialManagement />} />
+          <Route path="/legal" element={<LegalCompliance />} />
           <Route path="/reports" element={
             <div className="p-6">
               <DashboardHeader 

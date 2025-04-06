@@ -84,6 +84,7 @@ export function DashboardHeader({
           <Button 
             onClick={onActionClick}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
+            size="sm"
           >
             {actionIcon && <span className="mr-2">{actionIcon}</span>}
             {actionLabel}

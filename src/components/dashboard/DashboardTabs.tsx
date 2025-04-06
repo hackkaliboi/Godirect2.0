@@ -29,7 +29,7 @@ export function DashboardTabs({
       case "underline":
         return "bg-transparent border-b border-border rounded-none p-0 gap-4";
       default:
-        return `grid grid-cols-${tabs.length} mb-4`;
+        return "grid w-full grid-cols-" + tabs.length + " mb-4";
     }
   };
   

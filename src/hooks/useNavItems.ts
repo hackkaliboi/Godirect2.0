@@ -18,7 +18,9 @@ import {
   Calendar,
   Activity,
   FileText,
-  PieChart
+  PieChart,
+  Scales,
+  Gem
 } from "lucide-react";
 
 type NavItemWithPath = {
@@ -47,6 +49,8 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
       return [
         ...commonItems,
         { title: "Analytics", path: "/admin-dashboard/analytics", icon: PieChart },
+        { title: "Financial", path: "/admin-dashboard/financial", icon: DollarSign },
+        { title: "Legal & Compliance", path: "/admin-dashboard/legal", icon: Scales },
         { 
           title: "User Management", 
           icon: Users, 
