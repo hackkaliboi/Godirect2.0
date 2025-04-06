@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -167,10 +166,19 @@ const knowledgeBaseArticles = [
   }
 ];
 
-export default function SupportCenter() {
+interface SupportCenterProps {
+  initialTab?: "tickets" | "knowledge" | "team";
+}
+
+export default function SupportCenter({ initialTab = "tickets" }: SupportCenterProps) {
   const [selectedTicket, setSelectedTicket] = useState(supportTickets[0]);
   const [replyText, setReplyText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState(initialTab);
+  
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
   
   const getStatusColor = (status: string) => {
     switch(status) {
@@ -220,7 +228,7 @@ export default function SupportCenter() {
         </p>
       </div>
       
-      <Tabs defaultValue="tickets">
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="tickets">Support Tickets</TabsTrigger>
           <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>

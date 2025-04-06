@@ -1,51 +1,163 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { 
-  Mail, 
-  Wrench, 
-  Clock, 
-  AlertTriangle, 
-  Globe, 
-  Database, 
-  Check, 
-  RefreshCw,
-  FileText,
-  Brush,
-  DownloadCloud,
-  Code
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  Mail,
+  Settings,
+  Wrench,
+  Database,
+  Server,
+  Globe,
+  Shield,
+  Save,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  RefreshCw
 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
 
-export default function SystemConfiguration() {
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [theme, setTheme] = useState("light");
-  const [language, setLanguage] = useState("english");
-  const [currency, setCurrency] = useState("ngn");
+// Sample email templates
+const emailTemplates = [
+  {
+    id: "welcome",
+    name: "Welcome Email",
+    subject: "Welcome to GODIRECT",
+    description: "Sent to new users after sign up",
+    lastEdited: "2023-03-15"
+  },
+  {
+    id: "password-reset",
+    name: "Password Reset",
+    subject: "Reset Your GODIRECT Password",
+    description: "Sent when user requests password reset",
+    lastEdited: "2023-02-20"
+  },
+  {
+    id: "property-alert",
+    name: "Property Alert",
+    subject: "New Properties Matching Your Criteria",
+    description: "Sent when new properties match user's saved searches",
+    lastEdited: "2023-04-01"
+  },
+  {
+    id: "listing-approved",
+    name: "Listing Approved",
+    subject: "Your Property Listing Has Been Approved",
+    description: "Sent to agents when their listing is approved",
+    lastEdited: "2023-03-25"
+  },
+  {
+    id: "inquiry-notification",
+    name: "Inquiry Notification",
+    subject: "New Inquiry for Your Property",
+    description: "Sent to agents when someone inquires about their property",
+    lastEdited: "2023-03-28"
+  }
+];
+
+// Sample platform settings
+const platformSettings = {
+  general: [
+    { id: "site-name", name: "Site Name", value: "GODIRECT", type: "text" },
+    { id: "contact-email", name: "Contact Email", value: "support@godirect.com", type: "email" },
+    { id: "currency", name: "Default Currency", value: "NGN", type: "select", options: ["NGN", "USD", "EUR", "GBP"] },
+    { id: "timezone", name: "Default Timezone", value: "Africa/Lagos", type: "select", options: ["Africa/Lagos", "Africa/Accra", "Europe/London", "America/New_York"] }
+  ],
+  features: [
+    { id: "enable-reviews", name: "Enable Reviews", value: true, type: "boolean" },
+    { id: "enable-blog", name: "Enable Blog", value: true, type: "boolean" },
+    { id: "enable-chat", name: "Enable Live Chat", value: false, type: "boolean" },
+    { id: "enable-analytics", name: "Enable Analytics", value: true, type: "boolean" }
+  ],
+  security: [
+    { id: "two-factor", name: "Two-Factor Authentication", value: true, type: "boolean" },
+    { id: "password-expiry", name: "Password Expiry (days)", value: 90, type: "number" },
+    { id: "session-timeout", name: "Session Timeout (minutes)", value: 30, type: "number" },
+    { id: "login-attempts", name: "Max Login Attempts", value: 5, type: "number" }
+  ]
+};
+
+// Sample maintenance tasks
+const maintenanceTasks = [
+  {
+    id: "database-backup",
+    name: "Database Backup",
+    status: "success",
+    lastRun: "2023-04-05 03:00 AM",
+    nextRun: "2023-04-06 03:00 AM",
+    frequency: "Daily"
+  },
+  {
+    id: "cache-clear",
+    name: "Clear Cache",
+    status: "success",
+    lastRun: "2023-04-05 04:30 AM",
+    nextRun: "2023-04-06 04:30 AM",
+    frequency: "Daily"
+  },
+  {
+    id: "log-rotation",
+    name: "Log Rotation",
+    status: "success",
+    lastRun: "2023-04-01 01:15 AM",
+    nextRun: "2023-05-01 01:15 AM",
+    frequency: "Monthly"
+  },
+  {
+    id: "temp-file-cleanup",
+    name: "Temporary File Cleanup",
+    status: "pending",
+    lastRun: "2023-03-30 02:45 AM",
+    nextRun: "2023-04-06 02:45 AM",
+    frequency: "Weekly"
+  },
+  {
+    id: "search-reindex",
+    name: "Search Index Rebuild",
+    status: "failed",
+    lastRun: "2023-04-02 05:30 AM",
+    nextRun: "2023-04-09 05:30 AM",
+    frequency: "Weekly",
+    error: "Timeout during indexing process"
+  }
+];
+
+interface SystemConfigurationProps {
+  initialTab?: "email" | "platform" | "maintenance";
+}
+
+export default function SystemConfiguration({ initialTab = "email" }: SystemConfigurationProps) {
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [selectedTemplate, setSelectedTemplate] = useState(emailTemplates[0]);
+  const [templateContent, setTemplateContent] = useState("<h1>Welcome to GODIRECT!</h1><p>We're excited to have you on board...</p>");
   
-  const handleMaintenanceToggle = () => {
-    setMaintenanceMode(!maintenanceMode);
-    toast({
-      title: maintenanceMode ? "Maintenance Mode Disabled" : "Maintenance Mode Enabled",
-      description: maintenanceMode 
-        ? "Your platform is now accessible to all users." 
-        : "Your platform is now in maintenance mode. Only admins can access it.",
-    });
-  };
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
   
-  const handleBackupNow = () => {
-    toast({
-      title: "Backup Started",
-      description: "System backup has been initiated. You'll be notified when it's complete.",
-    });
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case "success":
+        return <Badge className="bg-green-100 text-green-800">Success</Badge>;
+      case "pending":
+        return <Badge className="bg-blue-100 text-blue-800">Pending</Badge>;
+      case "failed":
+        return <Badge className="bg-red-100 text-red-800">Failed</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">{status}</Badge>;
+    }
   };
   
   return (
@@ -53,253 +165,181 @@ export default function SystemConfiguration() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">System Configuration</h1>
         <p className="text-muted-foreground">
-          Manage all your platform settings, appearance, and system maintenance
+          Configure and maintain the platform settings and functionality
         </p>
       </div>
       
-      <Tabs defaultValue="general">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="general">General Settings</TabsTrigger>
-          <TabsTrigger value="email">Email Templates</TabsTrigger>
-          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="email">
+            <Mail className="mr-2 h-4 w-4" />
+            Email Templates
+          </TabsTrigger>
+          <TabsTrigger value="platform">
+            <Settings className="mr-2 h-4 w-4" />
+            Platform Settings
+          </TabsTrigger>
+          <TabsTrigger value="maintenance">
+            <Wrench className="mr-2 h-4 w-4" />
+            Maintenance
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="general" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Regional Settings</CardTitle>
-              <CardDescription>Configure language, currency, and timezone settings</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="language">Default Language</Label>
-                  <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="english">English</SelectItem>
-                      <SelectItem value="french">French</SelectItem>
-                      <SelectItem value="spanish">Spanish</SelectItem>
-                      <SelectItem value="hausa">Hausa</SelectItem>
-                      <SelectItem value="yoruba">Yoruba</SelectItem>
-                      <SelectItem value="igbo">Igbo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="currency">Default Currency</Label>
-                  <Select value={currency} onValueChange={setCurrency}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ngn">Nigerian Naira (₦)</SelectItem>
-                      <SelectItem value="usd">US Dollar ($)</SelectItem>
-                      <SelectItem value="eur">Euro (€)</SelectItem>
-                      <SelectItem value="gbp">British Pound (£)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="timezone">Default Timezone</Label>
-                  <Select defaultValue="west_africa">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="west_africa">West Africa Standard Time (GMT+1)</SelectItem>
-                      <SelectItem value="gmt">Greenwich Mean Time (GMT)</SelectItem>
-                      <SelectItem value="est">Eastern Standard Time (GMT-5)</SelectItem>
-                      <SelectItem value="cst">Central Standard Time (GMT-6)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="date_format">Date Format</Label>
-                  <Select defaultValue="dd_mm_yyyy">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select date format" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="dd_mm_yyyy">DD/MM/YYYY</SelectItem>
-                      <SelectItem value="mm_dd_yyyy">MM/DD/YYYY</SelectItem>
-                      <SelectItem value="yyyy_mm_dd">YYYY/MM/DD</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save Regional Settings</Button>
-            </CardFooter>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Feature Flags</CardTitle>
-              <CardDescription>Enable or disable platform features</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+        <TabsContent value="email" className="space-y-4 pt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card className="lg:col-span-1">
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Virtual Tours</p>
-                    <p className="text-sm text-muted-foreground">Allow agents to upload virtual tours for properties</p>
-                  </div>
-                  <Switch defaultChecked />
+                  <CardTitle>Email Templates</CardTitle>
+                  <Button size="sm" className="h-8">+ New Template</Button>
                 </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Online Payments</p>
-                    <p className="text-sm text-muted-foreground">Enable direct online payments through the platform</p>
-                  </div>
-                  <Switch defaultChecked />
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Search templates..." className="pl-8" />
                 </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[calc(100vh-350px)]">
+                  {emailTemplates.map((template) => (
+                    <div
+                      key={template.id}
+                      className={`p-3 border-b cursor-pointer hover:bg-muted transition-colors ${selectedTemplate.id === template.id ? 'bg-muted' : ''}`}
+                      onClick={() => setSelectedTemplate(template)}
+                    >
+                      <div className="font-medium truncate">{template.name}</div>
+                      <div className="text-sm text-muted-foreground truncate">{template.subject}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Last edited: {template.lastEdited}
+                      </div>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+            
+            <Card className="lg:col-span-2">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
                   <div>
-                    <p className="font-medium">Property Reviews</p>
-                    <p className="text-sm text-muted-foreground">Allow users to leave reviews on properties</p>
+                    <CardTitle>{selectedTemplate.name}</CardTitle>
+                    <CardDescription>{selectedTemplate.description}</CardDescription>
                   </div>
-                  <Switch />
                 </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Public Agent Profiles</p>
-                    <p className="text-sm text-muted-foreground">Make agent profiles visible to non-registered users</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject</Label>
+                  <Input id="subject" value={selectedTemplate.subject} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="template">Email Content</Label>
+                  <div className="border rounded-md">
+                    <div className="bg-muted px-3 py-2 border-b flex items-center gap-2">
+                      <Button variant="ghost" size="sm" className="h-8 px-2">
+                        <span className="font-bold">B</span>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 px-2">
+                        <span className="italic">I</span>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 px-2">
+                        <span className="underline">U</span>
+                      </Button>
+                      <Separator orientation="vertical" className="h-6" />
+                      <Button variant="ghost" size="sm" className="h-8 px-2">
+                        <Globe className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 px-2">
+                        <Mail className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Textarea 
+                      id="template" 
+                      value={templateContent}
+                      onChange={(e) => setTemplateContent(e.target.value)}
+                      className="min-h-[300px] border-0 rounded-none focus-visible:ring-0 resize-none"
+                    />
                   </div>
-                  <Switch defaultChecked />
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Save Feature Settings</Button>
-            </CardFooter>
-          </Card>
+              </CardContent>
+              <CardFooter>
+                <div className="flex justify-between w-full">
+                  <Button variant="outline">Preview</Button>
+                  <div className="space-x-2">
+                    <Button variant="outline">Test Send</Button>
+                    <Button>Save Template</Button>
+                  </div>
+                </div>
+              </CardFooter>
+            </Card>
+          </div>
         </TabsContent>
         
-        <TabsContent value="email" className="space-y-4 pt-4">
+        <TabsContent value="platform" className="space-y-4 pt-4">
           <Card>
             <CardHeader>
-              <CardTitle>Email Configuration</CardTitle>
-              <CardDescription>Configure your email server settings</CardDescription>
+              <CardTitle>Platform Settings</CardTitle>
+              <CardDescription>Configure general settings for the GODIRECT platform</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="smtp_server">SMTP Server</Label>
-                  <Input id="smtp_server" placeholder="smtp.example.com" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="smtp_port">SMTP Port</Label>
-                  <Input id="smtp_port" placeholder="587" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="smtp_username">SMTP Username</Label>
-                  <Input id="smtp_username" placeholder="username@example.com" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="smtp_password">SMTP Password</Label>
-                  <Input id="smtp_password" type="password" placeholder="••••••••" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="from_email">From Email</Label>
-                  <Input id="from_email" placeholder="noreply@godirect.com" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="from_name">From Name</Label>
-                  <Input id="from_name" placeholder="GODIRECT Properties" />
-                </div>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">General Settings</h3>
+                {platformSettings.general.map((setting) => (
+                  <div key={setting.id} className="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                    <Label htmlFor={setting.id}>{setting.name}</Label>
+                    {setting.type === 'select' ? (
+                      <Select defaultValue={setting.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {setting.options?.map((option) => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input id={setting.id} type={setting.type} defaultValue={setting.value} />
+                    )}
+                  </div>
+                ))}
               </div>
               
-              <Button className="mt-2">Save Email Settings</Button>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Email Templates</CardTitle>
-              <CardDescription>Customize email templates sent by the system</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="template_type">Select Template</Label>
-                <Select defaultValue="welcome">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="welcome">Welcome Email</SelectItem>
-                    <SelectItem value="password_reset">Password Reset</SelectItem>
-                    <SelectItem value="property_alert">Property Alert</SelectItem>
-                    <SelectItem value="booking_confirmation">Viewing Confirmation</SelectItem>
-                    <SelectItem value="purchase_receipt">Purchase Receipt</SelectItem>
-                  </SelectContent>
-                </Select>
+              <Separator />
+              
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Feature Settings</h3>
+                {platformSettings.features.map((setting) => (
+                  <div key={setting.id} className="flex items-center justify-between">
+                    <Label htmlFor={setting.id}>{setting.name}</Label>
+                    <Switch id={setting.id} checked={setting.value} />
+                  </div>
+                ))}
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="email_subject">Email Subject</Label>
-                <Input id="email_subject" placeholder="Welcome to GODIRECT Properties!" />
-              </div>
+              <Separator />
               
-              <div className="space-y-2">
-                <Label htmlFor="email_content">Email Content</Label>
-                <Textarea 
-                  id="email_content" 
-                  placeholder="Write your email template here..." 
-                  className="min-h-[200px]"
-                  defaultValue="Dear {{name}},
-
-Welcome to GODIRECT Properties! We're excited to have you join our platform.
-
-You can now:
-- Browse exclusive property listings
-- Save your favorite properties
-- Get personalized property recommendations
-- Connect with our professional agents
-
-If you have any questions, please don't hesitate to contact our support team.
-
-Best regards,
-The GODIRECT Team"
-                />
-              </div>
-              
-              <div className="bg-muted p-3 rounded-md text-sm">
-                <p className="font-medium mb-2">Available Variables:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <div><code>&#123;&#123;name&#125;&#125;</code> - Recipient's name</div>
-                  <div><code>&#123;&#123;email&#125;&#125;</code> - Recipient's email</div>
-                  <div><code>&#123;&#123;property_name&#125;&#125;</code> - Property name</div>
-                  <div><code>&#123;&#123;agent_name&#125;&#125;</code> - Agent name</div>
-                  <div><code>&#123;&#123;date&#125;&#125;</code> - Current date</div>
-                  <div><code>&#123;&#123;link&#125;&#125;</code> - Action link</div>
-                </div>
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Security Settings</h3>
+                {platformSettings.security.map((setting) => (
+                  <div key={setting.id} className="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
+                    <Label htmlFor={setting.id}>{setting.name}</Label>
+                    {setting.type === 'boolean' ? (
+                      <Switch id={setting.id} checked={setting.value} />
+                    ) : (
+                      <Input id={setting.id} type={setting.type} defaultValue={setting.value} />
+                    )}
+                  </div>
+                ))}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline">Preview</Button>
-              <Button>Save Template</Button>
+            <CardFooter className="flex justify-end">
+              <div className="space-x-2">
+                <Button variant="outline">Reset</Button>
+                <Button>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save All Settings
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -308,238 +348,108 @@ The GODIRECT Team"
           <Card>
             <CardHeader>
               <CardTitle>System Maintenance</CardTitle>
-              <CardDescription>Control system maintenance functions</CardDescription>
+              <CardDescription>Scheduled tasks and system maintenance operations</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between bg-yellow-50 dark:bg-yellow-950 p-4 rounded-md border border-yellow-200 dark:border-yellow-800">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-yellow-800 dark:text-yellow-300">Maintenance Mode</h4>
-                    <p className="text-sm text-yellow-700 dark:text-yellow-400">
-                      When enabled, only administrators can access the platform. All other users will see a maintenance message.
-                    </p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={maintenanceMode} 
-                  onCheckedChange={handleMaintenanceToggle}
-                  className="data-[state=checked]:bg-yellow-600"
-                />
-              </div>
-              
-              {maintenanceMode && (
-                <div className="space-y-2">
-                  <Label htmlFor="maintenance_message">Maintenance Message</Label>
-                  <Textarea 
-                    id="maintenance_message" 
-                    placeholder="Enter the message users will see during maintenance..." 
-                    className="min-h-[100px]"
-                    defaultValue="Our platform is currently undergoing scheduled maintenance to improve your experience. We'll be back online shortly. Thank you for your patience."
-                  />
-                  <div className="flex items-center gap-2 mt-2">
-                    <Label htmlFor="scheduled_end" className="flex-shrink-0">Scheduled End Time</Label>
-                    <Input 
-                      id="scheduled_end" 
-                      type="datetime-local" 
-                    />
-                  </div>
-                </div>
-              )}
-              
-              <Separator />
-              
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-                  <Database className="h-5 w-5" /> Database Management
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Database Backup</p>
-                      <p className="text-sm text-muted-foreground">Last backup: 2 days ago</p>
-                    </div>
-                    <Button onClick={handleBackupNow}>Backup Now</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Backup Schedule</p>
-                      <p className="text-sm text-muted-foreground">Automatic backups</p>
-                    </div>
-                    <Select defaultValue="daily">
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select frequency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hourly">Hourly</SelectItem>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Database Optimization</p>
-                      <p className="text-sm text-muted-foreground">Optimize database tables</p>
-                    </div>
-                    <Button variant="outline">Run Optimization</Button>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-                  <RefreshCw className="h-5 w-5" /> Cache Management
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Clear System Cache</p>
-                      <p className="text-sm text-muted-foreground">Remove temporary system files</p>
-                    </div>
-                    <Button variant="outline">Clear Cache</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Rebuild Search Index</p>
-                      <p className="text-sm text-muted-foreground">Improve search performance</p>
-                    </div>
-                    <Button variant="outline">Rebuild Index</Button>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div>
-                <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
-                  <FileText className="h-5 w-5" /> System Logs
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Error Logs</p>
-                      <p className="text-sm text-muted-foreground">View system error logs</p>
-                    </div>
-                    <Button variant="outline">View Logs</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Activity Logs</p>
-                      <p className="text-sm text-muted-foreground">View user activity logs</p>
-                    </div>
-                    <Button variant="outline">View Logs</Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Log Retention</p>
-                      <p className="text-sm text-muted-foreground">How long to keep logs</p>
-                    </div>
-                    <Select defaultValue="30">
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select days" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="7">7 days</SelectItem>
-                        <SelectItem value="30">30 days</SelectItem>
-                        <SelectItem value="90">90 days</SelectItem>
-                        <SelectItem value="365">1 year</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="appearance" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Theme Settings</CardTitle>
-              <CardDescription>Customize the appearance of your platform</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label className="block mb-2">Color Theme</Label>
-                <div className="flex flex-wrap gap-3">
-                  {["light", "dark", "system"].map((option) => (
-                    <Button
-                      key={option}
-                      variant={theme === option ? "default" : "outline"}
-                      onClick={() => setTheme(option)}
-                      className="flex items-center gap-2"
-                    >
-                      {option === "light" && <span className="h-4 w-4 rounded-full bg-background border" />}
-                      {option === "dark" && <span className="h-4 w-4 rounded-full bg-slate-900" />}
-                      {option === "system" && <span className="h-4 w-4 rounded-full bg-gradient-to-r from-background to-slate-900 border" />}
-                      {option.charAt(0).toUpperCase() + option.slice(1)}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              <div>
-                <Label className="block mb-2">Primary Color</Label>
-                <div className="flex flex-wrap gap-3">
-                  {["default", "red", "green", "blue", "purple", "orange"].map((color) => (
-                    <div
-                      key={color}
-                      className={`h-10 w-10 rounded-full cursor-pointer border-2 ${
-                        color === "default" ? "bg-primary border-primary" :
-                        color === "red" ? "bg-red-500 border-red-500" :
-                        color === "green" ? "bg-green-500 border-green-500" :
-                        color === "blue" ? "bg-blue-500 border-blue-500" :
-                        color === "purple" ? "bg-purple-500 border-purple-500" :
-                        "bg-orange-500 border-orange-500"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="logo">Logo</Label>
-                  <div className="flex items-center gap-2">
-                    <div className="h-12 w-12 rounded bg-primary flex items-center justify-center">
-                      <span className="text-primary-foreground font-bold">GD</span>
-                    </div>
-                    <Button variant="outline" size="sm">Change Logo</Button>
-                  </div>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Scheduled Tasks</h3>
+                  <Button>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Run All Tasks
+                  </Button>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="favicon">Favicon</Label>
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded bg-primary flex items-center justify-center">
-                      <span className="text-primary-foreground text-xs font-bold">G</span>
-                    </div>
-                    <Button variant="outline" size="sm">Change Favicon</Button>
-                  </div>
+                <div className="border rounded-md">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-muted">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Task</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Last Run</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Next Run</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Frequency</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {maintenanceTasks.map((task) => (
+                        <tr key={task.id} className="hover:bg-muted/50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {task.status === 'success' && <CheckCircle2 className="h-4 w-4 text-green-500 mr-2" />}
+                              {task.status === 'pending' && <Clock className="h-4 w-4 text-blue-500 mr-2" />}
+                              {task.status === 'failed' && <AlertTriangle className="h-4 w-4 text-red-500 mr-2" />}
+                              <div className="text-sm font-medium">{task.name}</div>
+                            </div>
+                            {task.error && (
+                              <div className="text-xs text-red-500 mt-1">Error: {task.error}</div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {getStatusBadge(task.status)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {task.lastRun}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {task.nextRun}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {task.frequency}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <Button variant="ghost" size="sm" className="h-8 px-2">
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 px-2">
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="custom_css">Custom CSS</Label>
-                <Textarea 
-                  id="custom_css" 
-                  placeholder="Add custom CSS styles..." 
-                  className="min-h-[150px] font-mono text-sm"
-                />
+              <div className="space-y-4 mt-8">
+                <h3 className="text-lg font-medium">Manual Maintenance Tasks</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-md">Database Operations</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Optimize Database</span>
+                        <Button size="sm">Run</Button>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Repair Database</span>
+                        <Button size="sm" variant="outline">Run</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-md">Cache Management</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Clear All Caches</span>
+                        <Button size="sm">Run</Button>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Rebuild Search Index</span>
+                        <Button size="sm" variant="outline">Run</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button>Save Appearance Settings</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>

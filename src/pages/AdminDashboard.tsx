@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -10,6 +11,8 @@ import AdminSales from "@/components/dashboard/admin/AdminSales";
 import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
 import { FinancialManagement } from "@/components/dashboard/financial/FinancialManagement";
 import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
+import SupportCenter from "@/components/dashboard/admin/SupportCenter";
+import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguration";
 import { Helmet } from "react-helmet-async";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
@@ -491,6 +494,17 @@ const AdminDashboard = () => {
               {/* Notifications content will go here */}
             </div>
           } />
+          
+          {/* Support Center Routes */}
+          <Route path="/support-tickets" element={<SupportCenter />} />
+          <Route path="/knowledge-base" element={<SupportCenter initialTab="knowledge" />} />
+          <Route path="/team-chat" element={<SupportCenter initialTab="team" />} />
+          
+          {/* System Config Routes */}
+          <Route path="/email-templates" element={<SystemConfiguration initialTab="email" />} />
+          <Route path="/platform-settings" element={<SystemConfiguration initialTab="platform" />} />
+          <Route path="/maintenance" element={<SystemConfiguration initialTab="maintenance" />} />
+          
           <Route path="*" element={<Navigate to="/admin-dashboard" replace />} />
         </Routes>
       </DashboardLayout>
