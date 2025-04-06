@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import { 
   Home, 
@@ -7,7 +8,6 @@ import {
   Settings, 
   BarChart3,
   DollarSign,
-  BellRing,
   MessageSquare,
   Heart,
   ShoppingBag,
@@ -19,7 +19,11 @@ import {
   FileText,
   PieChart,
   Scale,
-  Gem
+  Gem,
+  LifeBuoy,
+  Wrench,
+  Mail,
+  BellRing
 } from "lucide-react";
 
 type NavItemWithPath = {
@@ -75,6 +79,24 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
           title: "Notifications", 
           path: "/admin-dashboard/notifications", 
           icon: BellRing 
+        },
+        {
+          title: "System Config",
+          icon: Wrench,
+          subItems: [
+            { title: "Email Templates", path: "/admin-dashboard/email-templates" },
+            { title: "Platform Settings", path: "/admin-dashboard/platform-settings" },
+            { title: "Maintenance", path: "/admin-dashboard/maintenance" },
+          ]
+        },
+        {
+          title: "Support Center",
+          icon: LifeBuoy,
+          subItems: [
+            { title: "Support Tickets", path: "/admin-dashboard/support-tickets" },
+            { title: "Knowledge Base", path: "/admin-dashboard/knowledge-base" },
+            { title: "Team Chat", path: "/admin-dashboard/team-chat" },
+          ]
         },
       ];
     }

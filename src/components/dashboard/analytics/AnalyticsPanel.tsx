@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { DashboardTabs } from "../DashboardTabs";
 
-// Sample data for charts
 const propertyPerformanceData = [
   { name: 'Jan', Listings: 65, Views: 180, Inquiries: 42 },
   { name: 'Feb', Listings: 59, Views: 210, Inquiries: 51 },
@@ -47,7 +46,6 @@ const conversionData = [
   { name: 'Closed Deal', value: 8 },
 ];
 
-// Agent performance data
 const agentPerformanceData = [
   { name: 'Sarah Johnson', sales: 12, commission: 58000, rating: 4.9 },
   { name: 'David Martinez', sales: 9, commission: 42000, rating: 4.7 },
@@ -56,11 +54,10 @@ const agentPerformanceData = [
   { name: 'Amanda Davis', sales: 14, commission: 61000, rating: 4.6 },
 ];
 
-// Heatmap data (simplified representation)
 const heatmapData = [
   { area: "Downtown", hotness: 95, price: "$520k", change: 8.2 },
   { area: "North End", hotness: 88, price: "$410k", change: 5.4 },
-  { name: "West Side", hotness: 76, price: "$310k", change: 3.8 },
+  { area: "West Side", hotness: 76, price: "$310k", change: 3.8 },
   { area: "South Beach", hotness: 92, price: "$485k", change: 7.9 },
   { area: "East Village", hotness: 81, price: "$370k", change: 4.2 },
 ];
@@ -91,7 +88,7 @@ export default function AnalyticsPanel() {
         ]}
       />
       
-      <StatsCardGrid columns={4}>
+      <StatsCardGrid>
         <StatsCard 
           title="Total Listings" 
           value="124" 
@@ -100,7 +97,7 @@ export default function AnalyticsPanel() {
         />
         <StatsCard 
           title="Total Revenue" 
-          value="$37.95M" 
+          value="₦24,567,890" 
           change={18.2}
           icon={<DollarSign className="h-4 w-4" />} 
         />
@@ -521,37 +518,37 @@ function ConversionFunnel() {
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
       
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {conversionData.map((step, idx) => (
-          <Card key={idx} className={`bg-gradient-to-br ${
-            idx === 0 ? 'from-blue-50 to-blue-100' :
-            idx === conversionData.length - 1 ? 'from-green-50 to-green-100' : 
-            'from-indigo-50 to-indigo-100'
-          }`}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">{step.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-xl font-bold ${
-                idx === 0 ? 'text-blue-700' :
-                idx === conversionData.length - 1 ? 'text-green-700' : 
-                'text-indigo-700'
-              }`}>
-                {step.value}%
-              </div>
-              {idx < conversionData.length - 1 && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  {((conversionData[idx+1].value / step.value) * 100).toFixed(1)}% conversion
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {conversionData.map((step, idx) => (
+            <Card key={idx} className={`bg-gradient-to-br ${
+              idx === 0 ? 'from-blue-50 to-blue-100' :
+              idx === conversionData.length - 1 ? 'from-green-50 to-green-100' : 
+              'from-indigo-50 to-indigo-100'
+            }`}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">{step.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-xl font-bold ${
+                  idx === 0 ? 'text-blue-700' :
+                  idx === conversionData.length - 1 ? 'text-green-700' : 
+                  'text-indigo-700'
+                }`}>
+                  {step.value}%
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                {idx < conversionData.length - 1 && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {((conversionData[idx+1].value / step.value) * 100).toFixed(1)}% conversion
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }
