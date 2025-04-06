@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -518,37 +519,40 @@ function ConversionFunnel() {
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
       
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {conversionData.map((step, idx) => (
-            <Card key={idx} className={`bg-gradient-to-br ${
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {conversionData.map((step, idx) => (
+          <Card 
+            key={idx} 
+            className={`bg-gradient-to-br ${
               idx === 0 ? 'from-blue-50 to-blue-100' :
               idx === conversionData.length - 1 ? 'from-green-50 to-green-100' : 
               'from-indigo-50 to-indigo-100'
-            }`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">{step.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={`text-xl font-bold ${
-                  idx === 0 ? 'text-blue-700' :
-                  idx === conversionData.length - 1 ? 'text-green-700' : 
-                  'text-indigo-700'
-                }`}>
-                  {step.value}%
+            }`}
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">{step.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`text-xl font-bold ${
+                idx === 0 ? 'text-blue-700' :
+                idx === conversionData.length - 1 ? 'text-green-700' : 
+                'text-indigo-700'
+              }`}>
+                {step.value}%
+              </div>
+              {idx < conversionData.length - 1 && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {((conversionData[idx+1].value / step.value) * 100).toFixed(1)}% conversion
                 </div>
-                {idx < conversionData.length - 1 && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {((conversionData[idx+1].value / step.value) * 100).toFixed(1)}% conversion
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </Card>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
