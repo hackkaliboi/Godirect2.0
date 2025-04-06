@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -174,7 +175,7 @@ export default function SupportCenter({ initialTab = "tickets" }: SupportCenterP
   const [selectedTicket, setSelectedTicket] = useState(supportTickets[0]);
   const [replyText, setReplyText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState<"tickets" | "knowledge" | "team">(initialTab);
   
   useEffect(() => {
     setActiveTab(initialTab);
@@ -228,7 +229,11 @@ export default function SupportCenter({ initialTab = "tickets" }: SupportCenterP
         </p>
       </div>
       
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
+      <Tabs 
+        defaultValue={activeTab} 
+        value={activeTab} 
+        onValueChange={(value) => setActiveTab(value as "tickets" | "knowledge" | "team")}
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="tickets">Support Tickets</TabsTrigger>
           <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>

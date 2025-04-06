@@ -25,7 +25,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  RefreshCw
+  RefreshCw,
+  Search
 } from "lucide-react";
 
 // Sample email templates
@@ -139,7 +140,7 @@ interface SystemConfigurationProps {
 }
 
 export default function SystemConfiguration({ initialTab = "email" }: SystemConfigurationProps) {
-  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTab, setActiveTab] = useState<"email" | "platform" | "maintenance">(initialTab);
   const [selectedTemplate, setSelectedTemplate] = useState(emailTemplates[0]);
   const [templateContent, setTemplateContent] = useState("<h1>Welcome to GODIRECT!</h1><p>We're excited to have you on board...</p>");
   
@@ -169,7 +170,11 @@ export default function SystemConfiguration({ initialTab = "email" }: SystemConf
         </p>
       </div>
       
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
+      <Tabs 
+        defaultValue={activeTab} 
+        value={activeTab} 
+        onValueChange={(value) => setActiveTab(value as "email" | "platform" | "maintenance")}
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="email">
             <Mail className="mr-2 h-4 w-4" />
@@ -311,7 +316,7 @@ export default function SystemConfiguration({ initialTab = "email" }: SystemConf
                 {platformSettings.features.map((setting) => (
                   <div key={setting.id} className="flex items-center justify-between">
                     <Label htmlFor={setting.id}>{setting.name}</Label>
-                    <Switch id={setting.id} checked={setting.value} />
+                    <Switch id={setting.id} checked={Boolean(setting.value)} />
                   </div>
                 ))}
               </div>
@@ -324,9 +329,9 @@ export default function SystemConfiguration({ initialTab = "email" }: SystemConf
                   <div key={setting.id} className="grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
                     <Label htmlFor={setting.id}>{setting.name}</Label>
                     {setting.type === 'boolean' ? (
-                      <Switch id={setting.id} checked={setting.value} />
+                      <Switch id={setting.id} checked={Boolean(setting.value)} />
                     ) : (
-                      <Input id={setting.id} type={setting.type} defaultValue={setting.value} />
+                      <Input id={setting.id} type={setting.type} defaultValue={String(setting.value)} />
                     )}
                   </div>
                 ))}
