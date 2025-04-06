@@ -15,7 +15,10 @@ import {
   SearchCheck,
   Bell,
   History,
-  Calendar
+  Calendar,
+  Activity,
+  FileText,
+  PieChart
 } from "lucide-react";
 
 type NavItemWithPath = {
@@ -43,6 +46,7 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
     if (userType === "admin") {
       return [
         ...commonItems,
+        { title: "Analytics", path: "/admin-dashboard/analytics", icon: PieChart },
         { 
           title: "User Management", 
           icon: Users, 
@@ -57,7 +61,7 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
           icon: Building 
         },
         { 
-          title: "Analytics", 
+          title: "Reports", 
           icon: BarChart3,
           subItems: [
             { title: "Sales", path: "/admin-dashboard/sales" },

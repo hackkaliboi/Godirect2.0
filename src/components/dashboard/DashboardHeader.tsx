@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
+import { Calendar, Download, Filter, RefreshCcw } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DashboardHeaderProps {
   title: string;
@@ -10,6 +11,15 @@ interface DashboardHeaderProps {
   actionIcon?: React.ReactNode;
   onActionClick?: () => void;
   secondaryAction?: React.ReactNode;
+  dateFilter?: boolean;
+  exportButton?: boolean;
+  refreshButton?: boolean;
+  filters?: {
+    label: string;
+    options: {value: string, label: string}[];
+    onChange: (value: string) => void;
+    value: string;
+  }[];
 }
 
 export function DashboardHeader({
@@ -18,7 +28,11 @@ export function DashboardHeader({
   actionLabel,
   actionIcon,
   onActionClick,
-  secondaryAction
+  secondaryAction,
+  dateFilter = false,
+  exportButton = false,
+  refreshButton = false,
+  filters = []
 }: DashboardHeaderProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -30,8 +44,42 @@ export function DashboardHeader({
           </p>
         )}
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
+        {filters.length > 0 && filters.map((filter, index) => (
+          <div key={index} className="w-auto min-w-[140px]">
+            <Select value={filter.value} onValueChange={filter.onChange}>
+              <SelectTrigger className="h-9 text-xs">
+                <SelectValue placeholder={filter.label} />
+              </SelectTrigger>
+              <SelectContent>
+                {filter.options.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ))}
+        
+        {dateFilter && <CurrentMonthButton />}
+        
+        {refreshButton && (
+          <Button variant="outline" size="sm" className="h-9">
+            <RefreshCcw className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">Refresh</span>
+          </Button>
+        )}
+        
+        {exportButton && (
+          <Button variant="outline" size="sm" className="h-9">
+            <Download className="h-4 w-4 mr-1" />
+            <span className="hidden sm:inline">Export</span>
+          </Button>
+        )}
+        
         {secondaryAction}
+        
         {actionLabel && (
           <Button 
             onClick={onActionClick}
@@ -51,7 +99,7 @@ export function CurrentMonthButton() {
   const currentYear = new Date().getFullYear();
   
   return (
-    <Button variant="outline" size="sm">
+    <Button variant="outline" size="sm" className="h-9">
       <Calendar className="mr-2 h-4 w-4" />
       <span>{currentMonth} {currentYear}</span>
     </Button>
