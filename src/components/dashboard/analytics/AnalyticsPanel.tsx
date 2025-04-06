@@ -1,12 +1,11 @@
-
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
          LineChart, Line, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
 import { StatsCardGrid, StatsCard, AnalyticsCard } from '../StatsCard';
 import { DashboardHeader } from '../DashboardHeader';
-import { Building2, DollarSign, Users, TrendingUp, Calendar, Activity, ShoppingBag, Map, Search, MousePointerClick } from "lucide-react";
+import { Building2, DollarSign, Users, TrendingUp, Calendar, Activity, ShoppingBag, Map, Search, MousePointerClick, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { DashboardTabs } from "../DashboardTabs";
@@ -61,7 +60,7 @@ const agentPerformanceData = [
 const heatmapData = [
   { area: "Downtown", hotness: 95, price: "$520k", change: 8.2 },
   { area: "North End", hotness: 88, price: "$410k", change: 5.4 },
-  { area: "West Side", hotness: 76, price: "$310k", change: 3.8 },
+  { name: "West Side", hotness: 76, price: "$310k", change: 3.8 },
   { area: "South Beach", hotness: 92, price: "$485k", change: 7.9 },
   { area: "East Village", hotness: 81, price: "$370k", change: 4.2 },
 ];

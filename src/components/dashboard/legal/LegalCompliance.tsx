@@ -12,7 +12,7 @@ import {
   FileText,
   Search,
   FileCheck,
-  Scales,
+  Scale,
   FileQuestion,
   Download,
   Upload,

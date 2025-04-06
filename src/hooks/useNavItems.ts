@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { 
   Home, 
@@ -19,7 +18,7 @@ import {
   Activity,
   FileText,
   PieChart,
-  Scales,
+  Scale,
   Gem
 } from "lucide-react";
 
@@ -50,7 +49,7 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
         ...commonItems,
         { title: "Analytics", path: "/admin-dashboard/analytics", icon: PieChart },
         { title: "Financial", path: "/admin-dashboard/financial", icon: DollarSign },
-        { title: "Legal & Compliance", path: "/admin-dashboard/legal", icon: Scales },
+        { title: "Legal & Compliance", path: "/admin-dashboard/legal", icon: Scale },
         { 
           title: "User Management", 
           icon: Users, 
@@ -98,7 +97,6 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
       ];
     }
     
-    // User type
     return [
       ...commonItems,
       { title: "Favorites", path: "/user-dashboard/favorites", icon: Heart },
