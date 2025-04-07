@@ -1,29 +1,25 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 interface TabItem {
   value: string;
   label: string;
   content: React.ReactNode;
   icon?: React.ReactNode;
 }
-
 interface DashboardTabsProps {
   tabs: TabItem[];
   defaultValue?: string;
   className?: string;
   variant?: "default" | "pills" | "underline";
 }
-
-export function DashboardTabs({ 
-  tabs, 
-  defaultValue, 
+export function DashboardTabs({
+  tabs,
+  defaultValue,
   className = "w-full",
-  variant = "default" 
+  variant = "default"
 }: DashboardTabsProps) {
   // Determine appropriate className for TabsList based on variant
   const getTabsListClassName = () => {
-    switch(variant) {
+    switch (variant) {
       case "pills":
         return "bg-transparent p-0 gap-2";
       case "underline":
@@ -32,10 +28,10 @@ export function DashboardTabs({
         return "grid w-full grid-cols-" + tabs.length + " mb-4";
     }
   };
-  
+
   // Determine appropriate className for TabsTrigger based on variant
   const getTabsTriggerClassName = (tab: TabItem) => {
-    switch(variant) {
+    switch (variant) {
       case "pills":
         return "bg-background border border-input px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground";
       case "underline":
@@ -44,29 +40,15 @@ export function DashboardTabs({
         return "";
     }
   };
-  
-  return (
-    <Tabs defaultValue={defaultValue || tabs[0].value} className={className}>
+  return <Tabs defaultValue={defaultValue || tabs[0].value} className={className}>
       <TabsList className={getTabsListClassName()}>
-        {tabs.map((tab) => (
-          <TabsTrigger 
-            key={tab.value} 
-            value={tab.value}
-            className={getTabsTriggerClassName(tab)}
-          >
-            {tab.icon && <span className="mr-2">{tab.icon}</span>}
-            {tab.label}
-          </TabsTrigger>
-        ))}
+        {tabs.map(tab => {})}
       </TabsList>
       
       <div className="mt-6">
-        {tabs.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value} className="pt-4">
+        {tabs.map(tab => <TabsContent key={tab.value} value={tab.value} className="pt-4">
             {tab.content}
-          </TabsContent>
-        ))}
+          </TabsContent>)}
       </div>
-    </Tabs>
-  );
+    </Tabs>;
 }
