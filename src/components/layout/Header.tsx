@@ -92,8 +92,12 @@ const Header = () => {
                   <Link to="/user-dashboard">User Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Login</DropdownMenuItem>
-                <DropdownMenuItem>Sign Up</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/login">Login</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/signup">Sign Up</Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -165,12 +169,16 @@ const Header = () => {
               </Link>
             </nav>
             <div className="pt-4 border-t border-gray-200 dark:border-realty-800 flex flex-col space-y-3">
-              <Button variant="outline" className="justify-center">
-                <User className="h-4 w-4 mr-2" />
-                Login
+              <Button variant="outline" className="justify-center" asChild>
+                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                  <User className="h-4 w-4 mr-2" />
+                  Login
+                </Link>
               </Button>
-              <Button className="justify-center bg-realty-800 hover:bg-realty-900 text-white">
-                Sign Up
+              <Button className="justify-center bg-realty-800 hover:bg-realty-900 text-white" asChild>
+                <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                  Sign Up
+                </Link>
               </Button>
             </div>
           </div>

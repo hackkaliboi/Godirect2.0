@@ -16,6 +16,10 @@ import Footer from "./components/layout/Footer";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import AgentDashboard from "./pages/AgentDashboard";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const App = () => {
   // Create QueryClient instance inside the component
@@ -28,6 +32,12 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Authentication routes without header/footer */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            
             {/* Dashboard routes without header/footer */}
             <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
             <Route path="/user-dashboard/*" element={<UserDashboard />} />
