@@ -116,6 +116,7 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
         { title: "Commissions", path: "/agent-dashboard/commissions", icon: DollarSign },
         { title: "Performance", path: "/agent-dashboard/performance", icon: BarChart3 },
         { title: "Calendar", path: "/agent-dashboard/calendar", icon: Calendar },
+        { title: "Verifications", path: "/agent-dashboard/verifications", icon: SearchCheck }, // Add the verifications route
       ];
     }
     
@@ -125,7 +126,12 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
       { title: "Messages", path: "/user-dashboard/messages", icon: MessageSquare },
       { 
         title: "Properties", 
+        path: "/user-dashboard/properties", // Direct path to properties
         icon: Building,
+      },
+      {
+        title: "Property Tools",
+        icon: SearchCheck,
         subItems: [
           { title: "Saved Searches", path: "/user-dashboard/saved-searches" },
           { title: "Property Alerts", path: "/user-dashboard/property-alerts" },
