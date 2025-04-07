@@ -1,4 +1,5 @@
 
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,8 @@ const listedProperties = [
 ];
 
 export default function UserProperties() {
+  const navigate = useNavigate();
+  
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -62,7 +65,7 @@ export default function UserProperties() {
             Manage your property purchases and listings
           </p>
         </div>
-        <Button>
+        <Button onClick={() => navigate("/user-dashboard/properties/new")}>
           <PlusCircle className="mr-2 h-4 w-4" />
           List New Property
         </Button>
@@ -125,7 +128,11 @@ export default function UserProperties() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => navigate(`/user-dashboard/properties/${property.id}`)}
+                        >
                           <Eye className="h-4 w-4 mr-1" />
                           View Details
                         </Button>
@@ -192,10 +199,18 @@ export default function UserProperties() {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => navigate(`/user-dashboard/properties/${property.id}`)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => navigate(`/user-dashboard/properties/edit/${property.id}`)}
+                          >
                             Edit
                           </Button>
                         </div>
@@ -207,7 +222,12 @@ export default function UserProperties() {
               {listedProperties.length === 0 && (
                 <div className="text-center py-6">
                   <div className="text-muted-foreground">You haven't listed any properties yet</div>
-                  <Button className="mt-4">List Your First Property</Button>
+                  <Button 
+                    className="mt-4"
+                    onClick={() => navigate("/user-dashboard/properties/new")}
+                  >
+                    List Your First Property
+                  </Button>
                 </div>
               )}
             </CardContent>
