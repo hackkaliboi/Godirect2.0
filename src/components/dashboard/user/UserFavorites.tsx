@@ -1,163 +1,166 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { 
+  Heart, 
+  Search, 
+  Filter, 
+  ExternalLink, 
+  MessageSquare,
+  Trash2
+} from "lucide-react";
 
-const favoriteProperties = [
-  {
-    id: 1,
-    title: "Modern Downtown Apartment",
-    price: "$325,000",
-    location: "Downtown, City Center",
-    bedrooms: 2,
-    bathrooms: 2,
-    sqft: 1050,
-    type: "Apartment",
-    image: "/placeholder.svg",
-    dateAdded: "Jun 12, 2023"
+// Sample data
+const favorites = [
+  { 
+    id: 101, 
+    title: "Luxury Waterfront Condo", 
+    address: "789 Marina Blvd, Waterfront", 
+    price: "$875,000", 
+    type: "For Sale",
+    agent: "Sarah Johnson",
+    savedDate: "2023-06-12"
   },
-  {
-    id: 2,
-    title: "Suburban Family Home",
-    price: "$529,000",
-    location: "Pleasant Valley, Suburbs",
-    bedrooms: 4,
-    bathrooms: 3,
-    sqft: 2200,
-    type: "Single Family",
-    image: "/placeholder.svg",
-    dateAdded: "Jun 10, 2023"
+  { 
+    id: 102, 
+    title: "Modern Family Home", 
+    address: "456 Oak Ave, Pleasant Valley", 
+    price: "$529,000", 
+    type: "For Sale",
+    agent: "David Martinez",
+    savedDate: "2023-06-10"
   },
-  {
-    id: 3,
-    title: "Luxury Waterfront Condo",
-    price: "$875,000",
-    location: "Marina Bay, Waterfront",
-    bedrooms: 3,
-    bathrooms: 3.5,
-    sqft: 1875,
-    type: "Condo",
-    image: "/placeholder.svg",
-    dateAdded: "Jun 8, 2023"
+  { 
+    id: 103, 
+    title: "Downtown Loft Apartment", 
+    address: "555 Central St, Downtown", 
+    price: "$2,200/mo", 
+    type: "For Rent",
+    agent: "Jennifer Williams",
+    savedDate: "2023-06-05"
   },
-  {
-    id: 4,
-    title: "Cozy Studio Apartment",
-    price: "$189,000",
-    location: "University District",
-    bedrooms: 0,
-    bathrooms: 1,
-    sqft: 550,
-    type: "Studio",
-    image: "/placeholder.svg",
-    dateAdded: "Jun 5, 2023"
+  { 
+    id: 104, 
+    title: "Elegant Townhouse", 
+    address: "225 Park Lane, Midtown", 
+    price: "$425,000", 
+    type: "For Sale",
+    agent: "Robert Brown",
+    savedDate: "2023-05-28"
   },
-  {
-    id: 5,
-    title: "Elegant Townhouse",
-    price: "$425,000",
-    location: "Midtown",
-    bedrooms: 3,
-    bathrooms: 2.5,
-    sqft: 1680,
-    type: "Townhouse",
-    image: "/placeholder.svg",
-    dateAdded: "Jun 2, 2023"
-  },
-  {
-    id: 6,
-    title: "Renovated Bungalow",
-    price: "$385,000",
-    location: "Historic District",
-    bedrooms: 2,
-    bathrooms: 1,
-    sqft: 1250,
-    type: "Bungalow",
-    image: "/placeholder.svg",
-    dateAdded: "May 29, 2023"
+  { 
+    id: 105, 
+    title: "Suburban Ranch House", 
+    address: "888 Meadow Rd, Pleasant Valley", 
+    price: "$389,000", 
+    type: "For Sale",
+    agent: "Amanda Davis",
+    savedDate: "2023-05-25"
   },
 ];
 
-export default function UserFavorites() {
+const UserFavorites = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Favorites</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Saved Properties</h1>
           <p className="text-muted-foreground">
-            Properties you've saved to revisit later
+            Properties you've saved for future reference
           </p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex gap-4">
-          <Select defaultValue="newest">
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="price-high">Price: High to Low</SelectItem>
-              <SelectItem value="price-low">Price: Low to High</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
       
-      {favoriteProperties.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {favoriteProperties.map((property) => (
-            <Card key={property.id} className="overflow-hidden">
-              <div className="relative aspect-video">
-                <img 
-                  src={property.image} 
-                  alt={property.title} 
-                  className="object-cover w-full h-full"
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center">
+              <Heart className="h-5 w-5 text-muted-foreground mr-2" />
+              <CardTitle>Favorited Properties</CardTitle>
+            </div>
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search favorites..." 
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
                 />
-                <Button 
-                  variant="destructive" 
-                  size="icon" 
-                  className="absolute top-2 right-2 h-8 w-8 rounded-full opacity-90 hover:opacity-100"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
-              <CardContent className="p-4">
-                <h3 className="text-lg font-semibold line-clamp-1">{property.title}</h3>
-                <p className="text-primary text-xl font-medium">{property.price}</p>
-                <p className="text-sm text-muted-foreground mb-2">{property.location}</p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                  <span>{property.bedrooms} bd</span>
-                  <span className="text-xs">•</span>
-                  <span>{property.bathrooms} ba</span>
-                  <span className="text-xs">•</span>
-                  <span>{property.sqft} sqft</span>
-                  <span className="text-xs">•</span>
-                  <span>{property.type}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <Heart className="h-3 w-3 mr-1 fill-primary text-primary" />
-                    <span>Saved {property.dateAdded}</span>
-                  </div>
-                  <Button size="sm">View Details</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <Heart className="h-12 w-12 text-muted-foreground mb-4" />
-            <CardTitle className="mb-2">No saved properties yet</CardTitle>
-            <p className="text-center text-muted-foreground">
-              Save properties you're interested in to view them later
-            </p>
-            <Button className="mt-4">Browse Properties</Button>
-          </CardContent>
-        </Card>
-      )}
+              <Button variant="outline" size="icon">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Property</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead className="hidden md:table-cell">Type</TableHead>
+                <TableHead className="hidden lg:table-cell">Agent</TableHead>
+                <TableHead className="hidden sm:table-cell">Saved</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {favorites.map((property) => (
+                <TableRow key={property.id}>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{property.title}</p>
+                      <p className="text-xs text-muted-foreground">{property.address}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>{property.price}</TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <Badge variant="outline">{property.type}</Badge>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">{property.agent}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{property.savedDate}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="icon">
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default UserFavorites;

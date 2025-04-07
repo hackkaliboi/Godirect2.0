@@ -1,239 +1,211 @@
 
-import { Link, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { 
+  Table, 
+  TableHeader, 
+  TableRow, 
+  TableHead, 
+  TableBody, 
+  TableCell 
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, Eye, MapPin, Home, Clock, Check, XCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger, 
+  DropdownMenuSeparator 
+} from "@/components/ui/dropdown-menu";
+import { Plus, Search, MoreHorizontal, Filter } from "lucide-react";
 
-const purchasedProperties = [
+// Sample data
+const properties = [
   { 
     id: 1, 
-    title: "3-Bedroom Modern Apartment", 
-    type: "Apartment",
-    location: "Downtown Area", 
-    price: "$285,000", 
-    status: "Completed", 
-    date: "Mar 15, 2025",
-    verificationStatus: "Verified"
+    title: "Modern Downtown Apartment", 
+    address: "123 Main St, Downtown", 
+    price: "$325,000", 
+    status: "Active",
+    type: "For Sale",
+    views: 245,
+    inquiries: 8,
+    date: "2023-05-15"
   },
   { 
     id: 2, 
-    title: "Land Plot (500 sqm)", 
-    type: "Land",
-    location: "Greenfield Suburb", 
-    price: "$120,000", 
-    status: "In Progress", 
-    date: "Apr 01, 2025",
-    verificationStatus: "Under Review"
-  }
-];
-
-const listedProperties = [
-  { 
-    id: 1, 
-    title: "Studio Apartment", 
-    type: "Apartment",
-    location: "University District", 
-    price: "$175,000", 
-    status: "Active", 
-    views: 48,
-    inquiries: 5
+    title: "Luxury Waterfront Condo", 
+    address: "789 Marina Blvd, Waterfront", 
+    price: "$875,000", 
+    status: "Active",
+    type: "For Sale",
+    views: 187,
+    inquiries: 6,
+    date: "2023-05-18"
   },
   { 
-    id: 2, 
-    title: "2-Bedroom Townhouse", 
-    type: "House",
-    location: "Riverside Area", 
-    price: "$310,000", 
-    status: "Pending Verification", 
-    views: 24,
-    inquiries: 2
-  }
+    id: 3, 
+    title: "Suburban Family Home", 
+    address: "456 Oak Ave, Pleasant Valley", 
+    price: "$529,000", 
+    status: "Pending",
+    type: "For Sale",
+    views: 320,
+    inquiries: 12,
+    date: "2023-05-10"
+  },
+  { 
+    id: 4, 
+    title: "Downtown Office Space", 
+    address: "555 Business Ave, Downtown", 
+    price: "$4,500/mo", 
+    status: "Active",
+    type: "For Rent",
+    views: 110,
+    inquiries: 3,
+    date: "2023-05-20"
+  },
+  { 
+    id: 5, 
+    title: "Cozy Studio Apartment", 
+    address: "101 College St, University District", 
+    price: "$1,800/mo", 
+    status: "Active",
+    type: "For Rent",
+    views: 95,
+    inquiries: 5,
+    date: "2023-05-22"
+  },
+  { 
+    id: 6, 
+    title: "Elegant Townhouse", 
+    address: "225 Park Lane, Midtown", 
+    price: "$425,000", 
+    status: "Inactive",
+    type: "For Sale",
+    views: 72,
+    inquiries: 0,
+    date: "2023-04-15"
+  },
 ];
 
-export default function UserProperties() {
-  const navigate = useNavigate();
-  
+const UserProperties = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Properties</h1>
           <p className="text-muted-foreground">
-            Manage your property purchases and listings
+            Manage your property listings
           </p>
         </div>
-        <Button onClick={() => navigate("/user-dashboard/properties/new")}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          List New Property
-        </Button>
+        <Link to="/user-dashboard/properties/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Property
+          </Button>
+        </Link>
       </div>
       
-      <Tabs defaultValue="purchases" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="purchases">My Purchases</TabsTrigger>
-          <TabsTrigger value="listings">My Listings</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="purchases">
-          <Card>
-            <CardHeader>
-              <CardTitle>Property Purchases</CardTitle>
-              <CardDescription>Properties you've bought or are in the process of buying</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Property</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Transaction Status</TableHead>
-                    <TableHead>Verification</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {purchasedProperties.map((property) => (
-                    <TableRow key={property.id}>
-                      <TableCell>
-                        <div className="font-medium">{property.title}</div>
-                        <div className="text-xs text-muted-foreground">{property.type}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
-                          <span>{property.location}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{property.price}</TableCell>
-                      <TableCell>
-                        <Badge variant={property.status === "Completed" ? "success" : "outline"}>
-                          {property.status === "Completed" ? (
-                            <Check className="h-3 w-3 mr-1" />
-                          ) : (
-                            <Clock className="h-3 w-3 mr-1" />
-                          )}
-                          {property.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          property.verificationStatus === "Verified" ? "success" :
-                          property.verificationStatus === "Under Review" ? "warning" : "outline"
-                        }>
-                          {property.verificationStatus}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => navigate(`/user-dashboard/properties/${property.id}`)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View Details
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {purchasedProperties.length === 0 && (
-                <div className="text-center py-6">
-                  <div className="text-muted-foreground">You haven't purchased any properties yet</div>
-                  <Button variant="outline" className="mt-4">Browse Properties</Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="listings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Property Listings</CardTitle>
-              <CardDescription>Properties you've listed for sale</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Property</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Analytics</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {listedProperties.map((property) => (
-                    <TableRow key={property.id}>
-                      <TableCell>
-                        <div className="font-medium">{property.title}</div>
-                        <div className="text-xs text-muted-foreground">{property.type}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
-                          <span>{property.location}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{property.price}</TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          property.status === "Active" ? "success" :
-                          property.status === "Pending Verification" ? "warning" : "outline"
-                        }>
-                          {property.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-xs">
-                          <div>Views: {property.views}</div>
-                          <div>Inquiries: {property.inquiries}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => navigate(`/user-dashboard/properties/${property.id}`)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => navigate(`/user-dashboard/properties/edit/${property.id}`)}
-                          >
-                            Edit
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {listedProperties.length === 0 && (
-                <div className="text-center py-6">
-                  <div className="text-muted-foreground">You haven't listed any properties yet</div>
-                  <Button 
-                    className="mt-4"
-                    onClick={() => navigate("/user-dashboard/properties/new")}
-                  >
-                    List Your First Property
+      <Card>
+        <CardHeader className="px-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <CardTitle>All Properties</CardTitle>
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search properties..." className="pl-8" />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Filter className="h-4 w-4" />
                   </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>All Properties</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>For Sale</DropdownMenuItem>
+                  <DropdownMenuItem>For Rent</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Active</DropdownMenuItem>
+                  <DropdownMenuItem>Pending</DropdownMenuItem>
+                  <DropdownMenuItem>Inactive</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="px-6 overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Property</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead className="hidden md:table-cell">Type</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="hidden lg:table-cell">Views</TableHead>
+                <TableHead className="hidden sm:table-cell">Inquiries</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {properties.map((property) => (
+                <TableRow key={property.id}>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{property.title}</p>
+                      <p className="text-xs text-muted-foreground">{property.address}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>{property.price}</TableCell>
+                  <TableCell className="hidden md:table-cell">{property.type}</TableCell>
+                  <TableCell>
+                    <Badge variant={
+                      property.status === "Active" ? "default" : 
+                      property.status === "Pending" ? "secondary" : "outline"
+                    }>
+                      {property.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden lg:table-cell">{property.views}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{property.inquiries}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <Link to={`/user-dashboard/properties/${property.id}`}>
+                          <DropdownMenuItem>View Details</DropdownMenuItem>
+                        </Link>
+                        <Link to={`/user-dashboard/properties/edit/${property.id}`}>
+                          <DropdownMenuItem>Edit Listing</DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive">
+                          Remove Listing
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+};
+
+export default UserProperties;
