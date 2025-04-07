@@ -21,10 +21,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { formatPriceWithCommas } from "@/utils/data";
+import { Info } from "lucide-react";
 
 interface PropertyPurchaseProps {
   propertyId: string;
@@ -44,6 +46,10 @@ const purchaseFormSchema = z.object({
 const PropertyPurchase = ({ propertyId, propertyTitle, propertyPrice }: PropertyPurchaseProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Company commission percentage
+  const commissionRate = 0.05; // 5% commission
+  const commissionAmount = propertyPrice * commissionRate;
   
   const form = useForm<z.infer<typeof purchaseFormSchema>>({
     resolver: zodResolver(purchaseFormSchema),
@@ -68,6 +74,11 @@ const PropertyPurchase = ({ propertyId, propertyTitle, propertyPrice }: Property
           title: propertyTitle,
           price: propertyPrice,
         },
+        commission: {
+          rate: commissionRate,
+          amount: commissionAmount,
+        },
+        sellerPayout: propertyPrice - commissionAmount,
         customer: values
       });
       
@@ -104,8 +115,21 @@ const PropertyPurchase = ({ propertyId, propertyTitle, propertyPrice }: Property
           </DialogDescription>
         </DialogHeader>
         
+        <div className="bg-muted/30 p-4 rounded-lg mb-4 text-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <Info size={16} className="text-blue-500" />
+            <h4 className="font-medium">How the purchase process works:</h4>
+          </div>
+          <ol className="list-decimal list-inside space-y-1 ml-1">
+            <li>Submit your details and our team will contact you</li>
+            <li>We'll verify your identity and secure payment details</li>
+            <li>Once payment is processed, the property seller will be paid</li>
+            <li>We'll handle all documentation and title transfers</li>
+          </ol>
+        </div>
+        
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
             <FormField
               control={form.control}
               name="name"
@@ -147,6 +171,25 @@ const PropertyPurchase = ({ propertyId, propertyTitle, propertyPrice }: Property
                 </FormItem>
               )}
             />
+
+            <div className="pt-2">
+              <h3 className="text-sm font-medium mb-2">Purchase Summary</h3>
+              <div className="bg-muted/20 p-3 rounded space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Property Price:</span>
+                  <span className="font-medium">{formatPriceWithCommas(propertyPrice)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Service Fee:</span>
+                  <span>{formatPriceWithCommas(commissionAmount)}</span>
+                </div>
+                <Separator className="my-1" />
+                <div className="flex justify-between font-medium">
+                  <span>Total Amount:</span>
+                  <span>{formatPriceWithCommas(propertyPrice)}</span>
+                </div>
+              </div>
+            </div>
             
             <FormField
               control={form.control}
