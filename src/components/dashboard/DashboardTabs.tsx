@@ -1,16 +1,20 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 interface TabItem {
   value: string;
   label: string;
   content: React.ReactNode;
   icon?: React.ReactNode;
 }
+
 interface DashboardTabsProps {
   tabs: TabItem[];
   defaultValue?: string;
   className?: string;
   variant?: "default" | "pills" | "underline";
 }
+
 export function DashboardTabs({
   tabs,
   defaultValue,
@@ -40,15 +44,29 @@ export function DashboardTabs({
         return "";
     }
   };
-  return <Tabs defaultValue={defaultValue || tabs[0].value} className={className}>
+
+  return (
+    <Tabs defaultValue={defaultValue || tabs[0].value} className={className}>
       <TabsList className={getTabsListClassName()}>
-        {tabs.map(tab => {})}
+        {tabs.map((tab) => (
+          <TabsTrigger 
+            key={tab.value} 
+            value={tab.value}
+            className={getTabsTriggerClassName(tab)}
+          >
+            {tab.icon && <span className="mr-2">{tab.icon}</span>}
+            {tab.label}
+          </TabsTrigger>
+        ))}
       </TabsList>
       
       <div className="mt-6">
-        {tabs.map(tab => <TabsContent key={tab.value} value={tab.value} className="pt-4">
+        {tabs.map((tab) => (
+          <TabsContent key={tab.value} value={tab.value} className="pt-4">
             {tab.content}
-          </TabsContent>)}
+          </TabsContent>
+        ))}
       </div>
-    </Tabs>;
+    </Tabs>
+  );
 }
