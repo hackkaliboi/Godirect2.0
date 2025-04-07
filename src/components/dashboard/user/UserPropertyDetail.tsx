@@ -64,6 +64,9 @@ const propertyData = {
     images: [
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80"
     ],
+    // Adding optional bedrooms and bathrooms as null to fix type issues
+    bedrooms: null,
+    bathrooms: null,
     squareFeet: 5000,
     features: ["Corner Lot", "Utilities Available", "Clear Title", "No Liens"],
     ownerInfo: {
@@ -196,13 +199,13 @@ export default function UserPropertyDetail() {
                             <span className="text-muted-foreground">Location:</span>
                             <span>{property.location}</span>
                           </div>
-                          {property.bedrooms && (
+                          {property.bedrooms != null && (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Bedrooms:</span>
                               <span>{property.bedrooms}</span>
                             </div>
                           )}
-                          {property.bathrooms && (
+                          {property.bathrooms != null && (
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Bathrooms:</span>
                               <span>{property.bathrooms}</span>

@@ -58,6 +58,9 @@ const propertyData = {
     images: [
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80"
     ],
+    // Adding optional bedrooms and bathrooms as null to fix type issues
+    bedrooms: null,
+    bathrooms: null,
     squareFeet: 5000,
     features: ["Corner Lot", "Utilities Available", "Clear Title", "No Liens"],
   }
@@ -100,8 +103,8 @@ export default function UserPropertyForm() {
         address: "",
         price: 0,
         images: [] as string[],
-        bedrooms: 0,
-        bathrooms: 0,
+        bedrooms: null as number | null,
+        bathrooms: null as number | null,
         squareFeet: 0,
         features: [] as string[],
       };
@@ -134,7 +137,7 @@ export default function UserPropertyForm() {
     if (name === "price" || name === "bedrooms" || name === "bathrooms" || name === "squareFeet") {
       setFormData({
         ...formData,
-        [name]: Number(value)
+        [name]: Number(value) || 0
       });
     } else {
       setFormData({
@@ -145,11 +148,16 @@ export default function UserPropertyForm() {
   };
   
   const handleTypeChange = (value: string) => {
-    setFormData({
+    // Reset bedrooms and bathrooms when changing to Land type
+    const updatedFormData = {
       ...formData,
       type: value,
-      features: [] // Reset features when type changes
-    });
+      features: [], // Reset features when type changes
+      bedrooms: value === 'Land' ? null : formData.bedrooms,
+      bathrooms: value === 'Land' ? null : formData.bathrooms,
+    };
+    
+    setFormData(updatedFormData);
     setAvailableFeatures(featuresByType[value as keyof typeof featuresByType] || []);
   };
   
@@ -325,7 +333,7 @@ export default function UserPropertyForm() {
                           id="bedrooms" 
                           name="bedrooms"
                           type="number"
-                          value={formData.bedrooms || ''} 
+                          value={formData.bedrooms === null ? '' : formData.bedrooms} 
                           onChange={handleChange}
                           min="0"
                         />
@@ -336,7 +344,7 @@ export default function UserPropertyForm() {
                           id="bathrooms" 
                           name="bathrooms"
                           type="number"
-                          value={formData.bathrooms || ''} 
+                          value={formData.bathrooms === null ? '' : formData.bathrooms} 
                           onChange={handleChange}
                           min="0"
                           step="0.5"
