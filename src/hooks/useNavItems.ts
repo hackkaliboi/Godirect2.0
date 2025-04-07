@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { 
   Home, 
@@ -23,7 +22,10 @@ import {
   LifeBuoy,
   Wrench,
   Mail,
-  BellRing
+  BellRing,
+  Receipt,
+  Wallet,
+  CreditCard
 } from "lucide-react";
 
 type NavItemWithPath = {
@@ -52,7 +54,15 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
       return [
         ...commonItems,
         { title: "Analytics", path: "/admin-dashboard/analytics", icon: PieChart },
-        { title: "Financial", path: "/admin-dashboard/financial", icon: DollarSign },
+        { 
+          title: "Financial Management", 
+          icon: DollarSign, 
+          subItems: [
+            { title: "Financial Overview", path: "/admin-dashboard/financial" },
+            { title: "Sales Reports", path: "/admin-dashboard/sales" },
+            { title: "Payment Processing", path: "/admin-dashboard/payments" },
+          ]
+        },
         { title: "Legal & Compliance", path: "/admin-dashboard/legal", icon: Scale },
         { 
           title: "User Management", 
@@ -69,11 +79,8 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
         },
         { 
           title: "Reports", 
-          icon: BarChart3,
-          subItems: [
-            { title: "Sales", path: "/admin-dashboard/sales" },
-            { title: "Reports", path: "/admin-dashboard/reports" },
-          ]
+          path: "/admin-dashboard/reports", 
+          icon: FileText 
         },
         { 
           title: "Notifications", 

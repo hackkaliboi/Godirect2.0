@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -31,7 +30,12 @@ import {
   ActivitySquare,
   BarChart3,
   BellRing,
-  FileText
+  FileText,
+  Wallet,
+  Bank,
+  Landmark,
+  Receipt,
+  CreditCard as CreditCardIcon
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -86,12 +90,12 @@ const AdminDashboard = () => {
                 />
                 
                 <StatsCard
-                  title="Conversion Rate"
-                  value="3.2%"
-                  change={-0.5}
-                  icon={<TrendingUp className="h-4 w-4" />}
-                  progressValue={32}
-                  compareText="From visitor to customer"
+                  title="Payment Approvals"
+                  value="24"
+                  change={15.0}
+                  icon={<Receipt className="h-4 w-4" />}
+                  progressValue={45}
+                  compareText="Pending approval"
                 />
               </StatsCardGrid>
               
@@ -199,6 +203,86 @@ const AdminDashboard = () => {
                   </CardFooter>
                 </Card>
               </div>
+              
+              {/* Payment Processing Quick Access */}
+              <Card className="shadow-md hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xl font-semibold flex items-center">
+                    <Wallet className="mr-2 h-5 w-5 text-primary" />
+                    Payment Processing Center
+                  </CardTitle>
+                  <CardDescription>
+                    Review and manage property purchase requests and payments
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="bg-muted/30 p-3 rounded-lg text-center">
+                      <div className="text-sm text-muted-foreground">Pending Approvals</div>
+                      <div className="text-2xl font-bold">24</div>
+                      <div className="text-xs text-amber-500">Requires review</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg text-center">
+                      <div className="text-sm text-muted-foreground">Payments to Verify</div>
+                      <div className="text-2xl font-bold">18</div>
+                      <div className="text-xs text-blue-500">Received, not verified</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg text-center">
+                      <div className="text-sm text-muted-foreground">Scheduled Viewings</div>
+                      <div className="text-2xl font-bold">9</div>
+                      <div className="text-xs text-green-500">This week</div>
+                    </div>
+                    <div className="bg-muted/30 p-3 rounded-lg text-center">
+                      <div className="text-sm text-muted-foreground">Documents Pending</div>
+                      <div className="text-2xl font-bold">12</div>
+                      <div className="text-xs text-red-500">Requires attention</div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 mb-4">
+                    <h4 className="text-sm font-medium">Payment Methods Distribution</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Bank Transfers</span>
+                        <span>58%</span>
+                      </div>
+                      <Progress value={58} className="h-2" />
+                      
+                      <div className="flex justify-between text-sm">
+                        <span>USSD Payments</span>
+                        <span>24%</span>
+                      </div>
+                      <Progress value={24} className="h-2" />
+                      
+                      <div className="flex justify-between text-sm">
+                        <span>Crypto</span>
+                        <span>12%</span>
+                      </div>
+                      <Progress value={12} className="h-2" />
+                      
+                      <div className="flex justify-between text-sm">
+                        <span>Mobile Money</span>
+                        <span>6%</span>
+                      </div>
+                      <Progress value={6} className="h-2" />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <div className="flex flex-col sm:flex-row w-full gap-2">
+                    <Button className="flex-1" asChild>
+                      <a href="/admin-dashboard/payments">
+                        <Receipt className="mr-2 h-4 w-4" />
+                        Manage Payments
+                      </a>
+                    </Button>
+                    <Button variant="outline" className="flex-1">
+                      <Bank className="mr-2 h-4 w-4" />
+                      Payment Methods Config
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
               
               <DashboardTabs
                 variant="default"
@@ -457,6 +541,50 @@ const AdminDashboard = () => {
                         <CardFooter>
                           <Button className="w-full">View Detailed Financial Reports</Button>
                         </CardFooter>
+                      </Card>
+                    )
+                  },
+                  {
+                    value: "payments",
+                    label: "Payment Processing",
+                    content: (
+                      <Card className="shadow-md">
+                        <CardHeader>
+                          <CardTitle>Payment Processing Overview</CardTitle>
+                          <CardDescription>Manage property purchase requests and payment processing</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-muted/30 p-3 rounded-lg flex flex-col items-center">
+                              <CreditCardIcon className="h-8 w-8 mb-2 text-primary" />
+                              <div className="text-lg font-medium">Bank Transfers</div>
+                              <div className="text-sm text-muted-foreground">Manage bank transfers</div>
+                              <Button variant="outline" size="sm" className="mt-2 w-full">Configure</Button>
+                            </div>
+                            <div className="bg-muted/30 p-3 rounded-lg flex flex-col items-center">
+                              <Landmark className="h-8 w-8 mb-2 text-amber-500" />
+                              <div className="text-lg font-medium">USSD Payments</div>
+                              <div className="text-sm text-muted-foreground">Manage USSD payments</div>
+                              <Button variant="outline" size="sm" className="mt-2 w-full">Configure</Button>
+                            </div>
+                            <div className="bg-muted/30 p-3 rounded-lg flex flex-col items-center">
+                              <Wallet className="h-8 w-8 mb-2 text-green-500" />
+                              <div className="text-lg font-medium">Crypto</div>
+                              <div className="text-sm text-muted-foreground">Manage crypto payments</div>
+                              <Button variant="outline" size="sm" className="mt-2 w-full">Configure</Button>
+                            </div>
+                            <div className="bg-muted/30 p-3 rounded-lg flex flex-col items-center">
+                              <Bank className="h-8 w-8 mb-2 text-blue-500" />
+                              <div className="text-lg font-medium">Mobile Money</div>
+                              <div className="text-sm text-muted-foreground">Manage mobile payments</div>
+                              <Button variant="outline" size="sm" className="mt-2 w-full">Configure</Button>
+                            </div>
+                          </div>
+                          
+                          <Button asChild className="w-full">
+                            <a href="/admin-dashboard/payments">Go To Full Payment Center</a>
+                          </Button>
+                        </CardContent>
                       </Card>
                     )
                   },
