@@ -8,6 +8,7 @@ import AdminAgents from "@/components/dashboard/admin/AdminAgents";
 import AdminUsers from "@/components/dashboard/admin/AdminUsers";
 import AdminSettings from "@/components/dashboard/admin/AdminSettings";
 import AdminSales from "@/components/dashboard/admin/AdminSales";
+import PaymentProcessing from "@/components/dashboard/admin/PaymentProcessing";
 import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
 import { FinancialManagement } from "@/components/dashboard/financial/FinancialManagement";
 import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
@@ -470,6 +471,7 @@ const AdminDashboard = () => {
           <Route path="/users" element={<AdminUsers />} />
           <Route path="/settings" element={<AdminSettings />} />
           <Route path="/sales" element={<AdminSales />} />
+          <Route path="/payments" element={<PaymentProcessing />} />
           <Route path="/financial" element={<FinancialManagement />} />
           <Route path="/legal" element={<LegalCompliance />} />
           <Route path="/reports" element={
