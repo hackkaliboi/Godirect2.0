@@ -4,18 +4,13 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Moon, Sun, User } from "lucide-react";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const location = useLocation();
+  const { user, userType, signOut } = useAuth();
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -29,6 +24,14 @@ const Header = () => {
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
   ];
+
+  // Determine which dashboard to link to based on user type
+  const getDashboardLink = () => {
+    if (userType === "admin") return "/admin-dashboard";
+    if (userType === "agent") return "/agent-dashboard";
+    if (userType === "user") return "/user-dashboard";
+    return "/login";
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 dark:bg-realty-900/90 backdrop-blur-md border-b border-gray-200 dark:border-realty-800">
@@ -74,32 +77,46 @@ const Header = () => {
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-full">
-                  <User className="h-4 w-4 mr-2" />
-                  Account
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-full"
+                  asChild
+                >
+                  <Link to={getDashboardLink()}>
+                    <User className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Link>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/admin-dashboard">Admin Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/agent-dashboard">Agent Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/user-dashboard">User Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/login">Login</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/signup">Sign Up</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={signOut}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  asChild
+                >
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  className="bg-realty-800 hover:bg-realty-900 text-white"
+                  asChild
+                >
+                  <Link to="/user-signup">Sign Up</Link>
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -146,40 +163,44 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
-              <Link
-                to="/user-dashboard"
-                className="px-2 py-2 text-sm font-medium rounded-md text-realty-600 dark:text-realty-400"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                User Dashboard
-              </Link>
-              <Link
-                to="/agent-dashboard"
-                className="px-2 py-2 text-sm font-medium rounded-md text-realty-600 dark:text-realty-400"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Agent Dashboard
-              </Link>
-              <Link
-                to="/admin-dashboard"
-                className="px-2 py-2 text-sm font-medium rounded-md text-realty-600 dark:text-realty-400"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Admin Dashboard
-              </Link>
+              
+              {user && (
+                <Link
+                  to={getDashboardLink()}
+                  className="px-2 py-2 text-sm font-medium rounded-md text-realty-600 dark:text-realty-400"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
             </nav>
             <div className="pt-4 border-t border-gray-200 dark:border-realty-800 flex flex-col space-y-3">
-              <Button variant="outline" className="justify-center" asChild>
-                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                  <User className="h-4 w-4 mr-2" />
-                  Login
-                </Link>
-              </Button>
-              <Button className="justify-center bg-realty-800 hover:bg-realty-900 text-white" asChild>
-                <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                  Sign Up
-                </Link>
-              </Button>
+              {user ? (
+                <Button 
+                  variant="outline" 
+                  className="justify-center" 
+                  onClick={() => {
+                    signOut();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  Sign Out
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" className="justify-center" asChild>
+                    <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                      <User className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Link>
+                  </Button>
+                  <Button className="justify-center bg-realty-800 hover:bg-realty-900 text-white" asChild>
+                    <Link to="/user-signup" onClick={() => setIsMenuOpen(false)}>
+                      Sign Up
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
