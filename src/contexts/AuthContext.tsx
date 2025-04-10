@@ -57,10 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function fetchUserProfile(userId: string) {
     try {
+      // Use explicit typing for the response
       const { data, error } = await supabase
-        .from("profiles")
-        .select("user_type")
-        .eq("id", userId)
+        .from('profiles')
+        .select('user_type')
+        .eq('id', userId)
         .single();
 
       if (error) {
