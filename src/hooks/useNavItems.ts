@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import { 
   Home, 
@@ -25,7 +26,9 @@ import {
   BellRing,
   Receipt,
   Wallet,
-  CreditCard
+  CreditCard,
+  Landmark,
+  BuildingBank
 } from "lucide-react";
 
 type NavItemWithPath = {

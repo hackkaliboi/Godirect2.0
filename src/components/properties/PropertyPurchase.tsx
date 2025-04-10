@@ -77,7 +77,6 @@ const PropertyPurchase = ({ propertyId, propertyTitle, propertyPrice }: Property
   const [currentStep, setCurrentStep] = useState(1);
   const [purchaseStatus, setPurchaseStatus] = useState<'pending' | 'sent' | 'approved' | 'scheduled' | 'complete'>('pending');
   
-  // Company commission percentage
   const commissionRate = 0.05; // 5% commission
   const commissionAmount = propertyPrice * commissionRate;
   
@@ -112,7 +111,6 @@ const PropertyPurchase = ({ propertyId, propertyTitle, propertyPrice }: Property
     setIsSubmitting(true);
     
     try {
-      // Simulate API call to process purchase
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       console.log("Purchase submitted:", {
@@ -137,7 +135,6 @@ const PropertyPurchase = ({ propertyId, propertyTitle, propertyPrice }: Property
       
       setPurchaseStatus('sent');
       
-      // Don't close the dialog, show the confirmation step
     } catch (error) {
       toast({
         variant: "destructive",
@@ -747,7 +744,7 @@ const PropertyPurchase = ({ propertyId, propertyTitle, propertyPrice }: Property
         
         {renderStepIndicator()}
         
-        {currentStep === 1 && !purchaseStatus === 'sent' && (
+        {currentStep === 1 && purchaseStatus !== 'sent' && (
           <div className="bg-muted/30 p-4 rounded-lg mb-4 text-sm">
             <div className="flex items-center gap-2 mb-2">
               <Info size={16} className="text-blue-500" />

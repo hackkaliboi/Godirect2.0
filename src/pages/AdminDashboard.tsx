@@ -32,7 +32,7 @@ import {
   BellRing,
   FileText,
   Wallet,
-  Bank,
+  BuildingBank,
   Landmark,
   Receipt,
   CreditCard as CreditCardIcon
@@ -60,7 +60,6 @@ const AdminDashboard = () => {
                 exportButton={true}
               />
               
-              {/* Dashboard Summary Stats */}
               <StatsCardGrid>
                 <StatsCard
                   title="Total Revenue"
@@ -99,7 +98,6 @@ const AdminDashboard = () => {
                 />
               </StatsCardGrid>
               
-              {/* Revenue Report Cards */}
               <div className="grid gap-6 md:grid-cols-3">
                 <Card className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -204,7 +202,6 @@ const AdminDashboard = () => {
                 </Card>
               </div>
               
-              {/* Payment Processing Quick Access */}
               <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl font-semibold flex items-center">
@@ -277,7 +274,7 @@ const AdminDashboard = () => {
                       </a>
                     </Button>
                     <Button variant="outline" className="flex-1">
-                      <Bank className="mr-2 h-4 w-4" />
+                      <BuildingBank className="mr-2 h-4 w-4" />
                       Payment Methods Config
                     </Button>
                   </div>
@@ -574,7 +571,7 @@ const AdminDashboard = () => {
                               <Button variant="outline" size="sm" className="mt-2 w-full">Configure</Button>
                             </div>
                             <div className="bg-muted/30 p-3 rounded-lg flex flex-col items-center">
-                              <Bank className="h-8 w-8 mb-2 text-blue-500" />
+                              <BuildingBank className="h-8 w-8 mb-2 text-blue-500" />
                               <div className="text-lg font-medium">Mobile Money</div>
                               <div className="text-sm text-muted-foreground">Manage mobile payments</div>
                               <Button variant="outline" size="sm" className="mt-2 w-full">Configure</Button>
@@ -625,12 +622,10 @@ const AdminDashboard = () => {
             </div>
           } />
           
-          {/* Support Center Routes */}
           <Route path="/support-tickets" element={<SupportCenter />} />
           <Route path="/knowledge-base" element={<SupportCenter initialTab="knowledge" />} />
           <Route path="/team-chat" element={<SupportCenter initialTab="team" />} />
           
-          {/* System Config Routes */}
           <Route path="/email-templates" element={<SystemConfiguration initialTab="email" />} />
           <Route path="/platform-settings" element={<SystemConfiguration initialTab="platform" />} />
           <Route path="/maintenance" element={<SystemConfiguration initialTab="maintenance" />} />
