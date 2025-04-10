@@ -1,6 +1,6 @@
 
-import { ReactNode, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { 
   Sidebar, 
   SidebarContent, 
@@ -20,28 +20,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Home, 
-  User, 
-  Users, 
-  Building, 
-  Settings, 
-  LogOut, 
-  Calendar, 
-  BarChart3,
-  DollarSign,
-  FileText,
-  BellRing,
-  MessageSquare,
-  Heart,
-  ShoppingBag,
-  SearchCheck,
-  Bell,
-  History,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import DashboardTopBar from "./DashboardTopBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavItems } from "@/hooks/useNavItems";
+import { useAuth } from "@/contexts/AuthContext";
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -50,14 +33,9 @@ type DashboardLayoutProps = {
 
 export default function DashboardLayout({ children, userType }: DashboardLayoutProps) {
   const location = useLocation();
-  const navigate = useNavigate();
   const navItems = useNavItems(userType);
+  const { signOut } = useAuth();
   
-  const handleLogout = () => {
-    // In a real app, you would clear auth state here
-    navigate("/");
-  };
-
   // Helper function to check if an item has subItems
   const hasSubItems = (item: any): item is { title: string; icon: React.ComponentType<any>; subItems: { title: string; path: string }[] } => {
     return 'subItems' in item;
@@ -139,7 +117,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
               <Button 
                 variant="outline" 
                 className="w-full flex items-center gap-2 justify-center"
-                onClick={handleLogout}
+                onClick={signOut}
               >
                 <LogOut size={16} /> Logout
               </Button>

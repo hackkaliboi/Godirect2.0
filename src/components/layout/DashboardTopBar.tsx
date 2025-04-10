@@ -1,21 +1,14 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import { 
   Bell, 
   Search, 
   MessageSquare,
   Menu,
-  X,
   User,
   LogOut,
   Moon,
   Sun,
-  FileText,
-  Calendar,
-  Clock,
-  AlertTriangle,
   Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +34,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
+import { FileText, Calendar, Clock, AlertTriangle } from "lucide-react";
 
 type DashboardTopBarProps = {
   userType: "admin" | "agent" | "user";
@@ -50,7 +45,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { toggleSidebar, isMobile } = useSidebar();
   const [searchOpen, setSearchOpen] = useState(false);
-  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   // Toggle dark mode
   const toggleDarkMode = () => {
@@ -60,14 +55,15 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
 
   // Get user details based on type
   const getUserInfo = () => {
-    switch (userType) {
-      case "admin":
-        return { name: "Admin User", email: "admin@godirect.com", image: null };
-      case "agent":
-        return { name: "Agent Smith", email: "agent@godirect.com", image: null };
-      case "user":
-        return { name: "John Doe", email: "user@godirect.com", image: null };
-    }
+    const defaultInfo = {
+      name: user?.user_metadata?.first_name ? 
+        `${user.user_metadata.first_name} ${user.user_metadata.last_name || ''}` : 
+        (user?.email?.split('@')[0] || "User"),
+      email: user?.email || "user@example.com",
+      image: user?.user_metadata?.avatar_url || null
+    };
+    
+    return defaultInfo;
   };
 
   // Get notifications based on user type
@@ -151,12 +147,6 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
 
   const userInfo = getUserInfo();
   const notifications = getNotifications();
-
-  // Handle logout
-  const handleLogout = () => {
-    // In a real app, you would clear auth state here
-    navigate("/");
-  };
 
   return (
     <div className="sticky top-0 z-30 w-full border-b bg-background shadow-sm">
@@ -299,7 +289,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+              <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
