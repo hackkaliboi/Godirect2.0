@@ -32,7 +32,6 @@ import {
   BellRing,
   FileText,
   Wallet,
-  BuildingBank,
   Landmark,
   Receipt,
   CreditCard as CreditCardIcon
@@ -274,7 +273,7 @@ const AdminDashboard = () => {
                       </a>
                     </Button>
                     <Button variant="outline" className="flex-1">
-                      <BuildingBank className="mr-2 h-4 w-4" />
+                      <Landmark className="mr-2 h-4 w-4" />
                       Payment Methods Config
                     </Button>
                   </div>
@@ -571,7 +570,7 @@ const AdminDashboard = () => {
                               <Button variant="outline" size="sm" className="mt-2 w-full">Configure</Button>
                             </div>
                             <div className="bg-muted/30 p-3 rounded-lg flex flex-col items-center">
-                              <BuildingBank className="h-8 w-8 mb-2 text-blue-500" />
+                              <Building2 className="h-8 w-8 mb-2 text-blue-500" />
                               <div className="text-lg font-medium">Mobile Money</div>
                               <div className="text-sm text-muted-foreground">Manage mobile payments</div>
                               <Button variant="outline" size="sm" className="mt-2 w-full">Configure</Button>

@@ -28,7 +28,7 @@ import {
   Wallet,
   CreditCard,
   Landmark,
-  BuildingBank
+  Building2
 } from "lucide-react";
 
 type NavItemWithPath = {
