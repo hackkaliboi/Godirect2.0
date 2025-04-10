@@ -1,17 +1,30 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PropertyCard from "../properties/PropertyCard";
-import { properties } from "@/utils/data";
+import { fetchFeaturedProperties, Property } from "@/utils/supabaseData";
 
 const FeaturedListings = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const featuredProperties = properties.filter(property => property.featured);
-  const totalProperties = featuredProperties.length;
+  const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 3;
-  const totalPages = Math.ceil(totalProperties / itemsPerPage);
+
+  useEffect(() => {
+    const getProperties = async () => {
+      setIsLoading(true);
+      const data = await fetchFeaturedProperties();
+      setFeaturedProperties(data);
+      setIsLoading(false);
+    };
+    
+    getProperties();
+  }, []);
+
+  const totalProperties = featuredProperties.length;
+  const totalPages = Math.max(1, Math.ceil(totalProperties / itemsPerPage));
 
   const handlePrev = () => {
     setCurrentIndex(prev => 
@@ -26,6 +39,8 @@ const FeaturedListings = () => {
   };
 
   const currentProperties = () => {
+    if (featuredProperties.length === 0) return [];
+    
     const start = (currentIndex * itemsPerPage) % totalProperties;
     const end = Math.min(start + itemsPerPage, totalProperties);
     
@@ -92,11 +107,36 @@ const FeaturedListings = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {currentProperties().map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="bg-white dark:bg-realty-800 rounded-lg shadow-md overflow-hidden animate-pulse">
+                <div className="h-48 bg-gray-200 dark:bg-gray-700"></div>
+                <div className="p-4">
+                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-4 w-2/3"></div>
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : featuredProperties.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {currentProperties().map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-heading font-semibold mb-2 text-realty-900 dark:text-white">
+              No featured properties
+            </h3>
+            <p className="text-realty-600 dark:text-realty-400 mb-6">
+              There are currently no featured properties available.
+            </p>
+          </div>
+        )}
         
         <div className="text-center mt-12">
           <Link to="/properties">

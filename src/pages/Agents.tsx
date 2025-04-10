@@ -3,12 +3,28 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import AgentCard from "@/components/agents/AgentCard";
-import { agents } from "@/utils/data";
 import { Helmet } from "react-helmet-async";
+import { fetchAgents, Agent } from "@/utils/supabaseData";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Agents = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredAgents, setFilteredAgents] = useState(agents);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [filteredAgents, setFilteredAgents] = useState<Agent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const getAgents = async () => {
+      setIsLoading(true);
+      const data = await fetchAgents();
+      setAgents(data);
+      setFilteredAgents(data);
+      setIsLoading(false);
+    };
+    
+    getAgents();
+  }, []);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -23,7 +39,7 @@ const Agents = () => {
     );
     
     setFilteredAgents(results);
-  }, [searchTerm]);
+  }, [searchTerm, agents]);
 
   return (
     <>
@@ -54,7 +70,20 @@ const Agents = () => {
             />
           </div>
           
-          {filteredAgents.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="bg-white dark:bg-realty-800 p-6 rounded-lg shadow-md animate-pulse">
+                  <div className="flex justify-center">
+                    <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                  </div>
+                  <div className="mt-4 h-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="mt-2 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="mt-3 h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+              ))}
+            </div>
+          ) : filteredAgents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredAgents.map((agent) => (
                 <AgentCard key={agent.id} agent={agent} />
@@ -85,12 +114,13 @@ const Agents = () => {
           </div>
           
           <div className="flex justify-center">
-            <a 
-              href="/careers" 
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-realty-800 text-white hover:bg-realty-700 h-10 px-8"
-            >
-              View Career Opportunities
-            </a>
+            <Link to="/agent-signup">
+              <Button 
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-realty-800 text-white hover:bg-realty-700 h-10 px-8"
+              >
+                Become an Agent
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
