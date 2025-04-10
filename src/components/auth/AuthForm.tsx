@@ -15,9 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Eye, EyeOff } from "lucide-react";
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -56,6 +57,9 @@ export default function AuthForm({
   redirectPath 
 }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
 
   const loginForm = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -90,11 +94,20 @@ export default function AuthForm({
       if (error) {
         throw error;
       }
-      
+
       toast({
         title: "Login successful!",
         description: `Welcome back to GODIRECT.`,
       });
+      
+      // Redirect based on userType
+      if (userType === "admin") {
+        navigate("/admin-dashboard");
+      } else if (userType === "agent") {
+        navigate("/agent-dashboard");
+      } else {
+        navigate("/user-dashboard");
+      }
       
     } catch (error: any) {
       console.error("Login error:", error);
@@ -134,7 +147,7 @@ export default function AuthForm({
       });
       
       // Redirect to login
-      window.location.href = redirectPath;
+      navigate(redirectPath);
       
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -149,33 +162,38 @@ export default function AuthForm({
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
+    <Card className="w-full max-w-md shadow-lg border-0 bg-white dark:bg-slate-950">
+      <CardHeader className="space-y-1 pb-6">
         <Link to="/" className="flex items-center space-x-2 mb-4">
-          <div className="h-8 w-8 bg-realty-900 dark:bg-realty-gold rounded-md flex items-center justify-center">
-            <span className="text-white dark:text-realty-900 font-bold">GD</span>
+          <div className="h-10 w-10 bg-realty-900 dark:bg-realty-gold rounded-md flex items-center justify-center">
+            <span className="text-white dark:text-realty-900 font-bold text-lg">GD</span>
           </div>
-          <span className="text-xl font-heading font-semibold text-realty-900 dark:text-white">
+          <span className="text-2xl font-heading font-semibold text-realty-900 dark:text-white">
             GODIRECT
           </span>
         </Link>
-        <CardTitle className="text-2xl">{title}</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
+        <CardDescription className="text-base">
           {description}
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         {mode === "login" ? (
           <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
               <FormField
                 control={loginForm.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email address</FormLabel>
+                    <FormLabel className="text-base font-medium">Email address</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your email address" type="email" {...field} />
+                      <Input 
+                        placeholder="Your email address" 
+                        type="email" 
+                        className="h-12 text-base" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -186,15 +204,34 @@ export default function AuthForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-base font-medium">Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your password" type="password" {...field} />
+                      <div className="relative">
+                        <Input 
+                          placeholder="Your password" 
+                          type={showPassword ? "text" : "password"}
+                          className="h-12 text-base pr-10" 
+                          {...field} 
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-12 w-12 p-0"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? 
+                            <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
+                            <Eye className="h-5 w-5 text-muted-foreground" />
+                          }
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between">
                 <FormField
                   control={loginForm.control}
                   name="rememberMe"
@@ -207,37 +244,39 @@ export default function AuthForm({
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Remember me</FormLabel>
+                        <FormLabel className="text-sm">Remember me</FormLabel>
                       </div>
                     </FormItem>
                   )}
                 />
-                <div className="flex-1 text-right">
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-realty-600 hover:text-realty-800"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <Link
+                  to="/forgot-password"
+                  className="text-sm font-medium text-realty-600 hover:text-realty-800 transition-colors"
+                >
+                  Forgot password?
+                </Link>
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-medium bg-realty-800 hover:bg-realty-900 dark:bg-realty-gold dark:text-realty-900 dark:hover:bg-realty-gold/90" 
+                disabled={isLoading}
+              >
                 {isLoading ? "Logging in..." : "Log in"}
               </Button>
             </form>
           </Form>
         ) : (
           <Form {...signupForm}>
-            <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
+            <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={signupForm.control}
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First Name</FormLabel>
+                      <FormLabel className="text-base font-medium">First Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your first name" {...field} />
+                        <Input placeholder="Your first name" className="h-12 text-base" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -248,9 +287,9 @@ export default function AuthForm({
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Name</FormLabel>
+                      <FormLabel className="text-base font-medium">Last Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your last name" {...field} />
+                        <Input placeholder="Your last name" className="h-12 text-base" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -262,9 +301,9 @@ export default function AuthForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email address</FormLabel>
+                    <FormLabel className="text-base font-medium">Email address</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your email address" type="email" {...field} />
+                      <Input placeholder="Your email address" type="email" className="h-12 text-base" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -275,9 +314,9 @@ export default function AuthForm({
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel className="text-base font-medium">Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your phone number" type="tel" {...field} />
+                      <Input placeholder="Your phone number" type="tel" className="h-12 text-base" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -288,9 +327,28 @@ export default function AuthForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-base font-medium">Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="Create a password" type="password" {...field} />
+                      <div className="relative">
+                        <Input 
+                          placeholder="Create a password" 
+                          type={showPassword ? "text" : "password"} 
+                          className="h-12 text-base pr-10" 
+                          {...field} 
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-12 w-12 p-0"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? 
+                            <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
+                            <Eye className="h-5 w-5 text-muted-foreground" />
+                          }
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -301,9 +359,28 @@ export default function AuthForm({
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel className="text-base font-medium">Confirm Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="Confirm your password" type="password" {...field} />
+                      <div className="relative">
+                        <Input 
+                          placeholder="Confirm your password" 
+                          type={showConfirmPassword ? "text" : "password"} 
+                          className="h-12 text-base pr-10" 
+                          {...field} 
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-12 w-12 p-0"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? 
+                            <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
+                            <Eye className="h-5 w-5 text-muted-foreground" />
+                          }
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -321,13 +398,13 @@ export default function AuthForm({
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
+                      <FormLabel className="text-sm">
                         I agree to the{" "}
-                        <Link to="/terms" className="text-realty-600 hover:text-realty-800">
+                        <Link to="/terms" className="text-realty-600 hover:text-realty-800 font-medium">
                           Terms and Conditions
                         </Link>{" "}
                         and{" "}
-                        <Link to="/privacy" className="text-realty-600 hover:text-realty-800">
+                        <Link to="/privacy" className="text-realty-600 hover:text-realty-800 font-medium">
                           Privacy Policy
                         </Link>
                       </FormLabel>
@@ -336,16 +413,20 @@ export default function AuthForm({
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base font-medium bg-realty-800 hover:bg-realty-900 dark:bg-realty-gold dark:text-realty-900 dark:hover:bg-realty-gold/90" 
+                disabled={isLoading}
+              >
                 {isLoading ? "Creating account..." : "Create account"}
               </Button>
             </form>
           </Form>
         )}
       </CardContent>
-      <CardFooter>
-        <div className="text-center w-full">
-          <p className="text-sm text-muted-foreground">
+      <CardFooter className="pt-0">
+        <div className="text-center w-full pb-6">
+          <p className="text-base text-muted-foreground">
             {mode === "login" ? (
               <>
                 Don't have an account?{" "}

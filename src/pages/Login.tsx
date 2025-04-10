@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast";
 import { Helmet } from "react-helmet-async";
+import { Eye, EyeOff } from "lucide-react";
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -28,6 +29,7 @@ const loginFormSchema = z.object({
 const Login = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -72,33 +74,33 @@ const Login = () => {
         <title>Login | GODIRECT Realty</title>
       </Helmet>
       
-      <div className="container flex items-center justify-center min-h-screen py-10">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-950 flex items-center justify-center py-10 px-4">
+        <Card className="w-full max-w-md shadow-lg border-0 bg-white dark:bg-slate-950">
+          <CardHeader className="space-y-1 pb-6">
             <Link to="/" className="flex items-center space-x-2 mb-4">
-              <div className="h-8 w-8 bg-realty-900 dark:bg-realty-gold rounded-md flex items-center justify-center">
-                <span className="text-white dark:text-realty-900 font-bold">GD</span>
+              <div className="h-10 w-10 bg-realty-900 dark:bg-realty-gold rounded-md flex items-center justify-center">
+                <span className="text-white dark:text-realty-900 font-bold text-lg">GD</span>
               </div>
-              <span className="text-xl font-heading font-semibold text-realty-900 dark:text-white">
+              <span className="text-2xl font-heading font-semibold text-realty-900 dark:text-white">
                 GODIRECT
               </span>
             </Link>
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+            <CardDescription className="text-base">
               Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 <FormField
                   control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email address</FormLabel>
+                      <FormLabel className="text-base font-medium">Email address</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your email address" type="email" {...field} />
+                        <Input placeholder="Your email address" type="email" className="h-12 text-base" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -109,15 +111,34 @@ const Login = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-base font-medium">Password</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your password" type="password" {...field} />
+                        <div className="relative">
+                          <Input 
+                            placeholder="Your password" 
+                            type={showPassword ? "text" : "password"} 
+                            className="h-12 text-base pr-10" 
+                            {...field} 
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-12 w-12 p-0"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? 
+                              <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
+                              <Eye className="h-5 w-5 text-muted-foreground" />
+                            }
+                          </Button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-between">
                   <FormField
                     control={form.control}
                     name="rememberMe"
@@ -130,29 +151,31 @@ const Login = () => {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>Remember me</FormLabel>
+                          <FormLabel className="text-sm">Remember me</FormLabel>
                         </div>
                       </FormItem>
                     )}
                   />
-                  <div className="flex-1 text-right">
-                    <Link
-                      to="/forgot-password"
-                      className="text-sm text-realty-600 hover:text-realty-800"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm font-medium text-realty-600 hover:text-realty-800 transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 text-base font-medium bg-realty-800 hover:bg-realty-900 dark:bg-realty-gold dark:text-realty-900 dark:hover:bg-realty-gold/90" 
+                  disabled={isLoading}
+                >
                   {isLoading ? "Logging in..." : "Log in"}
                 </Button>
               </form>
             </Form>
           </CardContent>
-          <CardFooter>
-            <div className="text-center w-full">
-              <p className="text-sm text-muted-foreground">
+          <CardFooter className="pt-0">
+            <div className="text-center w-full pb-6">
+              <p className="text-base text-muted-foreground">
                 Don't have an account?{" "}
                 <Link
                   to="/signup"
