@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Phone, Mail, Star } from "lucide-react";
-import { Agent } from "@/utils/data";
+import { Agent } from "@/utils/supabaseData";
 import { Button } from "@/components/ui/button";
 
 interface AgentCardProps {
@@ -14,7 +14,7 @@ const AgentCard = ({ agent }: AgentCardProps) => {
       <div className="p-6 flex flex-col items-center text-center">
         {/* Agent Image */}
         <img 
-          src={agent.image} 
+          src={agent.image || "/placeholder.svg"} 
           alt={agent.name} 
           className="w-32 h-32 rounded-full object-cover border-4 border-realty-50 dark:border-realty-700 mb-4"
         />
@@ -23,7 +23,7 @@ const AgentCard = ({ agent }: AgentCardProps) => {
         <h3 className="text-xl font-heading font-semibold text-realty-900 dark:text-white mb-1">
           {agent.name}
         </h3>
-        <p className="text-realty-500 dark:text-realty-400 mb-2">{agent.title}</p>
+        <p className="text-realty-500 dark:text-realty-400 mb-2">{agent.title || "Real Estate Agent"}</p>
         
         {/* Rating */}
         <div className="flex items-center mb-4">
@@ -32,9 +32,9 @@ const AgentCard = ({ agent }: AgentCardProps) => {
               <Star 
                 key={i}
                 className={`h-4 w-4 ${
-                  i < Math.floor(agent.ratings) 
+                  i < Math.floor(agent.ratings || 0) 
                     ? "text-yellow-500 fill-yellow-500" 
-                    : (i < agent.ratings
+                    : (i < (agent.ratings || 0)
                       ? "text-yellow-500 fill-yellow-500" 
                       : "text-gray-300 dark:text-gray-600")
                 }`} 
@@ -42,14 +42,14 @@ const AgentCard = ({ agent }: AgentCardProps) => {
             ))}
           </div>
           <span className="text-sm text-realty-600 dark:text-realty-300">
-            {agent.ratings} ({agent.reviews} reviews)
+            {agent.ratings || 0} ({agent.reviews || 0} reviews)
           </span>
         </div>
         
         {/* Specializations */}
         <div className="mb-4">
           <div className="flex flex-wrap justify-center gap-2">
-            {agent.specializations.map((specialty, index) => (
+            {agent.specializations && agent.specializations.map((specialty, index) => (
               <span 
                 key={index}
                 className="text-xs bg-realty-50 dark:bg-realty-700 text-realty-700 dark:text-realty-200 py-1 px-2 rounded-full"
@@ -63,15 +63,15 @@ const AgentCard = ({ agent }: AgentCardProps) => {
         {/* Stats */}
         <div className="grid grid-cols-3 w-full mb-6 text-center text-sm">
           <div>
-            <p className="font-semibold text-realty-900 dark:text-white">{agent.listings}</p>
+            <p className="font-semibold text-realty-900 dark:text-white">{agent.listings || 0}</p>
             <p className="text-realty-500 dark:text-realty-400">Listings</p>
           </div>
           <div>
-            <p className="font-semibold text-realty-900 dark:text-white">{agent.sales}</p>
+            <p className="font-semibold text-realty-900 dark:text-white">{agent.sales || 0}</p>
             <p className="text-realty-500 dark:text-realty-400">Sales</p>
           </div>
           <div>
-            <p className="font-semibold text-realty-900 dark:text-white">{agent.experience}</p>
+            <p className="font-semibold text-realty-900 dark:text-white">{agent.experience || 0}</p>
             <p className="text-realty-500 dark:text-realty-400">Years</p>
           </div>
         </div>

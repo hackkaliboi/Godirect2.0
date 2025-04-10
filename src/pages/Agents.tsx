@@ -35,7 +35,7 @@ const Agents = () => {
     const term = searchTerm.toLowerCase();
     const results = agents.filter((agent) => 
       agent.name.toLowerCase().includes(term) ||
-      agent.specializations.some(spec => spec.toLowerCase().includes(term))
+      (agent.specializations && agent.specializations.some(spec => spec.toLowerCase().includes(term)))
     );
     
     setFilteredAgents(results);
