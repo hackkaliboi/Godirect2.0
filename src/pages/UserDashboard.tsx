@@ -28,6 +28,8 @@ import UserNewProperty from "@/components/dashboard/user/UserNewProperty";
 import UserEditProperty from "@/components/dashboard/user/UserEditProperty";
 import UserInquiryDetails from "@/components/dashboard/user/UserInquiryDetails";
 import UserNotFound from "@/components/dashboard/user/UserNotFound";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const UserDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -197,10 +199,33 @@ const UserDashboard = () => {
 
 // Dashboard Overview Component
 const UserDashboardOverview = () => {
+  // Fetch properties for stats
+  const { data: properties } = useQuery({
+    queryKey: ["dashboard-properties"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("properties")
+        .select("*");
+      
+      return data || [];
+    }
+  });
+
+  // Calculate stats
+  const activeListings = properties?.filter(p => p.status === "Active").length || 0;
+  const propertyViews = Math.floor(Math.random() * 3000) + 1000; // Random for now
+  const newInquiries = Math.floor(Math.random() * 30) + 5; // Random for now
+  const savedProperties = Math.floor(Math.random() * 20) + 5; // Random for now
+  
+  // Recent properties
+  const recentProperties = properties
+    ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 3) || [];
+
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Welcome, John Doe</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Welcome, User</h1>
         <p className="text-muted-foreground">
           Here's what's happening with your properties today
         </p>
@@ -209,28 +234,28 @@ const UserDashboardOverview = () => {
       <StatsCardGrid>
         <StatsCard
           title="Property Views"
-          value="2,874"
+          value={propertyViews.toString()}
           change={12}
           icon={<Building className="h-4 w-4" />}
           trend="positive"
         />
         <StatsCard
           title="New Inquiries"
-          value="24"
+          value={newInquiries.toString()}
           change={-5}
           icon={<MessageSquare className="h-4 w-4" />}
           trend="negative"
         />
         <StatsCard
           title="Active Listings"
-          value="8"
+          value={activeListings.toString()}
           change={0}
           icon={<Building className="h-4 w-4" />}
           trend="neutral"
         />
         <StatsCard
           title="Saved Properties"
-          value="16"
+          value={savedProperties.toString()}
           change={4}
           icon={<Heart className="h-4 w-4" />}
           trend="positive"
@@ -258,21 +283,21 @@ const UserDashboardOverview = () => {
           <div className="border rounded-lg p-6 bg-white dark:bg-gray-800 h-48 hover:border-primary transition-colors">
             <div className="flex justify-between items-start mb-4">
               <h3 className="font-medium text-lg">Recent Listings</h3>
-              <Badge variant="outline">8 Total</Badge>
+              <Badge variant="outline">{properties?.length || 0} Total</Badge>
             </div>
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <p className="text-sm">Modern Downtown Apartment</p>
-                <Badge>Active</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <p className="text-sm">Luxury Waterfront Condo</p>
-                <Badge>Active</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <p className="text-sm">Suburban Family Home</p>
-                <Badge variant="outline">Pending</Badge>
-              </div>
+              {recentProperties.length > 0 ? (
+                recentProperties.map((property) => (
+                  <div key={property.id} className="flex justify-between items-center">
+                    <p className="text-sm">{property.title}</p>
+                    <Badge variant={property.status === "Active" ? "default" : "outline"}>{property.status}</Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">
+                  No properties yet
+                </div>
+              )}
             </div>
           </div>
         </Link>
@@ -284,19 +309,19 @@ const UserDashboardOverview = () => {
           <div className="border rounded-lg p-6 bg-white dark:bg-gray-800 h-48 hover:border-primary transition-colors">
             <div className="flex justify-between items-start mb-4">
               <h3 className="font-medium text-lg">Recent Inquiries</h3>
-              <Badge variant="outline">24 Total</Badge>
+              <Badge variant="outline">{newInquiries} Total</Badge>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <p className="text-sm">Modern Downtown Apartment</p>
+                <p className="text-sm">Property Inquiry</p>
                 <Badge>New</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <p className="text-sm">Luxury Waterfront Condo</p>
+                <p className="text-sm">Information Request</p>
                 <Badge>New</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <p className="text-sm">Suburban Family Home</p>
+                <p className="text-sm">Viewing Request</p>
                 <Badge variant="secondary">Responded</Badge>
               </div>
             </div>
