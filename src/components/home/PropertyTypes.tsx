@@ -11,6 +11,7 @@ interface PropertyTypeData {
   count: number;
   url: string;
   type: string;
+  key: number; // Added key instead of id for identification
 }
 
 const PropertyTypes = () => {
@@ -46,7 +47,7 @@ const PropertyTypes = () => {
     // Map to our UI format
     return [
       {
-        id: 1,
+        key: 1,
         title: "Single Family Homes",
         image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop",
         count: typeCounts["House"] || 0,
@@ -54,7 +55,7 @@ const PropertyTypes = () => {
         type: "House"
       },
       {
-        id: 2,
+        key: 2,
         title: "Condos & Apartments",
         image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop",
         count: (typeCounts["Condo"] || 0) + (typeCounts["Apartment"] || 0),
@@ -62,7 +63,7 @@ const PropertyTypes = () => {
         type: "Condo"
       },
       {
-        id: 3,
+        key: 3,
         title: "Luxury Properties",
         image: "https://images.unsplash.com/photo-1613977257365-aaae5a9817ff?q=80&w=800&auto=format&fit=crop",
         count: properties.length > 5 ? Math.floor(properties.length / 5) : 0, // Estimate luxury properties
@@ -70,7 +71,7 @@ const PropertyTypes = () => {
         type: "Luxury"
       },
       {
-        id: 4,
+        key: 4,
         title: "Commercial Spaces",
         image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=800&auto=format&fit=crop",
         count: typeCounts["Commercial"] || 0,
@@ -83,7 +84,7 @@ const PropertyTypes = () => {
   // Default property types for when we have no data
   const defaultPropertyTypes: PropertyTypeData[] = [
     {
-      id: 1,
+      key: 1,
       title: "Single Family Homes",
       image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop",
       count: 0,
@@ -91,7 +92,7 @@ const PropertyTypes = () => {
       type: "House"
     },
     {
-      id: 2,
+      key: 2,
       title: "Condos & Apartments",
       image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop",
       count: 0,
@@ -99,7 +100,7 @@ const PropertyTypes = () => {
       type: "Condo"
     },
     {
-      id: 3,
+      key: 3,
       title: "Luxury Properties",
       image: "https://images.unsplash.com/photo-1613977257365-aaae5a9817ff?q=80&w=800&auto=format&fit=crop",
       count: 0,
@@ -107,7 +108,7 @@ const PropertyTypes = () => {
       type: "Luxury"
     },
     {
-      id: 4,
+      key: 4,
       title: "Commercial Spaces",
       image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=800&auto=format&fit=crop",
       count: 0,
@@ -142,7 +143,7 @@ const PropertyTypes = () => {
             // Property type cards
             propertyTypes.map((type) => (
               <Link 
-                key={type.id}
+                key={type.key}
                 to={type.url}
                 className="group relative h-80 rounded-xl overflow-hidden"
               >

@@ -47,8 +47,8 @@ export default function AdminProperties() {
       property.city.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (activeTab === "all") return matchesSearch;
-    if (activeTab === "active") return matchesSearch && property.status === "Active";
-    if (activeTab === "pending") return matchesSearch && property.status === "Pending";
+    if (activeTab === "for_sale") return matchesSearch && property.status === "For Sale";
+    if (activeTab === "for_rent") return matchesSearch && property.status === "For Rent";
     if (activeTab === "sold") return matchesSearch && property.status === "Sold";
     
     return matchesSearch;
@@ -112,8 +112,8 @@ export default function AdminProperties() {
           <Tabs defaultValue="all" onValueChange={setActiveTab}>
             <TabsList className="mb-4">
               <TabsTrigger value="all">All Properties</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="for_sale">For Sale</TabsTrigger>
+              <TabsTrigger value="for_rent">For Rent</TabsTrigger>
               <TabsTrigger value="sold">Sold</TabsTrigger>
             </TabsList>
             
@@ -149,8 +149,8 @@ export default function AdminProperties() {
                         </TableCell>
                         <TableCell>
                           <Badge variant={
-                            property.status === "Active" ? "default" : 
-                            property.status === "Pending" ? "secondary" : "outline"
+                            property.status === "For Sale" ? "default" : 
+                            property.status === "For Rent" ? "secondary" : "outline"
                           }>
                             {property.status}
                           </Badge>
@@ -187,10 +187,10 @@ export default function AdminProperties() {
               )}
             </TabsContent>
             
-            <TabsContent value="active">
+            <TabsContent value="for_sale">
               {filteredProperties && filteredProperties.length > 0 ? (
                 <Table>
-                  {/* Similar table structure as above, filtered for active properties */}
+                  {/* Similar table structure as above, filtered for For Sale properties */}
                   <TableHeader>
                     <TableRow>
                       <TableHead>Property</TableHead>
@@ -248,17 +248,17 @@ export default function AdminProperties() {
                 </Table>
               ) : (
                 <div className="flex h-40 items-center justify-center">
-                  <p className="text-muted-foreground">No active properties found</p>
+                  <p className="text-muted-foreground">No properties for sale found</p>
                 </div>
               )}
             </TabsContent>
             
-            <TabsContent value="pending">
+            <TabsContent value="for_rent">
               <div className="flex h-40 items-center justify-center">
                 <p className="text-muted-foreground">
                   {filteredProperties && filteredProperties.length > 0 
-                    ? "Pending properties would appear here" 
-                    : "No pending properties found"}
+                    ? "Properties for rent would appear here" 
+                    : "No properties for rent found"}
                 </p>
               </div>
             </TabsContent>

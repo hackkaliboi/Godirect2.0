@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   Card, 
@@ -59,9 +59,7 @@ const UserProperties = () => {
     if (filterType === "all") return matchesSearch;
     if (filterType === "For Sale") return matchesSearch && property.status === "For Sale";
     if (filterType === "For Rent") return matchesSearch && property.status === "For Rent";
-    if (filterType === "Active") return matchesSearch && property.status === "Active";
-    if (filterType === "Pending") return matchesSearch && property.status === "Pending";
-    if (filterType === "Inactive") return matchesSearch && property.status === "Inactive";
+    if (filterType === "Sold") return matchesSearch && property.status === "Sold";
     
     return matchesSearch;
   });
@@ -127,10 +125,7 @@ const UserProperties = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setFilterType("For Sale")}>For Sale</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setFilterType("For Rent")}>For Rent</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setFilterType("Active")}>Active</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterType("Pending")}>Pending</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterType("Inactive")}>Inactive</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterType("Sold")}>Sold</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -160,11 +155,11 @@ const UserProperties = () => {
                       </div>
                     </TableCell>
                     <TableCell>{formatPriceWithCommas(property.price)}</TableCell>
-                    <TableCell className="hidden md:table-cell">{property.status}</TableCell>
+                    <TableCell className="hidden md:table-cell">{property.property_type}</TableCell>
                     <TableCell>
                       <Badge variant={
-                        property.status === "Active" ? "default" : 
-                        property.status === "Pending" ? "secondary" : "outline"
+                        property.status === "For Sale" ? "default" : 
+                        property.status === "For Rent" ? "secondary" : "outline"
                       }>
                         {property.status}
                       </Badge>
