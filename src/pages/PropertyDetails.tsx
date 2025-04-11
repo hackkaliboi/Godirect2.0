@@ -7,20 +7,37 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { properties, agents, formatPriceWithCommas } from "@/utils/data";
+import { formatPriceWithCommas } from "@/utils/data";
 import PropertyGallery from "@/components/properties/PropertyGallery";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyPurchase from "@/components/properties/PropertyPurchase";
 import { Helmet } from "react-helmet-async";
+import { fetchPropertyById, Property } from "@/utils/supabaseData";
+import { useQuery } from "@tanstack/react-query";
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const [isFavorite, setIsFavorite] = useState(false);
   
-  const property = properties.find((p) => p.id === id);
+  const { data: property, isLoading, error } = useQuery({
+    queryKey: ["property", id],
+    queryFn: () => id ? fetchPropertyById(id) : null,
+    enabled: !!id
+  });
   
-  // If property not found
-  if (!property) {
+  // If loading
+  if (isLoading) {
+    return (
+      <div className="container-custom py-16 text-center">
+        <h2 className="text-2xl font-heading font-semibold mb-4">
+          Loading property information...
+        </h2>
+      </div>
+    );
+  }
+
+  // If error
+  if (error || !property) {
     return (
       <div className="container-custom py-16 text-center">
         <h2 className="text-2xl font-heading font-semibold mb-4">
@@ -34,18 +51,26 @@ const PropertyDetails = () => {
     );
   }
   
-  const agent = agents.find((a) => a.id === property.agentId);
-  
   // Similar properties (excluding current property)
-  const similarProperties = properties
-    .filter((p) => p.id !== property.id && p.propertyType === property.propertyType)
-    .slice(0, 3);
+  const { data: similarProperties = [] } = useQuery({
+    queryKey: ["similar-properties", property.id, property.property_type],
+    queryFn: async () => {
+      const allProperties = await fetch('/api/properties')
+        .then(res => res.json())
+        .catch(() => []);
+        
+      return allProperties
+        .filter((p: Property) => p.id !== property.id && p.property_type === property.property_type)
+        .slice(0, 3);
+    },
+    enabled: !!property
+  });
 
   return (
     <>
       <Helmet>
         <title>{property.title} | HomePulse Realty</title>
-        <meta name="description" content={property.description.substring(0, 160)} />
+        <meta name="description" content={property.description?.substring(0, 160) || ""} />
       </Helmet>
       
       <div className="bg-realty-50 dark:bg-realty-800/30 py-8">
@@ -74,7 +99,7 @@ const PropertyDetails = () => {
               <div className="flex items-center text-realty-600 dark:text-realty-400">
                 <MapPin className="h-4 w-4 mr-1" />
                 <span>
-                  {property.address.street}, {property.address.city}, {property.address.state} {property.address.zipCode}
+                  {property.street}, {property.city}, {property.state} {property.zip_code}
                 </span>
               </div>
             </div>
@@ -129,7 +154,7 @@ const PropertyDetails = () => {
                   <div className="text-center p-4 bg-realty-50 dark:bg-realty-700/30 rounded-lg">
                     <Bed className="h-6 w-6 mx-auto text-realty-800 dark:text-realty-300 mb-2" />
                     <div className="text-lg font-medium text-realty-900 dark:text-white">
-                      {property.bedrooms}
+                      {property.bedrooms || 0}
                     </div>
                     <div className="text-sm text-realty-600 dark:text-realty-400">
                       Bedrooms
@@ -139,7 +164,7 @@ const PropertyDetails = () => {
                   <div className="text-center p-4 bg-realty-50 dark:bg-realty-700/30 rounded-lg">
                     <Bath className="h-6 w-6 mx-auto text-realty-800 dark:text-realty-300 mb-2" />
                     <div className="text-lg font-medium text-realty-900 dark:text-white">
-                      {property.bathrooms}
+                      {property.bathrooms || 0}
                     </div>
                     <div className="text-sm text-realty-600 dark:text-realty-400">
                       Bathrooms
@@ -149,7 +174,7 @@ const PropertyDetails = () => {
                   <div className="text-center p-4 bg-realty-50 dark:bg-realty-700/30 rounded-lg">
                     <Move className="h-6 w-6 mx-auto text-realty-800 dark:text-realty-300 mb-2" />
                     <div className="text-lg font-medium text-realty-900 dark:text-white">
-                      {property.squareFeet}
+                      {property.square_feet || 0}
                     </div>
                     <div className="text-sm text-realty-600 dark:text-realty-400">
                       Sq Ft
@@ -159,7 +184,7 @@ const PropertyDetails = () => {
                   <div className="text-center p-4 bg-realty-50 dark:bg-realty-700/30 rounded-lg">
                     <Home className="h-6 w-6 mx-auto text-realty-800 dark:text-realty-300 mb-2" />
                     <div className="text-lg font-medium text-realty-900 dark:text-white">
-                      {property.propertyType}
+                      {property.property_type}
                     </div>
                     <div className="text-sm text-realty-600 dark:text-realty-400">
                       Property Type
@@ -171,7 +196,7 @@ const PropertyDetails = () => {
                   Description
                 </h2>
                 <p className="text-realty-600 dark:text-realty-300 whitespace-pre-line">
-                  {property.description}
+                  {property.description || 'No description available'}
                 </p>
                 
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-realty-700">
@@ -185,7 +210,7 @@ const PropertyDetails = () => {
                         Year Built: 
                       </span>
                       <span className="ml-1 text-realty-900 dark:text-white">
-                        {property.yearBuilt}
+                        {property.year_built || 'Unknown'}
                       </span>
                     </div>
                     <div className="flex items-center">
@@ -194,7 +219,7 @@ const PropertyDetails = () => {
                         Property Type: 
                       </span>
                       <span className="ml-1 text-realty-900 dark:text-white">
-                        {property.propertyType}
+                        {property.property_type}
                       </span>
                     </div>
                   </div>
@@ -236,7 +261,7 @@ const PropertyDetails = () => {
                   </div>
                   <div className="mt-4 text-realty-600 dark:text-realty-300">
                     <p>
-                      {property.address.street}, {property.address.city}, {property.address.state} {property.address.zipCode}
+                      {property.street}, {property.city}, {property.state} {property.zip_code}
                     </p>
                     <p className="mt-2">
                       Located in a prime neighborhood with easy access to schools, shopping centers, and public transportation.
@@ -260,39 +285,31 @@ const PropertyDetails = () => {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Agent info */}
-              {agent && (
+              {property.agent_id && (
                 <div className="bg-white dark:bg-realty-800 rounded-xl shadow p-6">
                   <div className="flex items-center mb-4">
                     <img 
-                      src={agent.image} 
-                      alt={agent.name} 
+                      src="/placeholder.svg" 
+                      alt="Agent" 
                       className="w-16 h-16 rounded-full object-cover" 
                     />
                     <div className="ml-3">
                       <h3 className="text-lg font-heading font-semibold text-realty-900 dark:text-white">
-                        {agent.name}
+                        Agent
                       </h3>
                       <p className="text-sm text-realty-500 dark:text-realty-400">
-                        {agent.title}
+                        Real Estate Agent
                       </p>
                     </div>
                   </div>
                   
                   <div className="space-y-3 mb-6">
-                    <a 
-                      href={`tel:${agent.phone}`}
-                      className="flex items-center text-sm text-realty-600 dark:text-realty-300 hover:text-realty-900 dark:hover:text-white transition-colors"
+                    <div 
+                      className="flex items-center text-sm text-realty-600 dark:text-realty-300"
                     >
                       <Phone className="h-4 w-4 mr-2 text-realty-500" />
-                      {agent.phone}
-                    </a>
-                    <a 
-                      href={`mailto:${agent.email}`}
-                      className="flex items-center text-sm text-realty-600 dark:text-realty-300 hover:text-realty-900 dark:hover:text-white transition-colors"
-                    >
-                      <Mail className="h-4 w-4 mr-2 text-realty-500" />
-                      {agent.email}
-                    </a>
+                      Contact agent for details
+                    </div>
                   </div>
                   
                   <div className="space-y-3">
