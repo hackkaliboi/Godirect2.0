@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { agents, properties, testimonials, marketTrends } from "./data";
 
 // Types
 export type Agent = {
@@ -57,105 +58,203 @@ export type MarketTrend = {
   description?: string;
 };
 
-// Fetch all agents
-export async function fetchAgents() {
-  const { data, error } = await supabase
-    .from("agents")
-    .select("*");
-  
-  if (error) {
+// Fetch all agents - using mock data for now
+export async function fetchAgents(): Promise<Agent[]> {
+  console.log("Fetching agents...");
+  try {
+    // When the Supabase table is created, uncomment the following:
+    // const { data, error } = await supabase
+    //   .from("agents")
+    //   .select("*");
+    
+    // if (error) {
+    //   throw error;
+    // }
+    
+    // return data as Agent[];
+    
+    // Using mock data for now
+    return agents;
+  } catch (error) {
     console.error("Error fetching agents:", error);
     return [];
   }
-  
-  return data as Agent[];
 }
 
-// Fetch agent by ID
-export async function fetchAgentById(id: string) {
-  const { data, error } = await supabase
-    .from("agents")
-    .select("*")
-    .eq("id", id)
-    .single();
-  
-  if (error) {
+// Fetch agent by ID - using mock data for now
+export async function fetchAgentById(id: string): Promise<Agent | null> {
+  console.log(`Fetching agent with id: ${id}`);
+  try {
+    // When the Supabase table is created, uncomment the following:
+    // const { data, error } = await supabase
+    //   .from("agents")
+    //   .select("*")
+    //   .eq("id", id)
+    //   .single();
+    
+    // if (error) {
+    //   throw error;
+    // }
+    
+    // return data as Agent;
+    
+    // Using mock data for now
+    const agent = agents.find(agent => agent.id === id);
+    return agent || null;
+  } catch (error) {
     console.error("Error fetching agent:", error);
     return null;
   }
-  
-  return data as Agent;
 }
 
-// Fetch all properties
-export async function fetchProperties() {
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*");
-  
-  if (error) {
+// Fetch all properties - using mock data for now
+export async function fetchProperties(): Promise<Property[]> {
+  console.log("Fetching properties...");
+  try {
+    // When the Supabase table is created, uncomment the following:
+    // const { data, error } = await supabase
+    //   .from("properties")
+    //   .select("*");
+    
+    // if (error) {
+    //   throw error;
+    // }
+    
+    // return data as Property[];
+    
+    // Using mock data for now
+    return properties.map(p => ({
+      ...p,
+      square_feet: p.squareFeet,
+      zip_code: p.address.zipCode,
+      street: p.address.street,
+      property_type: p.propertyType as "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial",
+      agent_id: p.agentId,
+      created_at: p.createdAt,
+    })) as Property[];
+  } catch (error) {
     console.error("Error fetching properties:", error);
     return [];
   }
-  
-  return data as Property[];
 }
 
-// Fetch featured properties
-export async function fetchFeaturedProperties() {
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("featured", true);
-  
-  if (error) {
+// Fetch featured properties - using mock data for now
+export async function fetchFeaturedProperties(): Promise<Property[]> {
+  console.log("Fetching featured properties...");
+  try {
+    // When the Supabase table is created, uncomment the following:
+    // const { data, error } = await supabase
+    //   .from("properties")
+    //   .select("*")
+    //   .eq("featured", true);
+    
+    // if (error) {
+    //   throw error;
+    // }
+    
+    // return data as Property[];
+    
+    // Using mock data for now
+    const featuredProps = properties.filter(p => p.featured);
+    return featuredProps.map(p => ({
+      ...p,
+      square_feet: p.squareFeet,
+      zip_code: p.address.zipCode,
+      street: p.address.street,
+      property_type: p.propertyType as "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial",
+      agent_id: p.agentId,
+      created_at: p.createdAt,
+    })) as Property[];
+  } catch (error) {
     console.error("Error fetching featured properties:", error);
     return [];
   }
-  
-  return data as Property[];
 }
 
-// Fetch property by ID
-export async function fetchPropertyById(id: string) {
-  const { data, error } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("id", id)
-    .single();
-  
-  if (error) {
+// Fetch property by ID - using mock data for now
+export async function fetchPropertyById(id: string): Promise<Property | null> {
+  console.log(`Fetching property with id: ${id}`);
+  try {
+    // When the Supabase table is created, uncomment the following:
+    // const { data, error } = await supabase
+    //   .from("properties")
+    //   .select("*")
+    //   .eq("id", id)
+    //   .single();
+    
+    // if (error) {
+    //   throw error;
+    // }
+    
+    // return data as Property;
+    
+    // Using mock data for now
+    const property = properties.find(property => property.id === id);
+    if (!property) return null;
+    
+    return {
+      ...property,
+      square_feet: property.squareFeet,
+      zip_code: property.address.zipCode,
+      street: property.address.street,
+      property_type: property.propertyType as "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial",
+      agent_id: property.agentId,
+      created_at: property.createdAt,
+    } as Property;
+  } catch (error) {
     console.error("Error fetching property:", error);
     return null;
   }
-  
-  return data as Property;
 }
 
-// Fetch all testimonials
-export async function fetchTestimonials() {
-  const { data, error } = await supabase
-    .from("testimonials")
-    .select("*");
-  
-  if (error) {
+// Fetch all testimonials - using mock data for now
+export async function fetchTestimonials(): Promise<Testimonial[]> {
+  console.log("Fetching testimonials...");
+  try {
+    // When the Supabase table is created, uncomment the following:
+    // const { data, error } = await supabase
+    //   .from("testimonials")
+    //   .select("*");
+    
+    // if (error) {
+    //   throw error;
+    // }
+    
+    // return data as Testimonial[];
+    
+    // Using mock data for now
+    return testimonials;
+  } catch (error) {
     console.error("Error fetching testimonials:", error);
     return [];
   }
-  
-  return data as Testimonial[];
 }
 
-// Fetch all market trends
-export async function fetchMarketTrends() {
-  const { data, error } = await supabase
-    .from("market_trends")
-    .select("*");
-  
-  if (error) {
+// Fetch all market trends - using mock data for now
+export async function fetchMarketTrends(): Promise<MarketTrend[]> {
+  console.log("Fetching market trends...");
+  try {
+    // When the Supabase table is created, uncomment the following:
+    // const { data, error } = await supabase
+    //   .from("market_trends")
+    //   .select("*");
+    
+    // if (error) {
+    //   throw error;
+    // }
+    
+    // return data as MarketTrend[];
+    
+    // Using mock data for now
+    return marketTrends.map(trend => ({
+      id: trend.id,
+      title: trend.title,
+      value: trend.value,
+      trend: trend.trend as "up" | "down" | "stable",
+      description: trend.description,
+    }));
+  } catch (error) {
     console.error("Error fetching market trends:", error);
     return [];
   }
-  
-  return data as MarketTrend[];
 }

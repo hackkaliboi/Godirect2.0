@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Bed, Bath, Move, MapPin, ArrowRight } from "lucide-react";
-import { Property, formatPriceWithCommas } from "@/utils/data";
+import { Property } from "@/utils/supabaseData";
+import { formatPriceWithCommas } from "@/utils/data";
 import { cn } from "@/lib/utils";
 
 interface PropertyCardProps {
@@ -59,7 +60,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
           <div className="flex items-center text-realty-500 dark:text-realty-400 text-sm mt-1">
             <MapPin className="h-4 w-4 flex-shrink-0 mr-1" />
             <span className="truncate">
-              {property.address.city}, {property.address.state}
+              {property.city}, {property.state}
             </span>
           </div>
         </div>
@@ -72,15 +73,15 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         <div className="flex space-x-4 mb-4 text-sm text-realty-600 dark:text-realty-300">
           <div className="flex items-center">
             <Bed className="h-4 w-4 mr-1" />
-            <span>{property.bedrooms} {property.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
+            <span>{property.bedrooms || 0} {property.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
           </div>
           <div className="flex items-center">
             <Bath className="h-4 w-4 mr-1" />
-            <span>{property.bathrooms} {property.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
+            <span>{property.bathrooms || 0} {property.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
           </div>
           <div className="flex items-center">
             <Move className="h-4 w-4 mr-1" />
-            <span>{property.squareFeet} sqft</span>
+            <span>{property.square_feet || 0} sqft</span>
           </div>
         </div>
         
