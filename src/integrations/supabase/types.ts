@@ -63,6 +63,178 @@ export type Database = {
         }
         Relationships: []
       }
+      clients: {
+        Row: {
+          agent_id: string | null
+          bathrooms: string | null
+          bedrooms: string | null
+          budget: string | null
+          created_at: string | null
+          email: string
+          id: string
+          last_contact: string | null
+          location: string | null
+          name: string
+          phone: string | null
+          price_range: string | null
+          property_type: string | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          bathrooms?: string | null
+          bedrooms?: string | null
+          budget?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          last_contact?: string | null
+          location?: string | null
+          name: string
+          phone?: string | null
+          price_range?: string | null
+          property_type?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          bathrooms?: string | null
+          bedrooms?: string | null
+          budget?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          last_contact?: string | null
+          location?: string | null
+          name?: string
+          phone?: string | null
+          price_range?: string | null
+          property_type?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dashboard_stats: {
+        Row: {
+          compare_text: string | null
+          id: string
+          stat_change: number | null
+          stat_name: string
+          stat_value: string
+          trend: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          compare_text?: string | null
+          id?: string
+          stat_change?: number | null
+          stat_name: string
+          stat_value: string
+          trend?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          compare_text?: string | null
+          id?: string
+          stat_change?: number | null
+          stat_name?: string
+          stat_value?: string
+          trend?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          property_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          property_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          property_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inquiries: {
+        Row: {
+          agent_id: string | null
+          created_at: string | null
+          id: string
+          message: string
+          property_id: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          property_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          property_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_trends: {
         Row: {
           created_at: string | null
@@ -92,6 +264,53 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          payment_date: string | null
+          payment_method: string
+          property_id: string | null
+          reference: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          payment_date?: string | null
+          payment_method: string
+          property_id?: string | null
+          reference?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          payment_date?: string | null
+          payment_method?: string
+          property_id?: string | null
+          reference?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -199,6 +418,98 @@ export type Database = {
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_views: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          property_id: string | null
+          user_id: string | null
+          view_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          property_id?: string | null
+          user_id?: string | null
+          view_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          property_id?: string | null
+          user_id?: string | null
+          view_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_views_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          agent_id: string | null
+          buyer_id: string | null
+          commission_amount: number | null
+          created_at: string | null
+          id: string
+          property_id: string | null
+          sale_date: string | null
+          sale_price: number
+          seller_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          buyer_id?: string | null
+          commission_amount?: number | null
+          created_at?: string | null
+          id?: string
+          property_id?: string | null
+          sale_date?: string | null
+          sale_price: number
+          seller_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          buyer_id?: string | null
+          commission_amount?: number | null
+          created_at?: string | null
+          id?: string
+          property_id?: string | null
+          sale_date?: string | null
+          sale_price?: number
+          seller_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
