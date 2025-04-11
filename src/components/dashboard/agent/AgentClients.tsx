@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
+// We'll use mock data for clients for now since there's no clients table yet
+// In a real application, this would come from a database table
 const clients = [
   { 
     id: 1, 
@@ -57,38 +61,28 @@ const clients = [
     bedrooms: "2-3",
     bathrooms: "2+",
     lastContact: "2 days ago"
-  },
-  { 
-    id: 4, 
-    name: "Sophia Davis", 
-    email: "sophia.davis@example.com", 
-    phone: "(555) 567-8901",
-    status: "Inactive", 
-    propertyType: "Apartment",
-    budget: "$250,000 - $350,000",
-    priceRange: "$250k-$350k",
-    location: "University District",
-    bedrooms: "1-2",
-    bathrooms: "1+",
-    lastContact: "2 weeks ago"
-  },
-  { 
-    id: 5, 
-    name: "William Wilson", 
-    email: "william.wilson@example.com", 
-    phone: "(555) 678-9012",
-    status: "Lead", 
-    propertyType: "Condo",
-    budget: "$350,000 - $450,000",
-    priceRange: "$350k-$450k",
-    location: "Waterfront",
-    bedrooms: "2+",
-    bathrooms: "2+",
-    lastContact: "1 day ago"
-  },
+  }
 ];
 
 export default function AgentClients() {
+  // In a real application, we would fetch clients from the database
+  // This is a placeholder for when a clients table is created
+  const { data: propertiesCount, isLoading } = useQuery({
+    queryKey: ["agent-clients-properties-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("properties")
+        .select("*", { count: 'exact', head: true });
+      
+      if (error) {
+        console.error("Error fetching property count:", error);
+        return 0;
+      }
+      
+      return count || 0;
+    }
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -66,8 +67,9 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
     return defaultInfo;
   };
 
-  // Get notifications based on user type
+  // Get notifications based on user type - these would ideally come from a database
   const getNotifications = () => {
+    // Fetch these from database in the future
     const commonNotifications = [
       {
         id: 1,
