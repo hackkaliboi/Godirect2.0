@@ -27,7 +27,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
       {/* Image container */}
       <div className="relative w-full h-64 overflow-hidden">
         <img 
-          src={property.images[0]} 
+          src={property.images[0] || "/placeholder.svg"} 
           alt={property.title} 
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
