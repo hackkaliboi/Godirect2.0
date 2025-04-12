@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Calendar, Download, Filter, RefreshCcw } from "lucide-react";
+import { Calendar, Download } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DashboardHeaderProps {
@@ -9,17 +9,9 @@ interface DashboardHeaderProps {
   subtitle?: string;
   actionLabel?: string;
   actionIcon?: React.ReactNode;
-  onActionClick?: () => void;
-  secondaryAction?: React.ReactNode;
+  onAction?: () => void;
   dateFilter?: boolean;
   exportButton?: boolean;
-  refreshButton?: boolean;
-  filters?: {
-    label: string;
-    options: {value: string, label: string}[];
-    onChange: (value: string) => void;
-    value: string;
-  }[];
 }
 
 export function DashboardHeader({
@@ -27,82 +19,48 @@ export function DashboardHeader({
   subtitle,
   actionLabel,
   actionIcon,
-  onActionClick,
-  secondaryAction,
+  onAction,
   dateFilter = false,
   exportButton = false,
-  refreshButton = false,
-  filters = []
 }: DashboardHeaderProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-        {subtitle && (
-          <p className="text-muted-foreground mt-1">
-            {subtitle}
-          </p>
-        )}
+        <h2 className="text-3xl font-bold tracking-tight">{title}</h2>
+        {subtitle && <p className="text-muted-foreground mt-1">{subtitle}</p>}
       </div>
-      <div className="flex flex-wrap gap-2 items-center">
-        {filters.length > 0 && filters.map((filter, index) => (
-          <div key={index} className="w-auto min-w-[140px]">
-            <Select value={filter.value} onValueChange={filter.onChange}>
-              <SelectTrigger className="h-9 text-xs">
-                <SelectValue placeholder={filter.label} />
-              </SelectTrigger>
-              <SelectContent>
-                {filter.options.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        ))}
-        
-        {dateFilter && <CurrentMonthButton />}
-        
-        {refreshButton && (
-          <Button variant="outline" size="sm" className="h-9">
-            <RefreshCcw className="h-4 w-4 mr-1" />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
+      <div className="flex flex-wrap gap-2">
+        {dateFilter && (
+          <Select defaultValue="month">
+            <SelectTrigger className="w-[180px]">
+              <Calendar className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="Select period" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="day">Today</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="quarter">This Quarter</SelectItem>
+              <SelectItem value="year">This Year</SelectItem>
+              <SelectItem value="all">All Time</SelectItem>
+            </SelectContent>
+          </Select>
         )}
         
         {exportButton && (
-          <Button variant="outline" size="sm" className="h-9">
-            <Download className="h-4 w-4 mr-1" />
-            <span className="hidden sm:inline">Export</span>
+          <Button variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            <span>Export</span>
           </Button>
         )}
         
-        {secondaryAction}
-        
         {actionLabel && (
-          <Button 
-            onClick={onActionClick}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-            size="sm"
-          >
-            {actionIcon && <span className="mr-2">{actionIcon}</span>}
-            {actionLabel}
+          <Button onClick={onAction} className="gap-2">
+            {actionIcon}
+            <span>{actionLabel}</span>
           </Button>
         )}
       </div>
     </div>
-  );
-}
-
-export function CurrentMonthButton() {
-  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-  const currentYear = new Date().getFullYear();
-  
-  return (
-    <Button variant="outline" size="sm" className="h-9">
-      <Calendar className="mr-2 h-4 w-4" />
-      <span>{currentMonth} {currentYear}</span>
-    </Button>
   );
 }

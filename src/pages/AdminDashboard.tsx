@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminProfile from "@/components/dashboard/admin/AdminProfile";
@@ -34,13 +34,69 @@ import {
   Wallet,
   Landmark,
   Receipt,
-  CreditCard as CreditCardIcon
+  CreditCard as CreditCardIcon,
+  RefreshCcw
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+interface DashboardStat {
+  id: string;
+  stat_name: string;
+  stat_value: string;
+  stat_change: number | null;
+  compare_text: string | null;
+  trend: string | null;
+  updated_at: string;
+}
 
 const AdminDashboard = () => {
+  const { data: dashboardStats, isLoading, error, refetch } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dashboard_stats")
+        .select("*");
+      
+      if (error) throw error;
+      return data as DashboardStat[];
+    }
+  });
+
+  const updateDashboardStats = async () => {
+    try {
+      toast.loading("Updating dashboard statistics...");
+      
+      const { data, error } = await supabase.functions.invoke('calculate-dashboard-stats', {
+        method: 'POST',
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Dashboard statistics updated successfully!");
+      refetch();
+    } catch (error) {
+      console.error("Error updating dashboard stats:", error);
+      toast.error("Failed to update dashboard statistics");
+    }
+  };
+
+  const getStatValue = (name: string): string => {
+    if (isLoading || !dashboardStats) return "...";
+    const stat = dashboardStats.find(s => s.stat_name === name);
+    return stat?.stat_value || "0";
+  };
+
+  const getStatChange = (name: string): number => {
+    if (isLoading || !dashboardStats) return 0;
+    const stat = dashboardStats.find(s => s.stat_name === name);
+    return stat?.stat_change || 0;
+  };
+
   return (
     <>
       <Helmet>
@@ -53,8 +109,9 @@ const AdminDashboard = () => {
               <DashboardHeader
                 title="Admin Dashboard"
                 subtitle="Welcome to the GODIRECT administration panel"
-                actionLabel="Generate Report"
-                actionIcon={<ActivitySquare className="h-4 w-4" />}
+                actionLabel="Update Stats"
+                actionIcon={<RefreshCcw className="h-4 w-4" />}
+                onAction={updateDashboardStats}
                 dateFilter={true}
                 exportButton={true}
               />
@@ -62,35 +119,35 @@ const AdminDashboard = () => {
               <StatsCardGrid>
                 <StatsCard
                   title="Total Revenue"
-                  value="$37.95M"
-                  change={18.2}
+                  value={getStatValue("total_revenue")}
+                  change={getStatChange("total_revenue")}
                   icon={<DollarSign className="h-4 w-4" />}
                   progressValue={82}
-                  compareText="FY 2024-2025"
+                  compareText="vs previous 30 days"
                 />
                 
                 <StatsCard
                   title="Active Listings"
-                  value="124"
-                  change={10.7}
+                  value={getStatValue("active_listings")}
+                  change={getStatChange("active_listings")}
                   icon={<Building2 className="h-4 w-4" />}
                   progressValue={75}
-                  compareText="12 new properties this month"
+                  compareText="vs previous 30 days"
                 />
                 
                 <StatsCard
                   title="Users & Agents"
-                  value="1,690"
-                  change={24.3}
+                  value={getStatValue("users_agents")}
+                  change={getStatChange("users_agents")}
                   icon={<Users className="h-4 w-4" />}
                   progressValue={65}
-                  compareText="1,652 users, 38 agents"
+                  compareText="Total registered users"
                 />
                 
                 <StatsCard
                   title="Payment Approvals"
-                  value="24"
-                  change={15.0}
+                  value={getStatValue("payment_approvals")}
+                  change={getStatChange("payment_approvals")}
                   icon={<Receipt className="h-4 w-4" />}
                   progressValue={45}
                   compareText="Pending approval"
@@ -104,7 +161,7 @@ const AdminDashboard = () => {
                     <Calendar className="h-5 w-5 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">$140,000</div>
+                    <div className="text-3xl font-bold">{getStatValue("daily_revenue")}</div>
                     <div className="flex items-center mt-1">
                       <ArrowUp className="mr-1 h-4 w-4 text-green-500" />
                       <CardDescription className="text-sm text-green-500">
@@ -117,11 +174,11 @@ const AdminDashboard = () => {
                     <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
                       <div>
                         <div className="text-muted-foreground">Sales Count</div>
-                        <div className="font-medium">24</div>
+                        <div className="font-medium">{getStatValue("sales_count")}</div>
                       </div>
                       <div>
                         <div className="text-muted-foreground">Avg. Value</div>
-                        <div className="font-medium">$5,833</div>
+                        <div className="font-medium">{getStatValue("avg_value")}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -138,7 +195,7 @@ const AdminDashboard = () => {
                     <BarChart3 className="h-5 w-5 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">$2.8M</div>
+                    <div className="text-3xl font-bold">{getStatValue("monthly_revenue")}</div>
                     <div className="flex items-center mt-1">
                       <ArrowUp className="mr-1 h-4 w-4 text-green-500" />
                       <CardDescription className="text-sm text-green-500">
@@ -151,11 +208,11 @@ const AdminDashboard = () => {
                     <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
                       <div>
                         <div className="text-muted-foreground">Properties Sold</div>
-                        <div className="font-medium">48</div>
+                        <div className="font-medium">{getStatValue("properties_sold")}</div>
                       </div>
                       <div>
                         <div className="text-muted-foreground">Commission</div>
-                        <div className="font-medium">$280K</div>
+                        <div className="font-medium">{getStatValue("commission")}</div>
                       </div>
                     </div>
                   </CardContent>
@@ -172,11 +229,11 @@ const AdminDashboard = () => {
                     <TrendingUp className="h-5 w-5 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">$37.95M</div>
+                    <div className="text-3xl font-bold">{getStatValue("yearly_revenue")}</div>
                     <div className="flex items-center mt-1">
                       <ArrowDown className="mr-1 h-4 w-4 text-red-500" />
                       <CardDescription className="text-sm text-red-500">
-                        -6.1% from last year
+                        {getStatChange("yearly_revenue")}% from last year
                       </CardDescription>
                     </div>
                     <div className="mt-4 h-1 w-full bg-muted overflow-hidden rounded-full">
@@ -185,11 +242,11 @@ const AdminDashboard = () => {
                     <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
                       <div>
                         <div className="text-muted-foreground">YTD Target</div>
-                        <div className="font-medium">$40M</div>
+                        <div className="font-medium">{getStatValue("ytd_target")}</div>
                       </div>
                       <div>
                         <div className="text-muted-foreground">Completion</div>
-                        <div className="font-medium">94.9%</div>
+                        <div className="font-medium">{getStatValue("completion")}</div>
                       </div>
                     </div>
                   </CardContent>
