@@ -1,8 +1,20 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Calendar, Download } from "lucide-react";
+import { Calendar, Download, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+interface FilterOption {
+  value: string;
+  label: string;
+}
+
+interface FilterProps {
+  label: string;
+  options: FilterOption[];
+  onChange: (value: string) => void;
+  value: string;
+}
 
 interface DashboardHeaderProps {
   title: string;
@@ -12,6 +24,8 @@ interface DashboardHeaderProps {
   onAction?: () => void;
   dateFilter?: boolean;
   exportButton?: boolean;
+  refreshButton?: boolean;
+  filters?: FilterProps[];
 }
 
 export function DashboardHeader({
@@ -22,6 +36,8 @@ export function DashboardHeader({
   onAction,
   dateFilter = false,
   exportButton = false,
+  refreshButton = false,
+  filters = [],
 }: DashboardHeaderProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -47,6 +63,21 @@ export function DashboardHeader({
           </Select>
         )}
         
+        {filters && filters.length > 0 && filters.map((filter, index) => (
+          <Select key={index} value={filter.value} onValueChange={filter.onChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={filter.label} />
+            </SelectTrigger>
+            <SelectContent>
+              {filter.options.map((option, optIndex) => (
+                <SelectItem key={optIndex} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ))}
+        
         {exportButton && (
           <Button variant="outline" className="gap-2">
             <Download className="h-4 w-4" />
@@ -54,7 +85,14 @@ export function DashboardHeader({
           </Button>
         )}
         
-        {actionLabel && (
+        {refreshButton && (
+          <Button variant="outline" onClick={onAction} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            <span>Refresh</span>
+          </Button>
+        )}
+        
+        {actionLabel && !refreshButton && (
           <Button onClick={onAction} className="gap-2">
             {actionIcon}
             <span>{actionLabel}</span>
