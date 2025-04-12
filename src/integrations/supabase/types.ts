@@ -552,6 +552,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_users: {
+        Args: Record<PropertyKey, never>
+        Returns: Json[]
+      }
       is_user_type: {
         Args: { requested_type: string }
         Returns: boolean

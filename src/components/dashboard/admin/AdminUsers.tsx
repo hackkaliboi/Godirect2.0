@@ -46,33 +46,14 @@ export default function AdminUsers() {
     queryKey: ["admin-users"],
     queryFn: async () => {
       // Fetch users from auth.users through RPC function
-      const { data: authUsers, error: authError } = await supabase.rpc('get_users');
+      const { data, error: authError } = await supabase.rpc('get_users');
       
       if (authError) {
         console.error("Error fetching users:", authError);
         throw authError;
       }
-
-      // Fetch profiles to get additional user information
-      const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*");
       
-      if (profilesError) {
-        console.error("Error fetching profiles:", profilesError);
-        throw profilesError;
-      }
-      
-      // Merge user data with their profile information
-      const usersWithProfiles = authUsers.map((user: any) => {
-        const profile = profilesData.find((p: any) => p.id === user.id);
-        return {
-          ...user,
-          profiles: profile || {}
-        };
-      });
-      
-      return usersWithProfiles as User[];
+      return data as User[];
     }
   });
 
@@ -203,7 +184,7 @@ export default function AdminUsers() {
                       <TableCell>
                         <Badge variant={
                           userStatus === "Active" ? "default" : 
-                          userStatus === "Inactive" ? "secondary" : "outline"
+                          userStatus === "Pending" ? "outline" : "secondary"
                         }>
                           {userStatus}
                         </Badge>
