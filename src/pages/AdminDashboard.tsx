@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import AdminDashboardOverview from "@/components/dashboard/admin/AdminDashboardOverview";
 import AdminAgents from "@/components/dashboard/admin/AdminAgents";
 import AdminProperties from "@/components/dashboard/admin/AdminProperties";
 import AdminSales from "@/components/dashboard/admin/AdminSales";
@@ -31,7 +32,7 @@ export default function AdminDashboard() {
   
   // If we're at the root of admin-dashboard, set default section
   if (currentSection === "admin-dashboard") {
-    currentSection = "analytics";
+    currentSection = "overview";
   }
 
   useEffect(() => {
@@ -60,14 +61,15 @@ export default function AdminDashboard() {
       }
     };
 
-    // Refresh dashboard stats when analytics section is loaded
-    if (currentSection === "analytics") {
+    // Refresh dashboard stats when overview or analytics section is loaded
+    if (currentSection === "overview" || currentSection === "analytics") {
       refreshDashboardStats();
     }
   }, [currentSection, toast]);
 
   // Define available sections
   const sections = {
+    overview: <AdminDashboardOverview />,
     analytics: <AnalyticsPanel />,
     properties: <AdminProperties />,
     users: <AdminUsers />,
