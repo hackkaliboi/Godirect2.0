@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminAgents from "@/components/dashboard/admin/AdminAgents";
 import AdminProperties from "@/components/dashboard/admin/AdminProperties";
@@ -16,6 +16,11 @@ import SupportCenter from "@/components/dashboard/admin/SupportCenter";
 import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguration";
 import NotFound from "@/pages/NotFound";
 import { useNavItems } from "@/hooks/useNavItems";
+import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
+import { FeatureCard } from "@/components/dashboard/FeatureCard";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
+import { Building2, Users, DollarSign, AlertTriangle, Clock, Activity } from "lucide-react";
 
 export default function AdminDashboard() {
   // Get section from URL parameters
