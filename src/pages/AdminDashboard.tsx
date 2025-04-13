@@ -15,6 +15,7 @@ import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
 import SupportCenter from "@/components/dashboard/admin/SupportCenter";
 import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguration";
 import NotFound from "@/pages/NotFound";
+import { useNavItems } from "@/hooks/useNavItems";
 
 export default function AdminDashboard() {
   // Get section from URL parameters
@@ -38,52 +39,12 @@ export default function AdminDashboard() {
     system: <SystemConfiguration />,
   };
 
-  // Navigation items for the dashboard
-  const navItems = [
-    {
-      title: "Dashboard",
-      links: [
-        { title: "Analytics", href: "/admin?section=analytics", icon: "BarChart2" },
-      ],
-    },
-    {
-      title: "Management",
-      links: [
-        { title: "Properties", href: "/admin?section=properties", icon: "Home" },
-        { title: "Users", href: "/admin?section=users", icon: "Users" },
-        { title: "Agents", href: "/admin?section=agents", icon: "UserCheck" },
-        { title: "Sales", href: "/admin?section=sales", icon: "TrendingUp" },
-      ],
-    },
-    {
-      title: "Finance",
-      links: [
-        { title: "Financial Management", href: "/admin?section=financial", icon: "DollarSign" },
-        { title: "Payment Processing", href: "/admin?section=payments", icon: "CreditCard" },
-        { title: "Payment Configuration", href: "/admin?section=payment-config", icon: "Settings" },
-        { title: "Legal & Compliance", href: "/admin?section=legal", icon: "Shield" },
-      ],
-    },
-    {
-      title: "Settings",
-      links: [
-        { title: "Site Settings", href: "/admin?section=settings", icon: "Settings" },
-        { title: "Profile", href: "/admin?section=profile", icon: "User" },
-        { title: "Support Center", href: "/admin?section=support", icon: "HelpCircle" },
-        { title: "System Config", href: "/admin?section=system", icon: "Server" },
-      ],
-    },
-  ];
-
   const currentSection = sectionParam in sections ? sectionParam : "analytics";
 
   return (
     <DashboardLayout
-      navItems={navItems}
       userType="admin"
-      dashboardType="admin"
-    >
-      {sections[currentSection] || <NotFound />}
-    </DashboardLayout>
+      children={sections[currentSection] || <NotFound />}
+    />
   );
 }
