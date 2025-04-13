@@ -1,20 +1,20 @@
 
 import React, { useState } from "react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { AdminAgents } from "@/components/dashboard/admin/AdminAgents";
-import { AdminProperties } from "@/components/dashboard/admin/AdminProperties";
-import { AdminSales } from "@/components/dashboard/admin/AdminSales";
-import { AdminUsers } from "@/components/dashboard/admin/AdminUsers";
-import { AdminSettings } from "@/components/dashboard/admin/AdminSettings";
-import { AdminProfile } from "@/components/dashboard/admin/AdminProfile";
-import { AnalyticsPanel } from "@/components/dashboard/analytics/AnalyticsPanel";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import AdminAgents from "@/components/dashboard/admin/AdminAgents";
+import AdminProperties from "@/components/dashboard/admin/AdminProperties";
+import AdminSales from "@/components/dashboard/admin/AdminSales";
+import AdminUsers from "@/components/dashboard/admin/AdminUsers";
+import AdminSettings from "@/components/dashboard/admin/AdminSettings";
+import AdminProfile from "@/components/dashboard/admin/AdminProfile";
+import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
 import { FinancialManagement } from "@/components/dashboard/financial/FinancialManagement";
-import { PaymentProcessing } from "@/components/dashboard/admin/PaymentProcessing";
+import PaymentProcessing from "@/components/dashboard/admin/PaymentProcessing";
 import { PaymentConfiguration } from "@/components/dashboard/admin/PaymentConfiguration";
-import { LegalCompliance } from "@/components/dashboard/legal/LegalCompliance";
-import { SupportCenter } from "@/components/dashboard/admin/SupportCenter";
-import { SystemConfiguration } from "@/components/dashboard/admin/SystemConfiguration";
-import { NotFound } from "@/pages/NotFound";
+import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
+import SupportCenter from "@/components/dashboard/admin/SupportCenter";
+import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguration";
+import NotFound from "@/pages/NotFound";
 
 export default function AdminDashboard() {
   // Get section from URL parameters
