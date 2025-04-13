@@ -1,5 +1,6 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminAgents from "@/components/dashboard/admin/AdminAgents";
 import AdminProperties from "@/components/dashboard/admin/AdminProperties";
@@ -15,17 +16,55 @@ import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
 import SupportCenter from "@/components/dashboard/admin/SupportCenter";
 import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguration";
 import NotFound from "@/pages/NotFound";
-import { useNavItems } from "@/hooks/useNavItems";
-import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
-import { FeatureCard } from "@/components/dashboard/FeatureCard";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
-import { Building2, Users, DollarSign, AlertTriangle, Clock, Activity } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function AdminDashboard() {
-  // Get section from URL parameters
-  const queryParams = new URLSearchParams(window.location.search);
-  const sectionParam = queryParams.get("section") || "analytics";
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Extract section from path instead of query parameters
+  const pathSegments = location.pathname.split('/');
+  let currentSection = pathSegments[pathSegments.length - 1];
+  
+  // If we're at the root of admin-dashboard, set default section
+  if (currentSection === "admin-dashboard") {
+    currentSection = "analytics";
+  }
+
+  useEffect(() => {
+    const refreshDashboardStats = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('calculate-dashboard-stats');
+        
+        if (error) {
+          console.error("Error refreshing dashboard stats:", error);
+          toast({
+            title: "Error refreshing data",
+            description: "Failed to fetch the latest dashboard statistics",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Dashboard refreshed",
+            description: "Latest statistics have been loaded",
+          });
+        }
+      } catch (err) {
+        console.error("Failed to invoke edge function:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Refresh dashboard stats when analytics section is loaded
+    if (currentSection === "analytics") {
+      refreshDashboardStats();
+    }
+  }, [currentSection, toast]);
 
   // Define available sections
   const sections = {
@@ -43,8 +82,6 @@ export default function AdminDashboard() {
     support: <SupportCenter />,
     system: <SystemConfiguration />,
   };
-
-  const currentSection = sectionParam in sections ? sectionParam : "analytics";
 
   return (
     <DashboardLayout
