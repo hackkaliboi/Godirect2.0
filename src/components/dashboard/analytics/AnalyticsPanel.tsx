@@ -112,9 +112,9 @@ export default function AnalyticsPanel() {
 
   // Find specific stats by name
   const findStatByName = (name) => {
-    if (!dashboardStats) return { value: '0', change: 0 };
+    if (!dashboardStats) return { stat_value: '0', stat_change: 0 };
     const stat = dashboardStats.find(s => s.stat_name === name);
-    return stat || { value: '0', change: 0 };
+    return stat || { stat_value: '0', stat_change: 0 };
   };
 
   // Format stats with the right icons and colors
@@ -174,9 +174,9 @@ export default function AnalyticsPanel() {
                   <Skeleton className="h-8 w-24" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold">{totalRevenue.value}</span>
-                    <span className={`text-xs flex items-center ${formatTrendClass(totalRevenue.change)}`}>
-                      {formatTrendIcon(totalRevenue.change)} {totalRevenue.change}%
+                    <span className="text-3xl font-bold">{totalRevenue.stat_value}</span>
+                    <span className={`text-xs flex items-center ${formatTrendClass(totalRevenue.stat_change)}`}>
+                      {formatTrendIcon(totalRevenue.stat_change)} {totalRevenue.stat_change}%
                     </span>
                   </div>
                 )}
@@ -197,9 +197,9 @@ export default function AnalyticsPanel() {
                   <Skeleton className="h-8 w-24" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold">{activeListings.value}</span>
-                    <span className={`text-xs flex items-center ${formatTrendClass(activeListings.change)}`}>
-                      {formatTrendIcon(activeListings.change)} {activeListings.change}%
+                    <span className="text-3xl font-bold">{activeListings.stat_value}</span>
+                    <span className={`text-xs flex items-center ${formatTrendClass(activeListings.stat_change)}`}>
+                      {formatTrendIcon(activeListings.stat_change)} {activeListings.stat_change}%
                     </span>
                   </div>
                 )}
@@ -220,9 +220,9 @@ export default function AnalyticsPanel() {
                   <Skeleton className="h-8 w-24" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold">{usersAgents.value}</span>
-                    <span className={`text-xs flex items-center ${formatTrendClass(usersAgents.change)}`}>
-                      {formatTrendIcon(usersAgents.change)} {usersAgents.change}%
+                    <span className="text-3xl font-bold">{usersAgents.stat_value}</span>
+                    <span className={`text-xs flex items-center ${formatTrendClass(usersAgents.stat_change)}`}>
+                      {formatTrendIcon(usersAgents.stat_change)} {usersAgents.stat_change}%
                     </span>
                   </div>
                 )}
@@ -243,9 +243,9 @@ export default function AnalyticsPanel() {
                   <Skeleton className="h-8 w-24" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold">{paymentApprovals.value}</span>
-                    <span className={`text-xs flex items-center ${formatTrendClass(paymentApprovals.change)}`}>
-                      {formatTrendIcon(paymentApprovals.change)} {paymentApprovals.change}%
+                    <span className="text-3xl font-bold">{paymentApprovals.stat_value}</span>
+                    <span className={`text-xs flex items-center ${formatTrendClass(paymentApprovals.stat_change)}`}>
+                      {formatTrendIcon(paymentApprovals.stat_change)} {paymentApprovals.stat_change}%
                     </span>
                   </div>
                 )}
@@ -266,9 +266,9 @@ export default function AnalyticsPanel() {
                   <Skeleton className="h-8 w-24" />
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold">{propertiesSold.value}</span>
-                    <span className={`text-xs flex items-center ${formatTrendClass(propertiesSold.change)}`}>
-                      {formatTrendIcon(propertiesSold.change)} {propertiesSold.change}%
+                    <span className="text-3xl font-bold">{propertiesSold.stat_value}</span>
+                    <span className={`text-xs flex items-center ${formatTrendClass(propertiesSold.stat_change)}`}>
+                      {formatTrendIcon(propertiesSold.stat_change)} {propertiesSold.stat_change}%
                     </span>
                   </div>
                 )}
