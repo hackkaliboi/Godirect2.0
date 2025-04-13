@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,21 +17,84 @@ import {
   FileSpreadsheet,
   Building,
   Users,
-  Download
+  Download,
+  RefreshCw
 } from "lucide-react";
 import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export function FinancialManagement() {
   const [activeCity, setActiveCity] = useState<string>("Lagos");
   const [activePropertyType, setActivePropertyType] = useState<string>("All");
+  const [isLoading, setIsLoading] = useState(false);
+  const [revenueMetrics, setRevenueMetrics] = useState({
+    totalRevenue: "₦42.8M",
+    commissions: "₦3.86M",
+    expenses: "₦1.24M",
+    profitMargin: "28.4%",
+    revenueChange: 12.5,
+    commissionChange: 8.2,
+    expenseChange: -4.3,
+    marginChange: 2.1
+  });
+  
+  // Fetch dashboard stats on load
+  useEffect(() => {
+    fetchFinancialStats();
+  }, []);
+  
+  // Function to fetch financial stats from Supabase
+  const fetchFinancialStats = async () => {
+    try {
+      // Get revenue metrics from DB
+      const { data: metrics, error } = await supabase
+        .from("revenue_metrics")
+        .select("*")
+        .order("metric_date", { ascending: false })
+        .limit(10);
+        
+      if (error) throw error;
+      
+      // Process metrics if available
+      if (metrics && metrics.length > 0) {
+        // Calculate and update metrics here
+        // This is just a placeholder, in a real implementation 
+        // you would process the data from the database
+        // setRevenueMetrics(processedMetrics);
+      }
+    } catch (error) {
+      console.error("Error fetching financial stats:", error);
+    }
+  };
+  
+  // Function to refresh dashboard stats via the edge function
+  const refreshDashboardStats = async () => {
+    setIsLoading(true);
+    try {
+      // Call the edge function to recalculate stats
+      const { data, error } = await supabase.functions.invoke("calculate-dashboard-stats");
+      
+      if (error) throw error;
+      if (data.success) {
+        toast.success("Financial statistics updated successfully");
+        fetchFinancialStats();
+      }
+    } catch (error) {
+      console.error("Error refreshing dashboard stats:", error);
+      toast.error("Failed to update statistics");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   return (
     <div className="p-6 space-y-6">
       <DashboardHeader
         title="Financial Management"
         subtitle="Track revenue, commissions, expenses and payments"
-        actionLabel="Export Report"
-        actionIcon={<Download className="h-4 w-4" />}
+        refreshButton={true}
+        onAction={refreshDashboardStats}
         dateFilter={true}
         filters={[
           {
@@ -60,15 +123,14 @@ export function FinancialManagement() {
           }
         ]}
         exportButton={true}
-        refreshButton={true}
       />
 
       {/* Financial Overview Stats */}
       <StatsCardGrid>
         <StatsCard
           title="Total Revenue"
-          value="₦42.8M"
-          change={12.5}
+          value={revenueMetrics.totalRevenue}
+          change={revenueMetrics.revenueChange}
           icon={<DollarSign className="h-4 w-4" />}
           progressValue={78}
           compareText="This Month"
@@ -76,8 +138,8 @@ export function FinancialManagement() {
         
         <StatsCard
           title="Commissions"
-          value="₦3.86M"
-          change={8.2}
+          value={revenueMetrics.commissions}
+          change={revenueMetrics.commissionChange}
           icon={<CreditCard className="h-4 w-4" />}
           progressValue={65}
           compareText="38 Agents"
@@ -85,8 +147,8 @@ export function FinancialManagement() {
         
         <StatsCard
           title="Expenses"
-          value="₦1.24M"
-          change={-4.3}
+          value={revenueMetrics.expenses}
+          change={revenueMetrics.expenseChange}
           icon={<FileText className="h-4 w-4" />}
           progressValue={40}
           compareText="Below Budget"
@@ -94,8 +156,8 @@ export function FinancialManagement() {
         
         <StatsCard
           title="Profit Margin"
-          value="28.4%"
-          change={2.1}
+          value={revenueMetrics.profitMargin}
+          change={revenueMetrics.marginChange}
           icon={<TrendingUp className="h-4 w-4" />}
           progressValue={84}
           compareText="Industry Avg: 24.8%"
@@ -138,6 +200,24 @@ export function FinancialManagement() {
 }
 
 function RevenueBreakdown() {
+  const [revenueData, setRevenueData] = useState({
+    byCity: [
+      { name: "Lagos", amount: "₦24.8M", percentage: 58 },
+      { name: "Abuja", amount: "₦8.5M", percentage: 20 },
+      { name: "Enugu", amount: "₦5.2M", percentage: 12 },
+      { name: "Calabar", amount: "₦4.3M", percentage: 10 }
+    ],
+    byPropertyType: [
+      { name: "Residential", amount: "₦23.5M", percentage: 55 },
+      { name: "Commercial", amount: "₦11.1M", percentage: 26 },
+      { name: "Land", amount: "₦5.6M", percentage: 13 },
+      { name: "Industrial", amount: "₦2.6M", percentage: 6 }
+    ]
+  });
+  
+  // Here you would typically fetch the real data from Supabase
+  // and update the revenueData state
+  
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <Card>
@@ -147,29 +227,15 @@ function RevenueBreakdown() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Lagos</span>
-              <span className="text-sm">₦24.8M (58%)</span>
-            </div>
-            <Progress value={58} className="h-2" />
-            
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Abuja</span>
-              <span className="text-sm">₦8.5M (20%)</span>
-            </div>
-            <Progress value={20} className="h-2" />
-            
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Enugu</span>
-              <span className="text-sm">₦5.2M (12%)</span>
-            </div>
-            <Progress value={12} className="h-2" />
-            
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Calabar</span>
-              <span className="text-sm">₦4.3M (10%)</span>
-            </div>
-            <Progress value={10} className="h-2" />
+            {revenueData.byCity.map((city, index) => (
+              <div key={index}>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">{city.name}</span>
+                  <span className="text-sm">{city.amount} ({city.percentage}%)</span>
+                </div>
+                <Progress value={city.percentage} className="h-2" />
+              </div>
+            ))}
           </div>
         </CardContent>
         <CardFooter>
@@ -184,29 +250,15 @@ function RevenueBreakdown() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Residential</span>
-              <span className="text-sm">₦23.5M (55%)</span>
-            </div>
-            <Progress value={55} className="h-2" />
-            
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Commercial</span>
-              <span className="text-sm">₦11.1M (26%)</span>
-            </div>
-            <Progress value={26} className="h-2" />
-            
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Land</span>
-              <span className="text-sm">₦5.6M (13%)</span>
-            </div>
-            <Progress value={13} className="h-2" />
-            
-            <div className="flex justify-between items-center">
-              <span className="font-medium">Industrial</span>
-              <span className="text-sm">₦2.6M (6%)</span>
-            </div>
-            <Progress value={6} className="h-2" />
+            {revenueData.byPropertyType.map((type, index) => (
+              <div key={index}>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">{type.name}</span>
+                  <span className="text-sm">{type.amount} ({type.percentage}%)</span>
+                </div>
+                <Progress value={type.percentage} className="h-2" />
+              </div>
+            ))}
           </div>
         </CardContent>
         <CardFooter>

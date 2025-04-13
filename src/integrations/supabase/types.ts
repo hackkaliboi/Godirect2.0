@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          description: string
+          id: string
+          reference_id: string | null
+          reference_table: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          description: string
+          id?: string
+          reference_id?: string | null
+          reference_table?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          reference_id?: string | null
+          reference_table?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       agents: {
         Row: {
           bio: string | null
@@ -265,6 +295,83 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_method_stats: {
+        Row: {
+          created_at: string | null
+          id: string
+          method_key: string | null
+          reference_date: string
+          transaction_count: number | null
+          transaction_percentage: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          method_key?: string | null
+          reference_date?: string
+          transaction_count?: number | null
+          transaction_percentage?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          method_key?: string | null
+          reference_date?: string
+          transaction_count?: number | null
+          transaction_percentage?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_method_stats_method_key_fkey"
+            columns: ["method_key"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["method_key"]
+          },
+        ]
+      }
+      payment_methods: {
+        Row: {
+          configuration: Json | null
+          created_at: string | null
+          description: string | null
+          display_name: string
+          icon_name: string
+          id: string
+          is_active: boolean | null
+          method_key: string
+          method_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string | null
+          display_name: string
+          icon_name: string
+          id?: string
+          is_active?: boolean | null
+          method_key: string
+          method_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string | null
+          display_name?: string
+          icon_name?: string
+          id?: string
+          is_active?: boolean | null
+          method_key?: string
+          method_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -456,6 +563,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      revenue_metrics: {
+        Row: {
+          average_value: number | null
+          change_percentage: number | null
+          completion_percentage: number | null
+          created_at: string | null
+          id: string
+          metric_date: string
+          metric_type: string
+          revenue: number
+          sales_count: number | null
+          target_value: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          average_value?: number | null
+          change_percentage?: number | null
+          completion_percentage?: number | null
+          created_at?: string | null
+          id?: string
+          metric_date: string
+          metric_type: string
+          revenue?: number
+          sales_count?: number | null
+          target_value?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          average_value?: number | null
+          change_percentage?: number | null
+          completion_percentage?: number | null
+          created_at?: string | null
+          id?: string
+          metric_date?: string
+          metric_type?: string
+          revenue?: number
+          sales_count?: number | null
+          target_value?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       sales: {
         Row: {
