@@ -21,11 +21,12 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { refreshDashboardStats } from "@/utils/dashboardUtils";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatTrendIcon } from "@/components/dashboard/DashboardIcons";
 
 export function FinancialManagement() {
   const [activeCity, setActiveCity] = useState<string>("Lagos");
@@ -240,14 +241,25 @@ export function FinancialManagement() {
       const result = await refreshDashboardStats();
       
       if (result.success) {
-        toast.success("Financial statistics updated successfully");
+        toast({
+          title: "Success",
+          description: "Financial statistics updated successfully",
+        });
         refetchRevenue();
       } else {
-        toast.error(result.message || "Failed to update statistics");
+        toast({
+          title: "Error",
+          description: result.message || "Failed to update statistics",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error refreshing financial stats:", error);
-      toast.error("Failed to update statistics");
+      toast({
+        title: "Error",
+        description: "Failed to update statistics",
+        variant: "destructive",
+      });
     } finally {
       setIsRefreshing(false);
     }
