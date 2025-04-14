@@ -13,6 +13,7 @@ import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
 import { FinancialManagement } from "@/components/dashboard/financial/FinancialManagement";
 import PaymentProcessing from "@/components/dashboard/admin/PaymentProcessing";
 import { PaymentConfiguration } from "@/components/dashboard/admin/PaymentConfiguration";
+import PaymentMethodSetup from "@/components/dashboard/admin/PaymentMethodSetup";
 import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
 import SupportCenter from "@/components/dashboard/admin/SupportCenter";
 import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguration";
@@ -84,11 +85,21 @@ export default function AdminDashboard() {
     financial: <FinancialManagement />,
     payments: <PaymentProcessing />,
     "payment-config": <PaymentConfiguration />,
+    "payment-methods": <PaymentMethodSetup />,
     legal: <LegalCompliance />,
     settings: <AdminSettings />,
     profile: <AdminProfile />,
     support: <SupportCenter />,
     system: <SystemConfiguration />,
+    // Add placeholders for previously missing routes
+    "email-templates": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Email Templates</h1><p>Email template management interface will be available soon.</p></div>,
+    "platform-settings": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Platform Settings</h1><p>Platform configuration settings will be available soon.</p></div>,
+    "maintenance": <div className="p-6"><h1 className="text-3xl font-bold mb-4">System Maintenance</h1><p>System maintenance tools will be available soon.</p></div>,
+    "support-tickets": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Support Tickets</h1><p>Support ticket management will be available soon.</p></div>,
+    "knowledge-base": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Knowledge Base</h1><p>Knowledge base articles will be available soon.</p></div>,
+    "team-chat": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Team Chat</h1><p>Team chat interface will be available soon.</p></div>,
+    "reports": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Reports</h1><p>Reporting dashboard will be available soon.</p></div>,
+    "notifications": <div className="p-6"><h1 className="text-3xl font-bold mb-4">Notifications</h1><p>Notification settings and history will be available soon.</p></div>,
   };
 
   return (

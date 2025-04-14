@@ -66,6 +66,14 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
             { title: "Payment Processing", path: "/admin-dashboard/payments" },
           ]
         },
+        { 
+          title: "Payment Setup", 
+          icon: CreditCard, 
+          subItems: [
+            { title: "Payment Configuration", path: "/admin-dashboard/payment-config" },
+            { title: "Payment Methods", path: "/admin-dashboard/payment-methods" },
+          ]
+        },
         { title: "Legal & Compliance", path: "/admin-dashboard/legal", icon: Scale },
         { 
           title: "User Management", 

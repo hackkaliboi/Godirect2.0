@@ -10,6 +10,9 @@ import UserNewProperty from "@/components/dashboard/user/UserNewProperty";
 import UserEditProperty from "@/components/dashboard/user/UserEditProperty";
 import UserInquiryDetails from "@/components/dashboard/user/UserInquiryDetails";
 import UserNotFound from "@/components/dashboard/user/UserNotFound";
+import UserMessages from "@/components/dashboard/user/UserMessages";
+import UserPurchases from "@/components/dashboard/user/UserPurchases";
+import UserSettings from "@/components/dashboard/user/UserSettings";
 import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
 import { Building, MessageSquare, Heart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -110,6 +113,12 @@ const UserDashboard = () => {
         <Route path="inquiries" element={<UserInquiries />} />
         <Route path="inquiries/:id" element={<UserInquiryDetails />} />
         <Route path="profile" element={<UserProfile />} />
+        <Route path="messages" element={<UserMessages />} />
+        <Route path="purchases" element={<UserPurchases />} />
+        <Route path="settings" element={<UserSettings />} />
+        <Route path="saved-searches" element={<div className="p-6"><h1 className="text-3xl font-bold">Saved Searches</h1><p className="mt-4">Your saved property searches will appear here.</p></div>} />
+        <Route path="property-alerts" element={<div className="p-6"><h1 className="text-3xl font-bold">Property Alerts</h1><p className="mt-4">Your property alerts settings will appear here.</p></div>} />
+        <Route path="viewing-history" element={<div className="p-6"><h1 className="text-3xl font-bold">Viewing History</h1><p className="mt-4">Your property viewing history will appear here.</p></div>} />
         <Route path="*" element={<UserNotFound />} />
       </Routes>
     </DashboardLayout>
