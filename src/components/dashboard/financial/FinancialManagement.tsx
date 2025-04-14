@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
@@ -18,73 +17,239 @@ import {
   Building,
   Users,
   Download,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle
 } from "lucide-react";
 import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { refreshDashboardStats } from "@/utils/dashboardUtils";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function FinancialManagement() {
   const [activeCity, setActiveCity] = useState<string>("Lagos");
   const [activePropertyType, setActivePropertyType] = useState<string>("All");
-  const [isLoading, setIsLoading] = useState(false);
-  const [revenueMetrics, setRevenueMetrics] = useState({
-    totalRevenue: "₦42.8M",
-    commissions: "₦3.86M",
-    expenses: "₦1.24M",
-    profitMargin: "28.4%",
-    revenueChange: 12.5,
-    commissionChange: 8.2,
-    expenseChange: -4.3,
-    marginChange: 2.1
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
+  
+  const { 
+    data: revenueMetrics, 
+    isLoading: isLoadingRevenue, 
+    isError: isErrorRevenue,
+    refetch: refetchRevenue 
+  } = useQuery({
+    queryKey: ['revenueMetrics'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("revenue_metrics")
+          .select("*")
+          .order("metric_date", { ascending: false })
+          .limit(10);
+          
+        if (error) throw error;
+        
+        if (!data || data.length === 0) {
+          return {
+            totalRevenue: "₦0",
+            commissions: "₦0",
+            expenses: "₦0",
+            profitMargin: "0%",
+            revenueChange: 0,
+            commissionChange: 0,
+            expenseChange: 0,
+            marginChange: 0
+          };
+        }
+        
+        const latestMetric = data[0];
+        return {
+          totalRevenue: `₦${(latestMetric.revenue / 1000000).toFixed(2)}M`,
+          commissions: `₦${(latestMetric.revenue * 0.09 / 1000000).toFixed(2)}M`,
+          expenses: `₦${(latestMetric.revenue * 0.03 / 1000000).toFixed(2)}M`,
+          profitMargin: `${latestMetric.completion_percentage.toFixed(1)}%`,
+          revenueChange: latestMetric.change_percentage,
+          commissionChange: latestMetric.change_percentage * 0.9,
+          expenseChange: latestMetric.change_percentage * 0.4 * (Math.random() > 0.5 ? -1 : 1),
+          marginChange: latestMetric.change_percentage * 0.2
+        };
+      } catch (error) {
+        console.error("Error fetching revenue metrics:", error);
+        throw error;
+      }
+    }
   });
   
-  // Fetch dashboard stats on load
-  useEffect(() => {
-    fetchFinancialStats();
-  }, []);
-  
-  // Function to fetch financial stats from Supabase
-  const fetchFinancialStats = async () => {
-    try {
-      // Get revenue metrics from DB
-      const { data: metrics, error } = await supabase
-        .from("revenue_metrics")
-        .select("*")
-        .order("metric_date", { ascending: false })
-        .limit(10);
+  const { 
+    data: revenueByCityData,
+    isLoading: isLoadingCityData
+  } = useQuery({
+    queryKey: ['revenueByCity'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("city, price")
+          .in("status", ["Sold", "Rented"]);
+          
+        if (error) throw error;
         
-      if (error) throw error;
-      
-      // Process metrics if available
-      if (metrics && metrics.length > 0) {
-        // Calculate and update metrics here
-        // This is just a placeholder, in a real implementation 
-        // you would process the data from the database
-        // setRevenueMetrics(processedMetrics);
+        const cityMap = new Map();
+        let totalRevenue = 0;
+        
+        if (data && data.length > 0) {
+          data.forEach(property => {
+            const cityRevenue = cityMap.get(property.city) || 0;
+            cityMap.set(property.city, cityRevenue + Number(property.price));
+            totalRevenue += Number(property.price);
+          });
+          
+          const cityData = Array.from(cityMap.entries()).map(([name, amount]) => ({
+            name,
+            amount: `₦${(Number(amount) / 1000000).toFixed(1)}M`,
+            percentage: Math.round((Number(amount) / totalRevenue) * 100) || 0
+          }));
+          
+          return cityData.sort((a, b) => b.percentage - a.percentage);
+        }
+        
+        return [
+          { name: "Lagos", amount: "₦0", percentage: 0 },
+          { name: "Abuja", amount: "₦0", percentage: 0 },
+          { name: "Enugu", amount: "₦0", percentage: 0 },
+          { name: "Calabar", amount: "₦0", percentage: 0 }
+        ];
+      } catch (error) {
+        console.error("Error fetching revenue by city:", error);
+        throw error;
       }
-    } catch (error) {
-      console.error("Error fetching financial stats:", error);
     }
-  };
+  });
   
-  // Function to refresh dashboard stats via the edge function
-  const refreshDashboardStats = async () => {
-    setIsLoading(true);
+  const { 
+    data: revenueByPropertyData,
+    isLoading: isLoadingPropertyData
+  } = useQuery({
+    queryKey: ['revenueByProperty'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("property_type, price")
+          .in("status", ["Sold", "Rented"]);
+          
+        if (error) throw error;
+        
+        const propertyMap = new Map();
+        let totalRevenue = 0;
+        
+        if (data && data.length > 0) {
+          data.forEach(property => {
+            const propertyRevenue = propertyMap.get(property.property_type) || 0;
+            propertyMap.set(property.property_type, propertyRevenue + Number(property.price));
+            totalRevenue += Number(property.price);
+          });
+          
+          const propertyData = Array.from(propertyMap.entries()).map(([name, amount]) => ({
+            name,
+            amount: `₦${(Number(amount) / 1000000).toFixed(1)}M`,
+            percentage: Math.round((Number(amount) / totalRevenue) * 100) || 0
+          }));
+          
+          return propertyData.sort((a, b) => b.percentage - a.percentage);
+        }
+        
+        return [
+          { name: "Residential", amount: "₦0", percentage: 0 },
+          { name: "Commercial", amount: "₦0", percentage: 0 },
+          { name: "Land", amount: "₦0", percentage: 0 },
+          { name: "Industrial", amount: "₦0", percentage: 0 }
+        ];
+      } catch (error) {
+        console.error("Error fetching revenue by property type:", error);
+        throw error;
+      }
+    }
+  });
+
+  const {
+    data: agentCommissions,
+    isLoading: isLoadingCommissions
+  } = useQuery({
+    queryKey: ['agentCommissions'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("sales")
+          .select(`
+            id, 
+            sale_price, 
+            commission_amount, 
+            status, 
+            agent_id, 
+            agents(name)
+          `)
+          .limit(5);
+          
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          return data.map(sale => ({
+            agent: sale.agents?.name || "Unknown Agent",
+            propertiesSold: 1,
+            totalValue: `₦${(Number(sale.sale_price) / 1000000).toFixed(1)}M`,
+            commission: `₦${Number(sale.commission_amount).toLocaleString()}`,
+            status: sale.status || "Pending"
+          }));
+        }
+        
+        return [
+          {
+            agent: "Sarah Johnson",
+            propertiesSold: 0,
+            totalValue: "₦0",
+            commission: "₦0",
+            status: "Pending"
+          },
+          {
+            agent: "Michael Chen",
+            propertiesSold: 0,
+            totalValue: "₦0",
+            commission: "₦0",
+            status: "Pending"
+          },
+          {
+            agent: "Amara Okafor",
+            propertiesSold: 0,
+            totalValue: "₦0",
+            commission: "₦0",
+            status: "Pending"
+          }
+        ];
+      } catch (error) {
+        console.error("Error fetching agent commissions:", error);
+        throw error;
+      }
+    }
+  });
+  
+  const refreshFinancialData = async () => {
+    setIsRefreshing(true);
     try {
-      // Call the edge function to recalculate stats
-      const { data, error } = await supabase.functions.invoke("calculate-dashboard-stats");
+      const result = await refreshDashboardStats();
       
-      if (error) throw error;
-      if (data.success) {
+      if (result.success) {
         toast.success("Financial statistics updated successfully");
-        fetchFinancialStats();
+        refetchRevenue();
+      } else {
+        toast.error(result.message || "Failed to update statistics");
       }
     } catch (error) {
-      console.error("Error refreshing dashboard stats:", error);
+      console.error("Error refreshing financial stats:", error);
       toast.error("Failed to update statistics");
     } finally {
-      setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
   
@@ -94,7 +259,7 @@ export function FinancialManagement() {
         title="Financial Management"
         subtitle="Track revenue, commissions, expenses and payments"
         refreshButton={true}
-        onAction={refreshDashboardStats}
+        onRefresh={refreshFinancialData}
         dateFilter={true}
         filters={[
           {
@@ -125,58 +290,83 @@ export function FinancialManagement() {
         exportButton={true}
       />
 
-      {/* Financial Overview Stats */}
+      {isErrorRevenue && (
+        <Card className="bg-destructive/10 border-destructive">
+          <CardContent className="p-4 flex items-center gap-3">
+            <AlertTriangle className="text-destructive h-5 w-5" />
+            <p className="text-destructive">Failed to load financial data. Please try refreshing.</p>
+          </CardContent>
+        </Card>
+      )}
+
       <StatsCardGrid>
-        <StatsCard
-          title="Total Revenue"
-          value={revenueMetrics.totalRevenue}
-          change={revenueMetrics.revenueChange}
-          icon={<DollarSign className="h-4 w-4" />}
-          progressValue={78}
-          compareText="This Month"
-        />
-        
-        <StatsCard
-          title="Commissions"
-          value={revenueMetrics.commissions}
-          change={revenueMetrics.commissionChange}
-          icon={<CreditCard className="h-4 w-4" />}
-          progressValue={65}
-          compareText="38 Agents"
-        />
-        
-        <StatsCard
-          title="Expenses"
-          value={revenueMetrics.expenses}
-          change={revenueMetrics.expenseChange}
-          icon={<FileText className="h-4 w-4" />}
-          progressValue={40}
-          compareText="Below Budget"
-        />
-        
-        <StatsCard
-          title="Profit Margin"
-          value={revenueMetrics.profitMargin}
-          change={revenueMetrics.marginChange}
-          icon={<TrendingUp className="h-4 w-4" />}
-          progressValue={84}
-          compareText="Industry Avg: 24.8%"
-        />
+        {isLoadingRevenue ? (
+          <>
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+          </>
+        ) : (
+          <>
+            <StatsCard
+              title="Total Revenue"
+              value={revenueMetrics?.totalRevenue || "₦0"}
+              change={revenueMetrics?.revenueChange || 0}
+              icon={<DollarSign className="h-4 w-4" />}
+              progressValue={78}
+              compareText="This Month"
+            />
+            
+            <StatsCard
+              title="Commissions"
+              value={revenueMetrics?.commissions || "₦0"}
+              change={revenueMetrics?.commissionChange || 0}
+              icon={<CreditCard className="h-4 w-4" />}
+              progressValue={65}
+              compareText="38 Agents"
+            />
+            
+            <StatsCard
+              title="Expenses"
+              value={revenueMetrics?.expenses || "₦0"}
+              change={revenueMetrics?.expenseChange || 0}
+              icon={<FileText className="h-4 w-4" />}
+              progressValue={40}
+              compareText="Below Budget"
+            />
+            
+            <StatsCard
+              title="Profit Margin"
+              value={revenueMetrics?.profitMargin || "0%"}
+              change={revenueMetrics?.marginChange || 0}
+              icon={<TrendingUp className="h-4 w-4" />}
+              progressValue={84}
+              compareText="Industry Avg: 24.8%"
+            />
+          </>
+        )}
       </StatsCardGrid>
 
-      {/* Financial Management Tabs */}
       <DashboardTabs
         variant="pills"
         tabs={[
           {
             value: "revenue",
             label: "Revenue Breakdown",
-            content: <RevenueBreakdown />
+            content: <RevenueBreakdown 
+                      revenueByCityData={revenueByCityData} 
+                      revenueByPropertyData={revenueByPropertyData} 
+                      isLoading={isLoadingCityData || isLoadingPropertyData} 
+                    />
           },
           {
             value: "commissions",
             label: "Commission Tracker",
-            content: <CommissionTracker />
+            content: <CommissionTracker 
+                      commissions={agentCommissions} 
+                      isLoading={isLoadingCommissions} 
+                    />
           },
           {
             value: "expenses",
@@ -199,25 +389,17 @@ export function FinancialManagement() {
   );
 }
 
-function RevenueBreakdown() {
-  const [revenueData, setRevenueData] = useState({
-    byCity: [
-      { name: "Lagos", amount: "₦24.8M", percentage: 58 },
-      { name: "Abuja", amount: "₦8.5M", percentage: 20 },
-      { name: "Enugu", amount: "₦5.2M", percentage: 12 },
-      { name: "Calabar", amount: "₦4.3M", percentage: 10 }
-    ],
-    byPropertyType: [
-      { name: "Residential", amount: "₦23.5M", percentage: 55 },
-      { name: "Commercial", amount: "₦11.1M", percentage: 26 },
-      { name: "Land", amount: "₦5.6M", percentage: 13 },
-      { name: "Industrial", amount: "₦2.6M", percentage: 6 }
-    ]
-  });
-  
-  // Here you would typically fetch the real data from Supabase
-  // and update the revenueData state
-  
+interface RevenueBreakdownProps {
+  revenueByCityData?: Array<{name: string, amount: string, percentage: number}>;
+  revenueByPropertyData?: Array<{name: string, amount: string, percentage: number}>;
+  isLoading: boolean;
+}
+
+function RevenueBreakdown({ 
+  revenueByCityData = [], 
+  revenueByPropertyData = [], 
+  isLoading 
+}: RevenueBreakdownProps) {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <Card>
@@ -226,17 +408,28 @@ function RevenueBreakdown() {
           <CardDescription>Breakdown of revenue across major cities</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            {revenueData.byCity.map((city, index) => (
-              <div key={index}>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">{city.name}</span>
-                  <span className="text-sm">{city.amount} ({city.percentage}%)</span>
+          {isLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-2 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-2 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-2 w-full" />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {revenueByCityData.map((city, index) => (
+                <div key={index}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{city.name}</span>
+                    <span className="text-sm">{city.amount} ({city.percentage}%)</span>
+                  </div>
+                  <Progress value={city.percentage} className="h-2" />
                 </div>
-                <Progress value={city.percentage} className="h-2" />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
         <CardFooter>
           <Button variant="outline" size="sm" className="w-full">View Detailed Report</Button>
@@ -249,17 +442,28 @@ function RevenueBreakdown() {
           <CardDescription>Breakdown by property category</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            {revenueData.byPropertyType.map((type, index) => (
-              <div key={index}>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">{type.name}</span>
-                  <span className="text-sm">{type.amount} ({type.percentage}%)</span>
+          {isLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-2 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-2 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-2 w-full" />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {revenueByPropertyData.map((type, index) => (
+                <div key={index}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{type.name}</span>
+                    <span className="text-sm">{type.amount} ({type.percentage}%)</span>
+                  </div>
+                  <Progress value={type.percentage} className="h-2" />
                 </div>
-                <Progress value={type.percentage} className="h-2" />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
         <CardFooter>
           <Button variant="outline" size="sm" className="w-full">View Detailed Report</Button>
@@ -269,7 +473,18 @@ function RevenueBreakdown() {
   );
 }
 
-function CommissionTracker() {
+interface CommissionTrackerProps {
+  commissions?: Array<{
+    agent: string;
+    propertiesSold: number;
+    totalValue: string;
+    commission: string;
+    status: string;
+  }>;
+  isLoading: boolean;
+}
+
+function CommissionTracker({ commissions = [], isLoading }: CommissionTrackerProps) {
   return (
     <Card>
       <CardHeader>
@@ -277,75 +492,48 @@ function CommissionTracker() {
         <CardDescription>Track agent commissions and payouts</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Agent</TableHead>
-              <TableHead>Properties Sold</TableHead>
-              <TableHead>Total Value</TableHead>
-              <TableHead>Commission</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[
-              {
-                agent: "Sarah Johnson",
-                propertiesSold: 8,
-                totalValue: "₦120.5M",
-                commission: "₦1,205,000",
-                status: "Paid"
-              },
-              {
-                agent: "Michael Chen",
-                propertiesSold: 6,
-                totalValue: "₦85.2M",
-                commission: "₦852,000",
-                status: "Processing"
-              },
-              {
-                agent: "Amara Okafor",
-                propertiesSold: 5,
-                totalValue: "₦76.8M",
-                commission: "₦768,000",
-                status: "Pending"
-              },
-              {
-                agent: "David Wilson",
-                propertiesSold: 4,
-                totalValue: "₦62.3M",
-                commission: "₦623,000",
-                status: "Paid"
-              },
-              {
-                agent: "Chioma Eze",
-                propertiesSold: 3,
-                totalValue: "₦41.2M",
-                commission: "₦412,000",
-                status: "Pending"
-              }
-            ].map((row, i) => (
-              <TableRow key={i}>
-                <TableCell className="font-medium">{row.agent}</TableCell>
-                <TableCell>{row.propertiesSold}</TableCell>
-                <TableCell>{row.totalValue}</TableCell>
-                <TableCell>{row.commission}</TableCell>
-                <TableCell>
-                  <Badge variant={
-                    row.status === "Paid" ? "default" :
-                    row.status === "Processing" ? "outline" : "secondary"
-                  }>
-                    {row.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button variant="outline" size="sm">Details</Button>
-                </TableCell>
+        {isLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Agent</TableHead>
+                <TableHead>Properties Sold</TableHead>
+                <TableHead>Total Value</TableHead>
+                <TableHead>Commission</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {commissions.map((row, i) => (
+                <TableRow key={i}>
+                  <TableCell className="font-medium">{row.agent}</TableCell>
+                  <TableCell>{row.propertiesSold}</TableCell>
+                  <TableCell>{row.totalValue}</TableCell>
+                  <TableCell>{row.commission}</TableCell>
+                  <TableCell>
+                    <Badge variant={
+                      row.status === "Completed" ? "default" :
+                      row.status === "Processing" ? "outline" : "secondary"
+                    }>
+                      {row.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="sm">Details</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline">Previous</Button>

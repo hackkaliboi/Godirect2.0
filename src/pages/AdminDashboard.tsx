@@ -19,6 +19,7 @@ import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguratio
 import NotFound from "@/pages/NotFound";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { refreshDashboardStats } from "@/utils/dashboardUtils";
 
 export default function AdminDashboard() {
   const location = useLocation();
@@ -36,13 +37,13 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    const refreshDashboardStats = async () => {
+    const refreshData = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase.functions.invoke('calculate-dashboard-stats');
+        const result = await refreshDashboardStats();
         
-        if (error) {
-          console.error("Error refreshing dashboard stats:", error);
+        if (!result.success) {
+          console.error("Error refreshing dashboard stats:", result.message);
           toast({
             title: "Error refreshing data",
             description: "Failed to fetch the latest dashboard statistics",
@@ -55,15 +56,20 @@ export default function AdminDashboard() {
           });
         }
       } catch (err) {
-        console.error("Failed to invoke edge function:", err);
+        console.error("Failed to refresh dashboard stats:", err);
+        toast({
+          title: "Error refreshing data", 
+          description: "An unexpected error occurred",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     // Refresh dashboard stats when overview or analytics section is loaded
-    if (currentSection === "overview" || currentSection === "analytics") {
-      refreshDashboardStats();
+    if (currentSection === "overview" || currentSection === "analytics" || currentSection === "financial") {
+      refreshData();
     }
   }, [currentSection, toast]);
 
