@@ -22,6 +22,7 @@ interface DashboardHeaderProps {
   actionLabel?: string;
   actionIcon?: React.ReactNode;
   onAction?: () => void;
+  onRefresh?: () => void;  // Added onRefresh prop
   dateFilter?: boolean;
   exportButton?: boolean;
   refreshButton?: boolean;
@@ -34,6 +35,7 @@ export function DashboardHeader({
   actionLabel,
   actionIcon,
   onAction,
+  onRefresh,  // Added onRefresh to destructuring
   dateFilter = false,
   exportButton = false,
   refreshButton = false,
@@ -86,7 +88,7 @@ export function DashboardHeader({
         )}
         
         {refreshButton && (
-          <Button variant="outline" onClick={onAction} className="gap-2">
+          <Button variant="outline" onClick={onRefresh} className="gap-2">
             <RefreshCw className="h-4 w-4" />
             <span>Refresh</span>
           </Button>

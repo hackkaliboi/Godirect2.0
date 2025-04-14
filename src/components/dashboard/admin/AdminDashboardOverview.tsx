@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { StatsCardGrid, StatsCard } from "@/components/dashboard/StatsCard";
@@ -23,7 +22,6 @@ import { useToast } from "@/components/ui/use-toast";
 const AdminDashboardOverview = () => {
   const { toast } = useToast();
   
-  // Fetch dashboard stats
   const { 
     data: dashboardStats, 
     isLoading, 
@@ -34,14 +32,12 @@ const AdminDashboardOverview = () => {
     queryFn: fetchDashboardStats
   });
 
-  // Find specific stats by name
   const totalRevenue = findStatByName(dashboardStats, 'total_revenue');
   const activeListings = findStatByName(dashboardStats, 'active_listings');
   const usersAgents = findStatByName(dashboardStats, 'users_agents');
   const paymentApprovals = findStatByName(dashboardStats, 'payment_approvals');
   const propertiesSold = findStatByName(dashboardStats, 'properties_sold');
 
-  // Fetch recent users
   const { data: recentUsers } = useQuery({
     queryKey: ['recentUsers'],
     queryFn: async () => {
@@ -60,7 +56,6 @@ const AdminDashboardOverview = () => {
     }
   });
 
-  // Fetch pending approvals
   const { data: pendingApprovals } = useQuery({
     queryKey: ['pendingApprovals'],
     queryFn: async () => {
@@ -80,7 +75,6 @@ const AdminDashboardOverview = () => {
     }
   });
 
-  // Fetch recent activities
   const { data: recentActivities } = useQuery({
     queryKey: ['recentActivities'],
     queryFn: async () => {
@@ -99,7 +93,6 @@ const AdminDashboardOverview = () => {
     }
   });
 
-  // Handle refresh
   const handleRefresh = async () => {
     try {
       toast({ 
@@ -134,7 +127,6 @@ const AdminDashboardOverview = () => {
     }
   };
 
-  // Format trend icon component
   const getTrendIcon = (change: number) => {
     if (change > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
     if (change < 0) return <TrendingDown className="h-4 w-4 text-red-500" />;
@@ -161,7 +153,6 @@ const AdminDashboardOverview = () => {
         </Card>
       )}
 
-      {/* Overview Statistics */}
       <StatsCardGrid>
         <StatsCard 
           title="Total Revenue" 
@@ -194,7 +185,6 @@ const AdminDashboardOverview = () => {
       </StatsCardGrid>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Activity Stream */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -237,7 +227,6 @@ const AdminDashboardOverview = () => {
           </CardContent>
         </Card>
 
-        {/* Pending Tasks */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -292,7 +281,6 @@ const AdminDashboardOverview = () => {
         </Card>
       </div>
 
-      {/* System Status and Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
           <CardHeader>
@@ -364,7 +352,6 @@ const AdminDashboardOverview = () => {
         </Card>
       </div>
 
-      {/* Recent Users Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -428,7 +415,6 @@ const AdminDashboardOverview = () => {
         </CardContent>
       </Card>
       
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
