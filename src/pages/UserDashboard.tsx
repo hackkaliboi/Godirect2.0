@@ -97,9 +97,7 @@ const Card = () => (
   </div>
 );
 
-const UserDashboard = () => {
-  const location = useLocation();
-  
+const UserDashboard = () => {  
   return (
     <DashboardLayout userType="user">
       <Routes>

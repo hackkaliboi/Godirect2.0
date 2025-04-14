@@ -18,7 +18,7 @@ import SupportCenter from "@/components/dashboard/admin/SupportCenter";
 import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguration";
 import NotFound from "@/pages/NotFound";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { refreshDashboardStats } from "@/utils/dashboardUtils";
 
 export default function AdminDashboard() {
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
   return (
     <DashboardLayout
       userType="admin"
-      children={sections[currentSection] || <NotFound />}
+      children={sections[currentSection as keyof typeof sections] || <NotFound />}
     />
   );
 }

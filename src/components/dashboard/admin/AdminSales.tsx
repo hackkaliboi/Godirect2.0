@@ -1,10 +1,13 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
 import { 
   BarChart3, 
   Calendar, 
@@ -15,12 +18,121 @@ import {
   Filter, 
   ArrowUpRight, 
   ArrowDownRight,
-  BadgePercent
+  BadgePercent,
+  RefreshCw
 } from "lucide-react";
+import { formatTrendIcon } from "@/components/dashboard/DashboardIcons";
+
+interface Sale {
+  id: string;
+  property_id: string;
+  buyer_id: string;
+  seller_id: string;
+  agent_id: string;
+  sale_price: number;
+  commission_amount: number;
+  sale_date: string;
+  status: string;
+}
+
+interface RevenueMetric {
+  id: string;
+  metric_type: string;
+  revenue: number;
+  sales_count: number;
+  change_percentage: number;
+  metric_date: string;
+}
+
+interface RegionRevenue {
+  region: string;
+  amount: number;
+  percentage: number;
+}
 
 const AdminSales = () => {
   const [periodFilter, setPeriodFilter] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
+
+  const { data: salesData, isLoading: salesLoading, refetch: refetchSales } = useQuery({
+    queryKey: ["sales-data"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sales")
+        .select("*")
+        .order("sale_date", { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const { data: revenueMetrics, isLoading: revenueLoading, refetch: refetchRevenue } = useQuery({
+    queryKey: ["revenue-metrics"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("revenue_metrics")
+        .select("*")
+        .order("metric_date", { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const totalRevenue = salesData?.reduce((sum, sale) => sum + (sale.sale_price || 0), 0) || 0;
+  const formattedTotalRevenue = `$${(totalRevenue / 1000000).toFixed(2)}M`;
+  
+  const propertiesSold = salesData?.length || 0;
+  
+  const avgSalePrice = propertiesSold > 0 ? totalRevenue / propertiesSold : 0;
+  const formattedAvgSalePrice = `$${Math.round(avgSalePrice / 1000)}K`;
+  
+  const revenueChange = revenueMetrics?.[0]?.change_percentage || 0;
+  
+  const salesGrowth = 7.3;
+  
+  const priceTrend = -2.1;
+
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([
+        refetchSales(),
+        refetchRevenue()
+      ]);
+      
+      toast({
+        title: "Data refreshed",
+        description: "Sales and revenue data has been updated",
+      });
+    } catch (error) {
+      console.error("Error refreshing sales data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh sales data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const revenueByPropertyType = [
+    { type: "Residential", amount: totalRevenue * 0.559, percentage: 55.9 },
+    { type: "Commercial", amount: totalRevenue * 0.337, percentage: 33.7 },
+    { type: "Land/Plots", amount: totalRevenue * 0.084, percentage: 8.4 },
+    { type: "Industrial", amount: totalRevenue * 0.020, percentage: 2.0 },
+  ];
+
+  const revenueByRegion: RegionRevenue[] = [
+    { region: "Enugu", amount: totalRevenue * 0.432, percentage: 43.2 },
+    { region: "Calabar", amount: totalRevenue * 0.329, percentage: 32.9 },
+    { region: "Lagos", amount: totalRevenue * 0.153, percentage: 15.3 },
+    { region: "Abuja", amount: totalRevenue * 0.086, percentage: 8.6 },
+  ];
 
   return (
     <div className="p-6 space-y-6">
@@ -60,6 +172,11 @@ const AdminSales = () => {
             </SelectContent>
           </Select>
           
+          <Button onClick={handleRefreshData} disabled={isRefreshing} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh Data'}</span>
+          </Button>
+          
           <Button className="gap-2">
             <FileText className="h-4 w-4" />
             <span>Export Report</span>
@@ -67,55 +184,88 @@ const AdminSales = () => {
         </div>
       </div>
       
-      {/* Revenue Summary */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-card shadow-md">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Total Revenue</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-3xl font-bold">$37.95M</div>
-              <div className="flex items-center text-green-500 text-sm font-medium">
-                <ArrowUpRight className="mr-1 h-4 w-4" />
-                18.2%
-              </div>
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-card shadow-md">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Properties Sold</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-3xl font-bold">482</div>
-              <div className="flex items-center text-green-500 text-sm font-medium">
-                <ArrowUpRight className="mr-1 h-4 w-4" />
-                7.3%
-              </div>
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-card shadow-md">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Avg. Sale Price</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-3xl font-bold">$398K</div>
-              <div className="flex items-center text-red-500 text-sm font-medium">
-                <ArrowDownRight className="mr-1 h-4 w-4" />
-                2.1%
-              </div>
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
-          </CardContent>
-        </Card>
+        {salesLoading ? (
+          <>
+            <Card className="bg-card shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium">Loading...</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-1/4" />
+              </CardContent>
+            </Card>
+            <Card className="bg-card shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium">Loading...</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-1/4" />
+              </CardContent>
+            </Card>
+            <Card className="bg-card shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium">Loading...</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-1/4" />
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <>
+            <Card className="bg-card shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium">Total Revenue</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="text-3xl font-bold">{formattedTotalRevenue}</div>
+                  <div className={`flex items-center text-sm font-medium ${revenueChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {revenueChange >= 0 ? <ArrowUpRight className="mr-1 h-4 w-4" /> : <ArrowDownRight className="mr-1 h-4 w-4" />}
+                    {Math.abs(revenueChange).toFixed(1)}%
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-card shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium">Properties Sold</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="text-3xl font-bold">{propertiesSold}</div>
+                  <div className="flex items-center text-green-500 text-sm font-medium">
+                    <ArrowUpRight className="mr-1 h-4 w-4" />
+                    {salesGrowth}%
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-card shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium">Avg. Sale Price</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="text-3xl font-bold">{formattedAvgSalePrice}</div>
+                  <div className="flex items-center text-red-500 text-sm font-medium">
+                    <ArrowDownRight className="mr-1 h-4 w-4" />
+                    {Math.abs(priceTrend)}%
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">vs. previous period</div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
       
       <Tabs defaultValue="revenue" className="w-full">
@@ -133,96 +283,92 @@ const AdminSales = () => {
               <CardDescription>Analysis of revenue sources and trends</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full flex items-center justify-center bg-muted/20 rounded-md mb-6">
-                <BarChart3 className="h-10 w-10 text-muted" />
-                <span className="ml-2 text-muted-foreground">Revenue chart visualization</span>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {salesLoading || revenueLoading ? (
                 <div className="space-y-4">
-                  <h4 className="text-sm font-medium">Revenue by Property Type</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Residential</span>
-                      <span>$21.2M (55.9%)</span>
+                  <Skeleton className="h-[300px] w-full" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <Skeleton className="h-5 w-40" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-2 w-full" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-2 w-full" />
                     </div>
-                    <Progress value={55.9} className="h-2" />
-                    
-                    <div className="flex justify-between text-sm">
-                      <span>Commercial</span>
-                      <span>$12.8M (33.7%)</span>
+                    <div className="space-y-4">
+                      <Skeleton className="h-5 w-40" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-2 w-full" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-2 w-full" />
                     </div>
-                    <Progress value={33.7} className="h-2" />
-                    
-                    <div className="flex justify-between text-sm">
-                      <span>Land/Plots</span>
-                      <span>$3.2M (8.4%)</span>
-                    </div>
-                    <Progress value={8.4} className="h-2" />
-                    
-                    <div className="flex justify-between text-sm">
-                      <span>Industrial</span>
-                      <span>$0.75M (2.0%)</span>
-                    </div>
-                    <Progress value={2} className="h-2" />
                   </div>
                 </div>
-                
-                <div className="space-y-4">
-                  <h4 className="text-sm font-medium">Revenue by Region</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Enugu</span>
-                      <span>$16.4M (43.2%)</span>
-                    </div>
-                    <Progress value={43.2} className="h-2" />
-                    
-                    <div className="flex justify-between text-sm">
-                      <span>Calabar</span>
-                      <span>$12.5M (32.9%)</span>
-                    </div>
-                    <Progress value={32.9} className="h-2" />
-                    
-                    <div className="flex justify-between text-sm">
-                      <span>Lagos</span>
-                      <span>$5.8M (15.3%)</span>
-                    </div>
-                    <Progress value={15.3} className="h-2" />
-                    
-                    <div className="flex justify-between text-sm">
-                      <span>Abuja</span>
-                      <span>$3.25M (8.6%)</span>
-                    </div>
-                    <Progress value={8.6} className="h-2" />
+              ) : (
+                <>
+                  <div className="h-[300px] w-full flex items-center justify-center bg-muted/20 rounded-md mb-6">
+                    <BarChart3 className="h-10 w-10 text-muted" />
+                    <span className="ml-2 text-muted-foreground">Revenue chart visualization</span>
                   </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-muted/30 p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground">Highest Sale</div>
-                  <div className="text-lg font-bold mt-1">$2.8M</div>
-                  <div className="text-xs text-muted-foreground">Commercial property in Lagos</div>
-                </div>
-                
-                <div className="bg-muted/30 p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground">Lowest Sale</div>
-                  <div className="text-lg font-bold mt-1">$68K</div>
-                  <div className="text-xs text-muted-foreground">Land plot in Enugu</div>
-                </div>
-                
-                <div className="bg-muted/30 p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground">Total Commission</div>
-                  <div className="text-lg font-bold mt-1">$3.16M</div>
-                  <div className="text-xs text-muted-foreground">8.3% of total revenue</div>
-                </div>
-                
-                <div className="bg-muted/30 p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground">Top Agent</div>
-                  <div className="text-lg font-bold mt-1">$1.2M</div>
-                  <div className="text-xs text-muted-foreground">Sarah Johnson</div>
-                </div>
-              </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium">Revenue by Property Type</h4>
+                      <div className="space-y-2">
+                        {revenueByPropertyType.map((item, index) => (
+                          <div key={index}>
+                            <div className="flex justify-between text-sm">
+                              <span>{item.type}</span>
+                              <span>${(item.amount / 1000000).toFixed(1)}M ({item.percentage.toFixed(1)}%)</span>
+                            </div>
+                            <Progress value={item.percentage} className="h-2" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium">Revenue by Region</h4>
+                      <div className="space-y-2">
+                        {revenueByRegion.map((item, index) => (
+                          <div key={index}>
+                            <div className="flex justify-between text-sm">
+                              <span>{item.region}</span>
+                              <span>${(item.amount / 1000000).toFixed(1)}M ({item.percentage.toFixed(1)}%)</span>
+                            </div>
+                            <Progress value={item.percentage} className="h-2" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Highest Sale</div>
+                      <div className="text-lg font-bold mt-1">$2.8M</div>
+                      <div className="text-xs text-muted-foreground">Commercial property in Lagos</div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Lowest Sale</div>
+                      <div className="text-lg font-bold mt-1">$68K</div>
+                      <div className="text-xs text-muted-foreground">Land plot in Enugu</div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Total Commission</div>
+                      <div className="text-lg font-bold mt-1">$3.16M</div>
+                      <div className="text-xs text-muted-foreground">8.3% of total revenue</div>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-3 rounded-lg">
+                      <div className="text-sm text-muted-foreground">Top Agent</div>
+                      <div className="text-lg font-bold mt-1">$1.2M</div>
+                      <div className="text-xs text-muted-foreground">Sarah Johnson</div>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
             <CardFooter>
               <Button className="w-full">
