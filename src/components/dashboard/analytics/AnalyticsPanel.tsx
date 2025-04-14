@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +20,7 @@ import {
   Calendar,
   RefreshCw
 } from 'lucide-react';
+import { formatTrendIcon } from '../DashboardIcons';
 
 export default function AnalyticsPanel() {
   // Fetch dashboard stats from Supabase
