@@ -17,7 +17,7 @@ import PaymentMethodSetup from "@/components/dashboard/admin/PaymentMethodSetup"
 import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
 import SupportCenter from "@/components/dashboard/admin/SupportCenter";
 import SystemConfiguration from "@/components/dashboard/admin/SystemConfiguration";
-import NotFound from "@/pages/NotFound";
+import UserNotFound from "@/components/dashboard/user/UserNotFound";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { refreshDashboardStats } from "@/utils/dashboardUtils";
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
   return (
     <DashboardLayout
       userType="admin"
-      children={sections[currentSection as keyof typeof sections] || <NotFound />}
+      children={sections[currentSection as keyof typeof sections] || <UserNotFound />}
     />
   );
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -84,7 +83,16 @@ export default function PaymentMethodSetup() {
         .order('display_name');
       
       if (error) throw error;
-      setPaymentMethods(data || []);
+      
+      // Process the data to ensure configuration is properly typed
+      const processedData: PaymentMethod[] = (data || []).map(item => ({
+        ...item,
+        configuration: typeof item.configuration === 'string' 
+          ? JSON.parse(item.configuration) 
+          : (item.configuration || {}) as Record<string, any>
+      }));
+      
+      setPaymentMethods(processedData);
     } catch (error) {
       console.error('Error fetching payment methods:', error);
       toast.error('Failed to load payment methods');
@@ -211,7 +219,15 @@ export default function PaymentMethodSetup() {
         if (error) throw error;
         
         if (data && data[0]) {
-          setPaymentMethods(prev => [...prev, data[0]]);
+          // Process the newly created method to ensure configuration is properly typed
+          const newMethod: PaymentMethod = {
+            ...data[0],
+            configuration: typeof data[0].configuration === 'string' 
+              ? JSON.parse(data[0].configuration) 
+              : (data[0].configuration || {}) as Record<string, any>
+          };
+          
+          setPaymentMethods(prev => [...prev, newMethod]);
           toast.dismiss(savingToast);
           toast.success('Payment method created successfully');
           setIsCreating(false);
@@ -234,15 +250,22 @@ export default function PaymentMethodSetup() {
         
         if (error) throw error;
         
-        // Update local state
+        // Update local state with properly typed configuration
         setPaymentMethods(methods => 
           methods.map(method => 
-            method.id === editMethod.id ? { 
-              ...method, 
-              ...formValues,
-              method_key: formValues.method_name.toLowerCase().replace(/\s+/g, '_'),
-              updated_at: new Date().toISOString()
-            } : method
+            method.id === editMethod.id 
+              ? { 
+                ...method, 
+                display_name: formValues.display_name,
+                method_name: formValues.method_name,
+                description: formValues.description,
+                icon_name: formValues.icon_name,
+                is_active: formValues.is_active,
+                configuration: formValues.configuration, // Already correctly typed
+                method_key: formValues.method_name.toLowerCase().replace(/\s+/g, '_'),
+                updated_at: new Date().toISOString()
+              } 
+              : method
           )
         );
         
