@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
@@ -61,9 +60,13 @@ export const findStatByName = (stats: DashboardStat[] | undefined, name: string)
   return stat || { id: '', stat_name: name, stat_value: '0', stat_change: 0, updated_at: '' };
 };
 
-export const formatTrendIcon = (change: number): JSX.Element | null => {
-  if (change > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
-  if (change < 0) return <TrendingDown className="h-4 w-4 text-red-500" />;
+export const formatTrendIcon = (change: number) => {
+  if (change > 0) {
+    return <TrendingUp className="h-4 w-4 text-green-500" />;
+  }
+  if (change < 0) {
+    return <TrendingDown className="h-4 w-4 text-red-500" />;
+  }
   return null;
 };
 
