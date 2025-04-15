@@ -41,6 +41,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatPriceWithCommas } from "@/utils/data";
 
+// Format currency for display
+const formatCurrency = (value: number) => {
+  return `₦${formatPriceWithCommas(value)}`;
+};
+
 // Sample transaction data (would come from backend in real implementation)
 const pendingTransactions = [
   {
@@ -570,11 +575,11 @@ const PaymentProcessing = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Amount:</span>
-                    <span className="text-sm">₦{formatPriceWithCommas(selectedTransaction.amount)}</span>
+                    <span className="text-sm">{formatCurrency(selectedTransaction.amount)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Commission:</span>
-                    <span className="text-sm">₦{formatPriceWithCommas(selectedTransaction.commission)}</span>
+                    <span className="text-sm">{formatCurrency(selectedTransaction.commission)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Payment Method:</span>

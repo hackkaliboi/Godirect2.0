@@ -5,14 +5,15 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminDashboardOverview from "@/components/dashboard/admin/AdminDashboardOverview";
 import AdminAgents from "@/components/dashboard/admin/AdminAgents";
 import AdminProperties from "@/components/dashboard/admin/AdminProperties";
+import AdminAddProperty from "@/components/dashboard/admin/AdminAddProperty";
 import AdminSales from "@/components/dashboard/admin/AdminSales";
 import AdminUsers from "@/components/dashboard/admin/AdminUsers";
 import AdminSettings from "@/components/dashboard/admin/AdminSettings";
 import AdminProfile from "@/components/dashboard/admin/AdminProfile";
-import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
+// Analytics is now integrated into the main dashboard overview
 import { FinancialManagement } from "@/components/dashboard/financial/FinancialManagement";
 import PaymentProcessing from "@/components/dashboard/admin/PaymentProcessing";
-import { PaymentConfiguration } from "@/components/dashboard/admin/PaymentConfiguration";
+// Payment configuration is now handled by PaymentMethodSetup
 import PaymentMethodSetup from "@/components/dashboard/admin/PaymentMethodSetup";
 import LegalCompliance from "@/components/dashboard/legal/LegalCompliance";
 import SupportCenter from "@/components/dashboard/admin/SupportCenter";
@@ -77,14 +78,15 @@ export default function AdminDashboard() {
   // Define available sections
   const sections = {
     overview: <AdminDashboardOverview />,
-    analytics: <AnalyticsPanel />,
+    // Analytics is now integrated into the main dashboard overview
     properties: <AdminProperties />,
+    "add-property": <AdminAddProperty />,
     users: <AdminUsers />,
     agents: <AdminAgents />,
     sales: <AdminSales />,
     financial: <FinancialManagement />,
     payments: <PaymentProcessing />,
-    "payment-config": <PaymentConfiguration />,
+    // Payment configuration is now handled by payment-methods
     "payment-methods": <PaymentMethodSetup />,
     legal: <LegalCompliance />,
     settings: <AdminSettings />,

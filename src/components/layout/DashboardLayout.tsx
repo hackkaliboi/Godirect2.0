@@ -43,7 +43,7 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen w-full overflow-hidden bg-background">
+      <div className="flex h-screen w-full overflow-hidden bg-background relative">
         {/* Sidebar - with proper background color */}
         <Sidebar 
           variant="sidebar" 
@@ -129,11 +129,11 @@ export default function DashboardLayout({ children, userType }: DashboardLayoutP
         </Sidebar>
         
         {/* Main content area */}
-        <div className="flex flex-col flex-1 overflow-hidden relative z-20 bg-background">
+        <div className="flex flex-col flex-1 overflow-hidden relative z-20 bg-background transition-all duration-300 ease-in-out">
           <DashboardTopBar userType={userType} />
           
           <div className="flex-1 overflow-auto">
-            <div className="container mx-auto p-4 max-w-full">
+            <div className="container mx-auto p-4 md:p-6 transition-all duration-300 ease-in-out">
               <div className="bg-background rounded-lg">
                 {children}
               </div>

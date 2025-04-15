@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
-  DollarSign,
+  Banknote,
   FileText,
   CreditCard,
   TrendingUp,
@@ -316,45 +316,39 @@ export function FinancialManagement() {
           <>
             <Skeleton className="h-28 w-full" />
             <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
           </>
         ) : (
           <>
             <StatsCard
               title="Total Revenue"
               value={revenueMetrics?.totalRevenue || "₦0"}
-              change={revenueMetrics?.revenueChange || 0}
-              icon={<DollarSign className="h-4 w-4" />}
-              progressValue={78}
-              compareText="This Month"
+              icon={<Banknote className="h-4 w-4" />}
+              trend={revenueMetrics?.revenueChange || 0}
+              trendIcon={formatTrendIcon(revenueMetrics?.revenueChange || 0)}
             />
             
             <StatsCard
               title="Commissions"
               value={revenueMetrics?.commissions || "₦0"}
-              change={revenueMetrics?.commissionChange || 0}
-              icon={<CreditCard className="h-4 w-4" />}
-              progressValue={65}
-              compareText="38 Agents"
+              icon={<Building className="h-4 w-4" />}
+              trend={revenueMetrics?.commissionChange || 0}
+              trendIcon={formatTrendIcon(revenueMetrics?.commissionChange || 0)}
             />
             
             <StatsCard
               title="Expenses"
               value={revenueMetrics?.expenses || "₦0"}
-              change={revenueMetrics?.expenseChange || 0}
               icon={<FileText className="h-4 w-4" />}
-              progressValue={40}
-              compareText="Below Budget"
+              trend={revenueMetrics?.expenseChange || 0}
+              trendIcon={formatTrendIcon(revenueMetrics?.expenseChange || 0)}
             />
             
             <StatsCard
               title="Profit Margin"
               value={revenueMetrics?.profitMargin || "0%"}
-              change={revenueMetrics?.marginChange || 0}
               icon={<TrendingUp className="h-4 w-4" />}
-              progressValue={84}
-              compareText="Industry Avg: 24.8%"
+              trend={revenueMetrics?.marginChange || 0}
+              trendIcon={formatTrendIcon(revenueMetrics?.marginChange || 0)}
             />
           </>
         )}
@@ -810,17 +804,17 @@ function InvoicingSystem() {
             <TableBody>
               {[
                 {
-                  id: "INV-2025-042",
-                  client: "Lagos Executive Homes",
-                  amount: "₦2,450,000",
-                  date: "Apr 4, 2025",
+                  id: "INV-2025-041",
+                  client: "Metro Developers",
+                  amount: "₦2,800,000",
+                  date: "Apr 5, 2025",
                   status: "Paid",
                 },
                 {
-                  id: "INV-2025-041",
-                  client: "Emerald Heights",
-                  amount: "₦1,850,000",
-                  date: "Apr 3, 2025",
+                  id: "INV-2025-042",
+                  client: "Sunrise Properties Ltd",
+                  amount: "₦4,500,000",
+                  date: "Apr 10, 2025",
                   status: "Pending",
                 },
                 {

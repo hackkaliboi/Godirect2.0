@@ -152,7 +152,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
 
   return (
     <div className="sticky top-0 z-30 w-full border-b bg-background shadow-sm">
-      <div className="flex h-16 items-center px-4 md:px-6">
+      <div className="flex h-16 items-center px-4 md:px-6 transition-all duration-300 ease-in-out">
         {/* Mobile menu toggle */}
         <Button 
           variant="ghost" 
@@ -175,13 +175,13 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
         </div>
 
         {/* Desktop search */}
-        <div className="hidden md:flex md:flex-1 md:mx-6">
-          <div className="relative w-full max-w-md">
+        <div className="hidden md:flex md:flex-1 md:mx-6 transition-all duration-300 ease-in-out">
+          <div className="relative w-full max-w-md transition-all duration-300 ease-in-out">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search..."
-              className="w-full pl-8 bg-background border-muted"
+              className="w-full pl-8 bg-background border-muted transition-all duration-300 ease-in-out"
             />
           </div>
         </div>
@@ -209,7 +209,7 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
         )}
         
         {/* Action buttons */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4 transition-all duration-300 ease-in-out">
           {/* Notifications */}
           <Drawer>
             <DrawerTrigger asChild>

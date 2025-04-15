@@ -6,10 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/hooks/use-toast';
+import { StatsCardGrid, StatsCard } from '@/components/dashboard/StatsCard';
 import { 
   Building2, 
   Users, 
-  DollarSign, 
+  Banknote, 
   CheckSquare, 
   AlertTriangle, 
   TrendingUp, 
@@ -47,7 +49,8 @@ export default function AnalyticsPanel() {
   // Fetch revenue metrics
   const { 
     data: revenueMetrics, 
-    isLoading: revenueLoading 
+    isLoading: revenueLoading,
+    refetch: refetchRevenue 
   } = useQuery({
     queryKey: ['revenueMetrics'],
     queryFn: async () => {
@@ -123,6 +126,27 @@ export default function AnalyticsPanel() {
   const usersAgents = findStatByName('users_agents');
   const paymentApprovals = findStatByName('payment_approvals');
   const propertiesSold = findStatByName('properties_sold');
+  
+  // Format currency for display (convert to Naira)
+  const formatCurrency = (value) => {
+    if (!value) return '₦0';
+    // If the value is already formatted with currency symbol, return as is
+    if (typeof value === 'string' && value.startsWith('₦')) return value;
+    
+    // Convert to number if it's a string without currency symbol
+    const numValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]+/g, '')) : value;
+    
+    // Format based on value size
+    if (numValue >= 1000000000) {
+      return `₦${(numValue / 1000000000).toFixed(1)}B`;
+    } else if (numValue >= 1000000) {
+      return `₦${(numValue / 1000000).toFixed(1)}M`;
+    } else if (numValue >= 1000) {
+      return `₦${(numValue / 1000).toFixed(1)}K`;
+    } else {
+      return `₦${numValue.toFixed(2)}`;
+    }
+  };
 
   const formatTrendIcon = (change) => {
     if (change > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -139,12 +163,19 @@ export default function AnalyticsPanel() {
   // Handle refresh button click
   const handleRefresh = async () => {
     try {
-      // Invoke edge function to refresh stats
+      // Invoke Supabase function to recalculate stats
       await supabase.functions.invoke('calculate-dashboard-stats');
-      // Refetch the data
-      refetchStats();
+      
+      // Refetch all data
+      await Promise.all([
+        refetchStats(),
+        refetchRevenue()
+      ]);
+      
+      toast({ title: 'Success', description: 'Dashboard data refreshed successfully' });
     } catch (error) {
-      console.error("Error refreshing dashboard:", error);
+      console.error('Error refreshing dashboard:', error);
+      toast({ title: 'Error', description: 'Failed to refresh dashboard data', variant: 'destructive' });
     }
   };
 
@@ -173,16 +204,18 @@ export default function AnalyticsPanel() {
                 {isLoading ? (
                   <Skeleton className="h-8 w-24" />
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-3xl font-bold">{totalRevenue.stat_value}</span>
-                    <span className={`text-xs flex items-center ${formatTrendClass(totalRevenue.stat_change)}`}>
-                      {formatTrendIcon(totalRevenue.stat_change)} {totalRevenue.stat_change}%
-                    </span>
-                  </div>
+                  <StatsCard 
+                    title="Total Revenue" 
+                    value={formatCurrency(totalRevenue.stat_value) || '₦0'}
+                    icon={<Banknote className="h-4 w-4" />}
+                    trend={totalRevenue.stat_change > 0 ? 'positive' : totalRevenue.stat_change < 0 ? 'negative' : 'neutral'}
+                    trendIcon={formatTrendIcon(totalRevenue.stat_change)}
+                    trendClass={formatTrendClass(totalRevenue.stat_change)}
+                  />
                 )}
               </div>
               <div className="p-2 bg-primary/10 rounded-full">
-                <DollarSign className="h-6 w-6 text-primary" />
+                <Banknote className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -364,7 +397,7 @@ export default function AnalyticsPanel() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">${(sale.sale_price / 1000).toFixed(1)}k</p>
+                          <p className="font-medium">{formatCurrency(sale.sale_price)}</p>
                           <p className="text-sm text-muted-foreground">
                             {new Date(sale.sale_date).toLocaleDateString()}
                           </p>
@@ -413,7 +446,7 @@ export default function AnalyticsPanel() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <p className="text-sm text-muted-foreground">Today's Revenue</p>
-                      <p className="text-2xl font-bold mt-1">$24,500</p>
+                      <p className="text-2xl font-bold mt-1">{formatCurrency(24500)}</p>
                       <div className="flex items-center mt-2 text-xs text-green-500">
                         <TrendingUp className="h-3 w-3 mr-1" />
                         <span>+12% from yesterday</span>
@@ -463,7 +496,7 @@ export default function AnalyticsPanel() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <p className="text-sm text-muted-foreground">Month Revenue</p>
-                      <p className="text-2xl font-bold mt-1">$493,200</p>
+                      <p className="text-2xl font-bold mt-1">{formatCurrency(125000000)}</p>
                       <div className="flex items-center mt-2 text-xs text-green-500">
                         <TrendingUp className="h-3 w-3 mr-1" />
                         <span>+8% from last month</span>
@@ -481,7 +514,7 @@ export default function AnalyticsPanel() {
                     
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <p className="text-sm text-muted-foreground">Average Price</p>
-                      <p className="text-2xl font-bold mt-1">$383K</p>
+                      <p className="text-2xl font-bold mt-1">₦383M</p>
                       <div className="flex items-center mt-2 text-xs text-red-500">
                         <TrendingDown className="h-3 w-3 mr-1" />
                         <span>-2% from last month</span>
@@ -513,7 +546,7 @@ export default function AnalyticsPanel() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <p className="text-sm text-muted-foreground">Annual Revenue</p>
-                      <p className="text-2xl font-bold mt-1">$5.2M</p>
+                      <p className="text-2xl font-bold mt-1">₦5.2B</p>
                       <div className="flex items-center mt-2 text-xs text-green-500">
                         <TrendingUp className="h-3 w-3 mr-1" />
                         <span>+15% from last year</span>

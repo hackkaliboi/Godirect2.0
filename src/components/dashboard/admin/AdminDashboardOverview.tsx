@@ -137,12 +137,31 @@ const AdminDashboardOverview = () => {
     <div className="space-y-6">
       <DashboardHeader
         title="Admin Dashboard"
-        subtitle="Welcome to your administrator dashboard"
-        dateFilter={true}
-        exportButton={true}
-        refreshButton={true}
-        onRefresh={handleRefresh}
+        subtitle="Monitor and manage your real estate platform"
+        actionLabel="Refresh Data"
+        actionIcon={<RefreshCw className="h-4 w-4" />}
+        onAction={handleRefresh}
       />
+      
+      {/* Quick Action Buttons */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-1" onClick={() => window.location.href = '/admin-dashboard/add-property'}>
+          <Building2 className="h-5 w-5 text-primary" />
+          <span>Add Property</span>
+        </Button>
+        <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-1" onClick={() => window.location.href = '/admin-dashboard/agents'}>
+          <Users className="h-5 w-5 text-primary" />
+          <span>Manage Agents</span>
+        </Button>
+        <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-1" onClick={() => window.location.href = '/admin-dashboard/payments'}>
+          <DollarSign className="h-5 w-5 text-primary" />
+          <span>Process Payments</span>
+        </Button>
+        <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-1" onClick={() => window.location.href = '/admin-dashboard/support'}>
+          <Bell className="h-5 w-5 text-primary" />
+          <span>Support Center</span>
+        </Button>
+      </div>
 
       {isError && (
         <Card className="bg-destructive/10 border-destructive">
@@ -421,7 +440,7 @@ const AdminDashboardOverview = () => {
             <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$238.5K</div>
+            <div className="text-2xl font-bold">₦238.5K</div>
             <p className="text-xs text-muted-foreground">
               <span className="text-green-500 inline-flex items-center">
                 <TrendingUp className="w-3 h-3 mr-1" /> +12.3%

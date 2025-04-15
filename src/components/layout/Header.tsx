@@ -34,33 +34,37 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 dark:bg-realty-900/90 backdrop-blur-md border-b border-gray-200 dark:border-realty-800">
+    <header className="sticky top-0 z-50 bg-white/90 dark:bg-realty-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-realty-800/50 shadow-sm transition-all duration-300">
       <div className="container-custom">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 bg-realty-900 dark:bg-realty-gold rounded-md flex items-center justify-center">
-              <span className="text-white dark:text-realty-900 font-bold">GD</span>
+          {/* Enhanced Logo */}
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className="h-9 w-9 bg-gradient-to-br from-realty-800 to-realty-900 dark:from-realty-gold dark:to-realty-gold/80 rounded-md flex items-center justify-center shadow-md transition-transform duration-300 group-hover:scale-105">
+              <span className="text-white dark:text-realty-900 font-bold text-lg">GD</span>
             </div>
-            <span className="text-xl font-heading font-semibold text-realty-900 dark:text-white">
+            <span className="text-xl font-heading font-bold text-realty-900 dark:text-white tracking-tight transition-colors duration-300 group-hover:text-realty-700 dark:group-hover:text-realty-gold">
               GODIRECT
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Enhanced Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-realty-700 dark:hover:text-realty-300",
+                  "text-sm font-medium transition-all duration-300 relative group",
                   location.pathname === item.path
                     ? "text-realty-900 dark:text-white font-semibold"
-                    : "text-realty-600 dark:text-realty-400"
+                    : "text-realty-600 dark:text-realty-400 hover:text-realty-800 dark:hover:text-realty-200"
                 )}
               >
                 {item.name}
+                <span className={cn(
+                  "absolute -bottom-1 left-0 w-0 h-0.5 bg-realty-gold transition-all duration-300 group-hover:w-full",
+                  location.pathname === item.path ? "w-full" : "w-0"
+                )}></span>
               </Link>
             ))}
           </nav>
@@ -82,11 +86,11 @@ const Header = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="rounded-full"
+                  className="rounded-full border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300"
                   asChild
                 >
                   <Link to={getDashboardLink()}>
-                    <User className="h-4 w-4 mr-2" />
+                    <User className="h-4 w-4 mr-2 text-realty-600 dark:text-realty-300" />
                     Dashboard
                   </Link>
                 </Button>
@@ -103,6 +107,7 @@ const Header = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
+                  className="border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300"
                   asChild
                 >
                   <Link to="/login">Sign In</Link>
@@ -110,7 +115,7 @@ const Header = () => {
                 <Button 
                   variant="default" 
                   size="sm"
-                  className="bg-realty-800 hover:bg-realty-900 text-white"
+                  className="bg-gradient-to-r from-realty-800 to-realty-900 hover:from-realty-700 hover:to-realty-800 text-white shadow-sm hover:shadow transition-all duration-300 dark:from-realty-gold dark:to-realty-gold/90 dark:text-realty-900"
                   asChild
                 >
                   <Link to="/user-signup">Sign Up</Link>
@@ -143,9 +148,9 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Enhanced */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-realty-900 border-b border-gray-200 dark:border-realty-800 animate-fade-in">
+        <div className="md:hidden bg-white/95 dark:bg-realty-900/95 backdrop-blur-md border-b border-gray-200 dark:border-realty-800 animate-fade-in shadow-lg">
           <div className="container-custom py-4 space-y-4">
             <nav className="flex flex-col space-y-3">
               {navItems.map((item) => (
@@ -188,13 +193,20 @@ const Header = () => {
                 </Button>
               ) : (
                 <>
-                  <Button variant="outline" className="justify-center" asChild>
+                  <Button 
+                    variant="outline" 
+                    className="justify-center border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300" 
+                    asChild
+                  >
                     <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                      <User className="h-4 w-4 mr-2" />
+                      <User className="h-4 w-4 mr-2 text-realty-600 dark:text-realty-300" />
                       Sign In
                     </Link>
                   </Button>
-                  <Button className="justify-center bg-realty-800 hover:bg-realty-900 text-white" asChild>
+                  <Button 
+                    className="justify-center bg-gradient-to-r from-realty-800 to-realty-900 hover:from-realty-700 hover:to-realty-800 text-white shadow-sm hover:shadow transition-all duration-300 dark:from-realty-gold dark:to-realty-gold/90 dark:text-realty-900" 
+                    asChild
+                  >
                     <Link to="/user-signup" onClick={() => setIsMenuOpen(false)}>
                       Sign Up
                     </Link>

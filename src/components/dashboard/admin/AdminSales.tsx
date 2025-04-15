@@ -83,12 +83,12 @@ const AdminSales = () => {
   });
 
   const totalRevenue = salesData?.reduce((sum, sale) => sum + (sale.sale_price || 0), 0) || 0;
-  const formattedTotalRevenue = `$${(totalRevenue / 1000000).toFixed(2)}M`;
+  const formattedTotalRevenue = `₦${(totalRevenue / 1000000).toFixed(2)}M`;
   
   const propertiesSold = salesData?.length || 0;
   
   const avgSalePrice = propertiesSold > 0 ? totalRevenue / propertiesSold : 0;
-  const formattedAvgSalePrice = `$${Math.round(avgSalePrice / 1000)}K`;
+  const formattedAvgSalePrice = `₦${Math.round(avgSalePrice / 1000)}K`;
   
   const revenueChange = revenueMetrics?.[0]?.change_percentage || 0;
   
@@ -318,7 +318,7 @@ const AdminSales = () => {
                           <div key={index}>
                             <div className="flex justify-between text-sm">
                               <span>{item.type}</span>
-                              <span>${(item.amount / 1000000).toFixed(1)}M ({item.percentage.toFixed(1)}%)</span>
+                              <span>₦{(item.amount / 1000000).toFixed(1)}M ({item.percentage.toFixed(1)}%)</span>
                             </div>
                             <Progress value={item.percentage} className="h-2" />
                           </div>
@@ -333,7 +333,7 @@ const AdminSales = () => {
                           <div key={index}>
                             <div className="flex justify-between text-sm">
                               <span>{item.region}</span>
-                              <span>${(item.amount / 1000000).toFixed(1)}M ({item.percentage.toFixed(1)}%)</span>
+                              <span>₦{(item.amount / 1000000).toFixed(1)}M ({item.percentage.toFixed(1)}%)</span>
                             </div>
                             <Progress value={item.percentage} className="h-2" />
                           </div>
@@ -345,25 +345,25 @@ const AdminSales = () => {
                   <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Highest Sale</div>
-                      <div className="text-lg font-bold mt-1">$2.8M</div>
+                      <div className="text-lg font-bold mt-1">₦2.8M</div>
                       <div className="text-xs text-muted-foreground">Commercial property in Lagos</div>
                     </div>
                     
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Lowest Sale</div>
-                      <div className="text-lg font-bold mt-1">$68K</div>
+                      <div className="text-lg font-bold mt-1">₦68K</div>
                       <div className="text-xs text-muted-foreground">Land plot in Enugu</div>
                     </div>
                     
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Total Commission</div>
-                      <div className="text-lg font-bold mt-1">$3.16M</div>
+                      <div className="text-lg font-bold mt-1">₦3.16M</div>
                       <div className="text-xs text-muted-foreground">8.3% of total revenue</div>
                     </div>
                     
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Top Agent</div>
-                      <div className="text-lg font-bold mt-1">$1.2M</div>
+                      <div className="text-lg font-bold mt-1">₦1.2M</div>
                       <div className="text-xs text-muted-foreground">Sarah Johnson</div>
                     </div>
                   </div>
@@ -395,7 +395,7 @@ const AdminSales = () => {
                 <div className="space-y-4">
                   <h4 className="text-sm font-medium">Today's Revenue</h4>
                   <div className="bg-muted/30 p-4 rounded-lg">
-                    <div className="text-3xl font-bold">$140,000</div>
+                    <div className="text-3xl font-bold">₦140,000</div>
                     <div className="flex items-center mt-1">
                       <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
                       <span className="text-sm text-green-500">+15% from yesterday</span>
@@ -406,19 +406,19 @@ const AdminSales = () => {
                   <div className="space-y-2 mt-4">
                     <div className="flex justify-between text-sm">
                       <span>Morning (6AM-12PM)</span>
-                      <span>$42,000 (30%)</span>
+                      <span>₦42,000 (30%)</span>
                     </div>
                     <Progress value={30} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Afternoon (12PM-5PM)</span>
-                      <span>$70,000 (50%)</span>
+                      <span>₦70,000 (50%)</span>
                     </div>
                     <Progress value={50} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Evening (5PM-11PM)</span>
-                      <span>$28,000 (20%)</span>
+                      <span>₦28,000 (20%)</span>
                     </div>
                     <Progress value={20} className="h-2" />
                   </div>
@@ -430,7 +430,7 @@ const AdminSales = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Avg. Transaction</div>
-                      <div className="text-lg font-bold mt-1">$5,833</div>
+                      <div className="text-lg font-bold mt-1">₦5,833</div>
                     </div>
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Listings Viewed</div>
@@ -442,7 +442,7 @@ const AdminSales = () => {
                     </div>
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Agent Commission</div>
-                      <div className="text-lg font-bold mt-1">$14,000</div>
+                      <div className="text-lg font-bold mt-1">₦14,000</div>
                     </div>
                   </div>
                   
@@ -454,7 +454,7 @@ const AdminSales = () => {
                         <div className="text-xs text-muted-foreground">Residential</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">$420,000</div>
+                        <div className="font-medium">₦420,000</div>
                         <div className="text-xs text-muted-foreground">John Davis (Agent)</div>
                       </div>
                     </div>
@@ -464,7 +464,7 @@ const AdminSales = () => {
                         <div className="text-xs text-muted-foreground">Commercial</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">$380,000</div>
+                        <div className="font-medium">₦380,000</div>
                         <div className="text-xs text-muted-foreground">Sarah Johnson (Agent)</div>
                       </div>
                     </div>
@@ -474,7 +474,7 @@ const AdminSales = () => {
                         <div className="text-xs text-muted-foreground">Residential</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">$325,000</div>
+                        <div className="font-medium">₦325,000</div>
                         <div className="text-xs text-muted-foreground">Mark Williams (Agent)</div>
                       </div>
                     </div>
@@ -504,7 +504,7 @@ const AdminSales = () => {
                 <div className="space-y-4">
                   <h4 className="text-sm font-medium">This Month's Revenue</h4>
                   <div className="bg-muted/30 p-4 rounded-lg">
-                    <div className="text-3xl font-bold">$2.8M</div>
+                    <div className="text-3xl font-bold">₦2.8M</div>
                     <div className="flex items-center mt-1">
                       <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
                       <span className="text-sm text-green-500">+12.5% from last month</span>
@@ -515,25 +515,25 @@ const AdminSales = () => {
                   <div className="space-y-2 mt-4">
                     <div className="flex justify-between text-sm">
                       <span>Week 1</span>
-                      <span>$560,000 (20%)</span>
+                      <span>₦560,000 (20%)</span>
                     </div>
                     <Progress value={20} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Week 2</span>
-                      <span>$840,000 (30%)</span>
+                      <span>₦840,000 (30%)</span>
                     </div>
                     <Progress value={30} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Week 3</span>
-                      <span>$700,000 (25%)</span>
+                      <span>₦700,000 (25%)</span>
                     </div>
                     <Progress value={25} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Week 4</span>
-                      <span>$700,000 (25%)</span>
+                      <span>₦700,000 (25%)</span>
                     </div>
                     <Progress value={25} className="h-2" />
                   </div>
@@ -545,7 +545,7 @@ const AdminSales = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Avg. Property Value</div>
-                      <div className="text-lg font-bold mt-1">$385K</div>
+                      <div className="text-lg font-bold mt-1">₦385K</div>
                     </div>
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Days on Market</div>
@@ -553,7 +553,7 @@ const AdminSales = () => {
                     </div>
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">Total Commission</div>
-                      <div className="text-lg font-bold mt-1">$280K</div>
+                      <div className="text-lg font-bold mt-1">₦280K</div>
                     </div>
                     <div className="bg-muted/30 p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground">New Listings</div>
@@ -620,7 +620,7 @@ const AdminSales = () => {
                 <div className="space-y-4">
                   <h4 className="text-sm font-medium">Annual Revenue</h4>
                   <div className="bg-muted/30 p-4 rounded-lg">
-                    <div className="text-3xl font-bold">$37.95M</div>
+                    <div className="text-3xl font-bold">₦37.95M</div>
                     <div className="flex items-center mt-1">
                       <ArrowDownRight className="mr-1 h-4 w-4 text-red-500" />
                       <span className="text-sm text-red-500">-6.1% from last year</span>
@@ -631,25 +631,25 @@ const AdminSales = () => {
                   <div className="space-y-2 mt-4">
                     <div className="flex justify-between text-sm">
                       <span>Q1 (Jan-Mar)</span>
-                      <span>$8.5M (22.4%)</span>
+                      <span>₦8.5M (22.4%)</span>
                     </div>
                     <Progress value={22.4} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Q2 (Apr-Jun)</span>
-                      <span>$10.2M (26.9%)</span>
+                      <span>₦10.2M (26.9%)</span>
                     </div>
                     <Progress value={26.9} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Q3 (Jul-Sep)</span>
-                      <span>$11.5M (30.3%)</span>
+                      <span>₦11.5M (30.3%)</span>
                     </div>
                     <Progress value={30.3} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Q4 (Oct-Dec)</span>
-                      <span>$7.75M (20.4%)</span>
+                      <span>₦7.75M (20.4%)</span>
                     </div>
                     <Progress value={20.4} className="h-2" />
                   </div>

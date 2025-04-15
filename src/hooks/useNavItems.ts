@@ -56,7 +56,7 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
     if (userType === "admin") {
       return [
         ...commonItems,
-        { title: "Analytics", path: "/admin-dashboard/analytics", icon: PieChart },
+        // Analytics is now integrated into the main dashboard overview
         { 
           title: "Financial Management", 
           icon: DollarSign, 
@@ -70,7 +70,6 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
           title: "Payment Setup", 
           icon: CreditCard, 
           subItems: [
-            { title: "Payment Configuration", path: "/admin-dashboard/payment-config" },
             { title: "Payment Methods", path: "/admin-dashboard/payment-methods" },
           ]
         },

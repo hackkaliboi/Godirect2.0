@@ -30,40 +30,51 @@ const HeroSearch = () => {
 
   return (
     <div className="relative w-full">
-      {/* Background Image */}
+      {/* Background Image with Parallax Effect */}
       <div 
-        className="absolute inset-0 bg-cover bg-center z-0" 
+        className="absolute inset-0 bg-cover bg-center z-0 transition-transform duration-[3000ms] ease-out transform hover:scale-105" 
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2000&auto=format&fit=crop')",
-          height: "100%"
+          height: "100%",
+          backgroundAttachment: "fixed"
         }}
       />
       
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-realty-900/80 to-realty-900/50 z-10" />
+      {/* Enhanced Overlay with Multiple Gradients */}
+      <div className="absolute inset-0 bg-gradient-to-r from-realty-900/90 via-realty-800/70 to-realty-900/60 z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-realty-900/10 to-realty-900/30 z-10" />
       
       {/* Content */}
-      <div className="relative z-20 container-custom min-h-[650px] flex flex-col justify-center items-center text-center py-20">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-semibold text-white mb-6 animate-fade-up">
-          Find Your <span className="text-realty-gold">Dream Home</span> Today
+      <div className="relative z-20 container-custom min-h-[700px] flex flex-col justify-center items-center text-center py-20">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-bold text-white mb-6 animate-fade-up tracking-tight">
+          Find Your <span className="text-realty-gold relative inline-block">
+            <span className="relative z-10">Dream Home</span>
+            <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
+          </span> Today
         </h1>
-        <p className="text-white/80 max-w-2xl mb-10 text-lg md:text-xl animate-fade-up" style={{ animationDelay: "0.1s" }}>
+        <p className="text-white/90 max-w-2xl mb-10 text-lg md:text-xl animate-fade-up leading-relaxed" style={{ animationDelay: "0.1s" }}>
           Discover thousands of properties for sale and rent across the country. Let us help you find the perfect place to call home.
         </p>
         
-        {/* Animated elements */}
+        {/* Enhanced Animated elements */}
         <div className="absolute hidden md:block top-40 -left-4 animate-bounce opacity-70">
-          <div className="h-16 w-16 rounded-full bg-realty-gold/10 backdrop-blur-sm"></div>
+          <div className="h-16 w-16 rounded-full bg-realty-gold/20 backdrop-blur-sm border border-realty-gold/30"></div>
         </div>
         <div className="absolute hidden md:block bottom-40 -right-10 animate-bounce opacity-70" style={{ animationDelay: "0.5s", animationDuration: "3s" }}>
-          <div className="h-20 w-20 rounded-full bg-realty-gold/10 backdrop-blur-sm"></div>
+          <div className="h-20 w-20 rounded-full bg-realty-gold/20 backdrop-blur-sm border border-realty-gold/30"></div>
+        </div>
+        <div className="absolute hidden md:block top-1/4 right-20 animate-pulse opacity-50" style={{ animationDuration: "4s" }}>
+          <div className="h-24 w-24 rounded-full bg-realty-gold/10 backdrop-blur-sm border border-realty-gold/20"></div>
+        </div>
+        <div className="absolute hidden md:block bottom-1/3 left-16 animate-pulse opacity-40" style={{ animationDuration: "5s" }}>
+          <div className="h-32 w-32 rounded-full bg-realty-gold/5 backdrop-blur-sm border border-realty-gold/10"></div>
         </div>
         
         {/* Search Form */}
         <div className="w-full max-w-4xl animate-fade-up" style={{ animationDelay: "0.2s" }}>
           <form 
             onSubmit={handleSearch}
-            className="bg-white dark:bg-realty-800 rounded-lg shadow-xl p-4 md:p-6"
+            className="bg-white/95 dark:bg-realty-800/95 backdrop-blur-md rounded-xl shadow-2xl p-4 md:p-6 border border-white/20 dark:border-realty-700/20 transition-all duration-300 hover:shadow-realty-gold/10"
           >
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="md:col-span-5">
@@ -121,7 +132,7 @@ const HeroSearch = () => {
             </div>
             
             {/* Popular searches */}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-2 animate-fade-up" style={{ animationDelay: "0.3s" }}>
               <span className="text-sm text-realty-500 dark:text-realty-400">Popular:</span>
               {recentSearches.map((item, index) => (
                 <button 
@@ -137,21 +148,23 @@ const HeroSearch = () => {
           </form>
           
           {/* Quick links */}
-          <div className="mt-6 flex flex-wrap justify-center gap-4">
+          <div className="mt-6 flex flex-wrap justify-center gap-6 animate-fade-up" style={{ animationDelay: "0.4s" }}>
             <Button 
               variant="link" 
-              className="text-white hover:text-realty-gold transition-colors group flex items-center"
+              className="text-white hover:text-realty-gold transition-colors group flex items-center relative overflow-hidden"
               onClick={() => navigate("/properties?status=For Sale")}
             >
-              Browse Properties for Sale
+              <span className="relative z-10">Browse Properties for Sale</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-realty-gold group-hover:w-full transition-all duration-300"></span>
               <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button 
               variant="link" 
-              className="text-white hover:text-realty-gold transition-colors group flex items-center"
+              className="text-white hover:text-realty-gold transition-colors group flex items-center relative overflow-hidden"
               onClick={() => navigate("/properties?status=For Rent")}
             >
-              Explore Rental Properties
+              <span className="relative z-10">Explore Rental Properties</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-realty-gold group-hover:w-full transition-all duration-300"></span>
               <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>

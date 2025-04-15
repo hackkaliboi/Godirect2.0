@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import { formatPriceWithCommas } from "@/utils/data";
 import { Link } from "react-router-dom";
 
 export default function AdminProperties() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
@@ -82,7 +83,7 @@ export default function AdminProperties() {
             Manage all property listings on the platform
           </p>
         </div>
-        <Button>
+        <Button onClick={() => navigate('/admin-dashboard/add-property')}>
           <Plus className="mr-2 h-4 w-4" />
           Add Property
         </Button>
@@ -190,7 +191,6 @@ export default function AdminProperties() {
             <TabsContent value="for_sale">
               {filteredProperties && filteredProperties.length > 0 ? (
                 <Table>
-                  {/* Similar table structure as above, filtered for For Sale properties */}
                   <TableHeader>
                     <TableRow>
                       <TableHead>Property</TableHead>
