@@ -1,0 +1,14 @@
+{
+  "name": "godirect-scripts",
+  "version": "1.0.0",
+  "description": "Utility scripts for GoDirectly platform",
+  "main": "check-tables.js",
+  "type": "module",
+  "scripts": {
+    "check-tables": "node check-tables.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1"
+  }
+}

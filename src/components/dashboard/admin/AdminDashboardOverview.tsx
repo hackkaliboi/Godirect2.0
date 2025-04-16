@@ -7,9 +7,10 @@ import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  Building2, Users, DollarSign, AlertTriangle, Clock, Activity, 
+  Building2, Users, DollarSign, Home, MapPin, Clock, Activity, AlertTriangle,
   Bell, Search, ArrowUpRight, Briefcase, Calendar, ChevronRight,
-  User, CheckCircle, XCircle, Hourglass, TrendingUp, TrendingDown, RefreshCw
+  User, CheckCircle, XCircle, Hourglass, TrendingUp, TrendingDown, RefreshCw,
+  LineChart, BarChart, PieChart, PercentCircle, Landmark, BedDouble, Bath, Ruler
 } from "lucide-react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
@@ -86,6 +87,43 @@ const AdminDashboardOverview = () => {
       
       if (error) {
         console.error("Error fetching recent activities:", error);
+        return [];
+      }
+      
+      return data || [];
+    }
+  });
+  
+  // Fetch top performing locations
+  const { data: topLocations } = useQuery({
+    queryKey: ['topLocations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('city, count(*)')
+        .order('count', { ascending: false })
+        .limit(5);
+      
+      if (error) {
+        console.error("Error fetching top locations:", error);
+        return [];
+      }
+      
+      return data || [];
+    }
+  });
+  
+  // Fetch property type distribution
+  const { data: propertyTypes } = useQuery({
+    queryKey: ['propertyTypes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('property_type, count(*)')
+        .order('count', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching property types:", error);
         return [];
       }
       
@@ -175,7 +213,7 @@ const AdminDashboardOverview = () => {
       <StatsCardGrid>
         <StatsCard 
           title="Total Revenue" 
-          value={isLoading ? '--' : totalRevenue.stat_value} 
+          value={isLoading ? '--' : `₦${totalRevenue.stat_value.toLocaleString()}`} 
           change={isLoading ? undefined : totalRevenue.stat_change}
           trend={totalRevenue.stat_change > 0 ? "positive" : totalRevenue.stat_change < 0 ? "negative" : "neutral"}
           icon={<DollarSign className="h-4 w-4" />}
@@ -303,43 +341,107 @@ const AdminDashboardOverview = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>System Status</CardTitle>
-            <CardDescription>Server and application performance</CardDescription>
+            <CardTitle>Real Estate Market Insights</CardTitle>
+            <CardDescription>Key metrics and trends in your property portfolio</CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="space-y-3">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">API Response Time</span>
-                    <span className="text-xs text-muted-foreground">Avg: 125 ms</span>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Landmark className="h-5 w-5 text-blue-600" />
                   </div>
-                  <Progress value={25} className="h-2" />
+                  <div>
+                    <p className="text-sm font-medium">Avg. Property Price</p>
+                    <p className="text-xs text-muted-foreground">₦45,200,000</p>
+                  </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Server Load</span>
-                    <span className="text-xs text-muted-foreground">Current: 42%</span>
+                <div className="flex items-center gap-2">
+                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-green-600" />
                   </div>
-                  <Progress value={42} className="h-2" />
+                  <div>
+                    <p className="text-sm font-medium">Avg. Days on Market</p>
+                    <p className="text-xs text-muted-foreground">32 days</p>
+                  </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Database Connections</span>
-                    <span className="text-xs text-muted-foreground">Active: 18/50</span>
+                <div className="flex items-center gap-2">
+                  <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-amber-600" />
                   </div>
-                  <Progress value={36} className="h-2" />
+                  <div>
+                    <p className="text-sm font-medium">Hottest Location</p>
+                    <p className="text-xs text-muted-foreground">Lekki, Lagos</p>
+                  </div>
                 </div>
               </div>
-            )}
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm">Property Type Distribution</p>
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-xs">
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>Apartments</span>
+                      <span className="font-medium">42%</span>
+                    </div>
+                    <Progress value={42} className="h-2 bg-blue-100">
+                      <div className="h-full bg-blue-500 rounded-full"></div>
+                    </Progress>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>Houses</span>
+                      <span className="font-medium">28%</span>
+                    </div>
+                    <Progress value={28} className="h-2 bg-green-100">
+                      <div className="h-full bg-green-500 rounded-full"></div>
+                    </Progress>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>Land</span>
+                      <span className="font-medium">18%</span>
+                    </div>
+                    <Progress value={18} className="h-2 bg-amber-100">
+                      <div className="h-full bg-amber-500 rounded-full"></div>
+                    </Progress>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>Commercial</span>
+                      <span className="font-medium">12%</span>
+                    </div>
+                    <Progress value={12} className="h-2 bg-purple-100">
+                      <div className="h-full bg-purple-500 rounded-full"></div>
+                    </Progress>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm">Property Features in Demand</p>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex items-center gap-2">
+                    <BedDouble className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs">3+ Bedrooms (78%)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Bath className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs">2+ Bathrooms (65%)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Ruler className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs">150m²+ Area (52%)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -434,72 +536,125 @@ const AdminDashboardOverview = () => {
         </CardContent>
       </Card>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Top Performing Locations</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₦238.5K</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-500 inline-flex items-center">
-                <TrendingUp className="w-3 h-3 mr-1" /> +12.3%
-              </span> from last month
-            </p>
-            <div className="mt-4 h-1 w-full bg-muted overflow-hidden rounded-full">
-              <div className="bg-primary h-full w-3/4 rounded-full"></div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Lekki, Lagos</p>
+                    <p className="text-xs text-muted-foreground">32 properties</p>
+                  </div>
+                </div>
+                <Badge variant="outline">₦65M avg</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Ikeja, Lagos</p>
+                    <p className="text-xs text-muted-foreground">28 properties</p>
+                  </div>
+                </div>
+                <Badge variant="outline">₦48M avg</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Calabar, Cross River</p>
+                    <p className="text-xs text-muted-foreground">24 properties</p>
+                  </div>
+                </div>
+                <Badge variant="outline">₦32M avg</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Enugu, Enugu</p>
+                    <p className="text-xs text-muted-foreground">18 properties</p>
+                  </div>
+                </div>
+                <Badge variant="outline">₦28M avg</Badge>
+              </div>
             </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active Listings</CardTitle>
+            <CardTitle className="text-sm font-medium">Top Performing Agents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isLoading ? '--' : activeListings.stat_value}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className={`${formatTrendClass(activeListings.stat_change)} inline-flex items-center`}>
-                {activeListings.stat_change > 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                {activeListings.stat_change}%
-              </span> from previous month
-            </p>
-            <div className="mt-4 h-1 w-full bg-muted overflow-hidden rounded-full">
-              <div className="bg-primary h-full w-2/3 rounded-full"></div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">User Engagement</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">9.2K</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-500 inline-flex items-center">
-                <TrendingUp className="w-3 h-3 mr-1" /> +8.7%
-              </span> visits this week
-            </p>
-            <div className="mt-4 h-1 w-full bg-muted overflow-hidden rounded-full">
-              <div className="bg-primary h-full w-1/2 rounded-full"></div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4.3%</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-red-500 inline-flex items-center">
-                <TrendingDown className="w-3 h-3 mr-1" /> -1.2%
-              </span> from last week
-            </p>
-            <div className="mt-4 h-1 w-full bg-muted overflow-hidden rounded-full">
-              <div className="bg-primary h-full w-1/4 rounded-full"></div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Sarah Johnson</p>
+                    <p className="text-xs text-muted-foreground">12 properties sold</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="bg-green-50 text-green-700">₦148M</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Michael Okonkwo</p>
+                    <p className="text-xs text-muted-foreground">10 properties sold</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="bg-green-50 text-green-700">₦132M</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Chioma Eze</p>
+                    <p className="text-xs text-muted-foreground">8 properties sold</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="bg-green-50 text-green-700">₦98M</Badge>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">David Adeyemi</p>
+                    <p className="text-xs text-muted-foreground">7 properties sold</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="bg-green-50 text-green-700">₦85M</Badge>
+              </div>
             </div>
           </CardContent>
         </Card>

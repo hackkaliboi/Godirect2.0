@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
-  Bell, 
   Search, 
   MessageSquare,
   Menu,
@@ -10,7 +9,11 @@ import {
   LogOut,
   Moon,
   Sun,
-  Settings
+  Settings,
+  Clock,
+  FileText,
+  AlertTriangle,
+  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +39,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileText, Calendar, Clock, AlertTriangle } from "lucide-react";
+import { NotificationSystem } from "@/components/dashboard/NotificationSystem";
 
 type DashboardTopBarProps = {
   userType: "admin" | "agent" | "user";
@@ -148,7 +151,6 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
   };
 
   const userInfo = getUserInfo();
-  const notifications = getNotifications();
 
   return (
     <div className="sticky top-0 z-30 w-full border-b bg-background shadow-sm">
@@ -210,43 +212,8 @@ export default function DashboardTopBar({ userType }: DashboardTopBarProps) {
         
         {/* Action buttons */}
         <div className="flex items-center gap-2 md:gap-4 transition-all duration-300 ease-in-out">
-          {/* Notifications */}
-          <Drawer>
-            <DrawerTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <Badge variant="info" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center">{notifications.length}</Badge>
-                <span className="sr-only">Notifications</span>
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="bg-background">
-              <DrawerHeader>
-                <DrawerTitle>Notifications</DrawerTitle>
-                <DrawerDescription>Stay updated with your recent activity.</DrawerDescription>
-              </DrawerHeader>
-              <div className="p-4 space-y-4">
-                {notifications.map((notification) => (
-                  <div key={notification.id} className="flex items-start gap-4 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className={`h-10 w-10 rounded-full ${notification.bgColor} flex items-center justify-center flex-shrink-0`}>
-                      {notification.icon}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{notification.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
-                      <p className="text-xs text-muted-foreground mt-2">{notification.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <DrawerFooter>
-                <Button variant="outline" className="w-full">View all notifications</Button>
-                <DrawerClose asChild>
-                  <Button variant="ghost">Close</Button>
-                </DrawerClose>
-              </DrawerFooter>
-            </DrawerContent>
-          </Drawer>
-
+          {/* Notifications System */}
+          <NotificationSystem />
           {/* Messages - Desktop only */}
           <Button variant="ghost" size="icon" className="relative hidden md:flex">
             <MessageSquare className="h-5 w-5" />
