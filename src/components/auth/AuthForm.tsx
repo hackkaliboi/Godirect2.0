@@ -102,19 +102,20 @@ export default function AuthForm({
       
       // Redirect based on userType
       if (userType === "admin") {
-        navigate("/admin-dashboard");
+        navigate("/dashboard/admin");
       } else if (userType === "agent") {
-        navigate("/agent-dashboard");
+        navigate("/dashboard/agent");
       } else {
-        navigate("/user-dashboard");
+        navigate("/dashboard/user");
       }
       
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Please check your credentials and try again.";
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: error.message || "Please check your credentials and try again.",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -124,7 +125,8 @@ export default function AuthForm({
   const onSignupSubmit = async (values: z.infer<typeof signupFormSchema>) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      // First, sign up the user
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -132,29 +134,54 @@ export default function AuthForm({
             first_name: values.firstName,
             last_name: values.lastName,
             phone: values.phone,
-            user_type: userType,
-          },
+            role: userType,
+            full_name: `${values.firstName} ${values.lastName}`,
+          }
         },
       });
       
-      if (error) {
-        throw error;
+      if (signUpError) {
+        throw signUpError;
       }
       
-      toast({
-        title: "Account created successfully!",
-        description: "Welcome to GODIRECT. You can now log in.",
+      // Since email confirmation is disabled, automatically sign in the user
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
       });
       
-      // Redirect to login
-      navigate(redirectPath);
+      if (signInError) {
+        // If sign in fails, it might be because email confirmation is still required
+        toast({
+          title: "Account created!",
+          description: "Please check your email to confirm your account, then try logging in.",
+        });
+        navigate(redirectPath);
+        return;
+      }
       
-    } catch (error: any) {
+      // Success - user is signed up and logged in
+      toast({
+        title: "Account created successfully!",
+        description: "Welcome to GODIRECT. You're now logged in.",
+      });
+      
+      // Redirect to dashboard based on user type
+      if (userType === "admin") {
+        navigate("/dashboard/admin");
+      } else if (userType === "agent") {
+        navigate("/dashboard/agent");
+      } else {
+        navigate("/dashboard/user");
+      }
+
+    } catch (error) {
       console.error("Signup error:", error);
+      const errorMessage = error instanceof Error ? error.message : "There was a problem creating your account. Please try again.";
       toast({
         variant: "destructive",
         title: "Signup failed",
-        description: error.message || "There was a problem creating your account. Please try again.",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);

@@ -5,33 +5,8 @@ import { Button } from "@/components/ui/button";
 import { fetchTestimonials, Testimonial } from "@/utils/supabaseData";
 import { cn } from "@/lib/utils";
 
-// Mock data for additional testimonials to ensure we have enough for the carousel
-const additionalTestimonials: Testimonial[] = [
-  {
-    id: "4",
-    name: "John & Sarah Williams",
-    image: "https://images.unsplash.com/photo-1543269664-56d93c1b41a6?q=80&w=200&auto=format&fit=crop",
-    testimonial: "GoDirectly made our relocation to Nigeria seamless. Their knowledge of the local market and attention to our specific needs was exceptional.",
-    rating: 5,
-    location: "Lagos, Nigeria"
-  },
-  {
-    id: "5",
-    name: "Emmanuel Okonkwo",
-    image: "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?q=80&w=200&auto=format&fit=crop",
-    testimonial: "After months of searching on my own, I found my perfect home within two weeks of working with GoDirectly. Their agents truly understand the Enugu market.",
-    rating: 5,
-    location: "Enugu, Nigeria"
-  },
-  {
-    id: "6",
-    name: "Chioma Adeyemi",
-    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200&auto=format&fit=crop",
-    testimonial: "The investment advice I received from GoDirectly was invaluable. They helped me find a property with excellent rental potential in Calabar.",
-    rating: 4,
-    location: "Calabar, Nigeria"
-  }
-];
+// Additional testimonials will be fetched from Supabase
+const additionalTestimonials: Testimonial[] = [];
 
 const Testimonials = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -44,14 +19,11 @@ const Testimonials = () => {
       setIsLoading(true);
       try {
         const data = await fetchTestimonials();
-        // Combine fetched testimonials with additional ones to ensure we have enough
-        const combinedTestimonials = [...data, ...additionalTestimonials.filter(at => 
-          !data.some(d => d.id === at.id)
-        )];
-        setTestimonials(combinedTestimonials);
+        // Use only fetched testimonials from Supabase
+        setTestimonials(data);
       } catch (error) {
         console.error("Error fetching testimonials:", error);
-        setTestimonials(additionalTestimonials);
+        setTestimonials([]);
       } finally {
         setIsLoading(false);
       }

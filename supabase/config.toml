@@ -17,7 +17,8 @@ port = 54324
 
 [auth]
 enabled = true
-port = 54325
+enable_signup = true
+enable_anonymous_sign_ins = false
 
 [storage]
 enabled = true

@@ -55,35 +55,9 @@ const MarketTrends = () => {
   };
 
   const getTrendData = (trend: string) => {
-    // Generate sample chart data based on trend direction
-    if (trend === 'up') {
-      return [
-        { month: 'Jan', value: 40 },
-        { month: 'Feb', value: 45 },
-        { month: 'Mar', value: 42 },
-        { month: 'Apr', value: 48 },
-        { month: 'May', value: 50 },
-        { month: 'Jun', value: 55 }
-      ];
-    } else if (trend === 'down') {
-      return [
-        { month: 'Jan', value: 55 },
-        { month: 'Feb', value: 50 },
-        { month: 'Mar', value: 48 },
-        { month: 'Apr', value: 45 },
-        { month: 'May', value: 42 },
-        { month: 'Jun', value: 40 }
-      ];
-    } else {
-      return [
-        { month: 'Jan', value: 45 },
-        { month: 'Feb', value: 48 },
-        { month: 'Mar', value: 45 },
-        { month: 'Apr', value: 47 },
-        { month: 'May', value: 45 },
-        { month: 'Jun', value: 48 }
-      ];
-    }
+    // Chart data will be fetched from Supabase in future implementation
+    // For now, return empty array until real historical data is available
+    return [];
   };
 
   const getTrendColor = (trend: string) => {

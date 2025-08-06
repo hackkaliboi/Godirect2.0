@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Moon, Sun, User } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,9 +27,9 @@ const Header = () => {
 
   // Determine which dashboard to link to based on user type
   const getDashboardLink = () => {
-    if (userType === "admin") return "/admin-dashboard";
-    if (userType === "agent") return "/agent-dashboard";
-    if (userType === "user") return "/user-dashboard";
+    if (userType === "admin") return "/dashboard/admin";
+    if (userType === "agent") return "/dashboard/agent";
+    if (userType === "user") return "/dashboard/user";
     return "/login";
   };
 

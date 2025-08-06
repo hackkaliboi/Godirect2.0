@@ -16,9 +16,19 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 
 // Dashboard Pages
-import AdminDashboard from "./pages/AdminDashboard";
-import UserDashboard from "./pages/UserDashboard";
-import AgentDashboard from "./pages/AgentDashboard";
+import { AdminDashboard } from "./pages/dashboard/AdminDashboard";
+import { UserDashboard } from "./pages/dashboard/UserDashboard";
+import { AgentDashboard } from "./pages/dashboard/AgentDashboard";
+
+// Admin Pages
+import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminAgents from "./pages/admin/AdminAgents";
+import AdminTransactions from "./pages/admin/AdminTransactions";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminSystem from "./pages/admin/AdminSystem";
+import AdminProperties from "./pages/admin/AdminProperties";
 
 // Auth Pages
 import UserLogin from "./pages/auth/UserLogin";
@@ -78,6 +88,37 @@ const App = () => {
                 </RequireAuth>
               } 
             />
+            
+            {/* New dashboard routes matching sidebar structure */}
+            <Route 
+              path="/dashboard/admin/*" 
+              element={
+                <RequireAuth requiredUserType="admin">
+                  <AdminDashboard />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/dashboard/user/*" 
+              element={
+                <RequireAuth requiredUserType="user">
+                  <UserDashboard />
+                </RequireAuth>
+              } 
+            />
+            <Route 
+              path="/dashboard/agent/*" 
+              element={
+                <RequireAuth requiredUserType="agent">
+                  <AgentDashboard />
+                </RequireAuth>
+              } 
+            />
+            
+            {/* Preview routes for dashboards (no authentication required) */}
+            <Route path="/preview/dashboard/admin/*" element={<AdminDashboard />} />
+            <Route path="/preview/dashboard/user/*" element={<UserDashboard />} />
+            <Route path="/preview/dashboard/agent/*" element={<AgentDashboard />} />
             
             {/* Public routes with header/footer */}
             <Route

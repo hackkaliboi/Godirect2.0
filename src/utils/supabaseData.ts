@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { agents, properties, testimonials, marketTrends } from "./data";
 
 // Types
 export type Agent = {
@@ -24,7 +23,7 @@ export type Property = {
   title: string;
   description?: string;
   price: number;
-  featured: boolean;
+  is_featured: boolean;
   status: "For Sale" | "For Rent" | "Sold";
   bedrooms?: number;
   bathrooms?: number;
@@ -67,20 +66,14 @@ export async function fetchAgents(): Promise<Agent[]> {
       .select("*");
     
     if (error) {
-      throw error;
+      console.error("Error fetching agents:", error);
+      return [];
     }
     
-    // If no data is returned from Supabase, use mock data
-    if (!data || data.length === 0) {
-      console.log("No agents found in database, using mock data");
-      return agents;
-    }
-    
-    return data as Agent[];
+    return (data || []) as Agent[];
   } catch (error) {
     console.error("Error fetching agents:", error);
-    // Fallback to mock data if there's an error
-    return agents;
+    return [];
   }
 }
 
@@ -101,10 +94,7 @@ export async function fetchAgentById(id: string): Promise<Agent | null> {
     return data as Agent;
   } catch (error) {
     console.error("Error fetching agent:", error);
-    
-    // Fallback to mock data
-    const agent = agents.find(agent => agent.id === id);
-    return agent || null;
+    return null;
   }
 }
 
@@ -115,68 +105,21 @@ export async function fetchProperties(): Promise<Property[]> {
     const { data, error } = await supabase
       .from("properties")
       .select("*");
-    
     if (error) {
-      throw error;
+      console.error("Error fetching properties:", error);
+      return [];
     }
-    
-    // If no data is returned from Supabase, use mock data
-    if (!data || data.length === 0) {
-      console.log("No properties found in database, using mock data");
-      
-      // Format mock data to match our Property type
-      return properties.map(p => ({
-        id: p.id,
-        title: p.title,
-        description: p.description,
-        price: p.price,
-        featured: p.featured,
-        status: p.status,
-        bedrooms: p.bedrooms,
-        bathrooms: p.bathrooms,
-        square_feet: p.squareFeet,
-        street: p.address.street,
-        city: p.address.city,
-        state: p.address.state,
-        zip_code: p.address.zipCode,
-        images: p.images,
-        amenities: p.amenities,
-        property_type: p.propertyType as "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial",
-        year_built: p.yearBuilt,
-        agent_id: p.agentId,
-        created_at: p.createdAt,
-      })) as Property[];
-    }
-    
-    return data as Property[];
+    return (data || []).map(item => ({
+      ...item,
+      is_featured: item.featured || false,
+      property_type: item.property_type as Property['property_type'],
+      status: item.status as Property['status']
+    }));
   } catch (error) {
     console.error("Error fetching properties:", error);
-    
-    // Format mock data to match our Property type
-    return properties.map(p => ({
-      id: p.id,
-      title: p.title,
-      description: p.description,
-      price: p.price,
-      featured: p.featured,
-      status: p.status,
-      bedrooms: p.bedrooms,
-      bathrooms: p.bathrooms,
-      square_feet: p.squareFeet,
-      street: p.address.street,
-      city: p.address.city,
-      state: p.address.state,
-      zip_code: p.address.zipCode,
-      images: p.images,
-      amenities: p.amenities,
-      property_type: p.propertyType as "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial",
-      year_built: p.yearBuilt,
-      agent_id: p.agentId,
-      created_at: p.createdAt,
-    })) as Property[];
+    return [];
   }
 }
-
 // Fetch featured properties
 export async function fetchFeaturedProperties(): Promise<Property[]> {
   console.log("Fetching featured properties...");
@@ -190,62 +133,15 @@ export async function fetchFeaturedProperties(): Promise<Property[]> {
       throw error;
     }
     
-    // If no data is returned from Supabase, use mock data
-    if (!data || data.length === 0) {
-      console.log("No featured properties found in database, using mock data");
-      
-      // Format mock data to match our Property type
-      const featuredProps = properties.filter(p => p.featured);
-      return featuredProps.map(p => ({
-        id: p.id,
-        title: p.title,
-        description: p.description,
-        price: p.price,
-        featured: p.featured,
-        status: p.status,
-        bedrooms: p.bedrooms,
-        bathrooms: p.bathrooms,
-        square_feet: p.squareFeet,
-        street: p.address.street,
-        city: p.address.city,
-        state: p.address.state,
-        zip_code: p.address.zipCode,
-        images: p.images,
-        amenities: p.amenities,
-        property_type: p.propertyType as "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial",
-        year_built: p.yearBuilt,
-        agent_id: p.agentId,
-        created_at: p.createdAt,
-      })) as Property[];
-    }
-    
-    return data as Property[];
+    return (data || []).map(item => ({
+      ...item,
+      is_featured: item.featured || false,
+      property_type: item.property_type as Property['property_type'],
+      status: item.status as Property['status']
+    }));
   } catch (error) {
     console.error("Error fetching featured properties:", error);
-    
-    // Format mock data to match our Property type
-    const featuredProps = properties.filter(p => p.featured);
-    return featuredProps.map(p => ({
-      id: p.id,
-      title: p.title,
-      description: p.description,
-      price: p.price,
-      featured: p.featured,
-      status: p.status,
-      bedrooms: p.bedrooms,
-      bathrooms: p.bathrooms,
-      square_feet: p.squareFeet,
-      street: p.address.street,
-      city: p.address.city,
-      state: p.address.state,
-      zip_code: p.address.zipCode,
-      images: p.images,
-      amenities: p.amenities,
-      property_type: p.propertyType as "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial",
-      year_built: p.yearBuilt,
-      agent_id: p.agentId,
-      created_at: p.createdAt,
-    })) as Property[];
+    return [];
   }
 }
 
@@ -263,35 +159,15 @@ export async function fetchPropertyById(id: string): Promise<Property | null> {
       throw error;
     }
     
-    return data as Property;
+    return {
+      ...data,
+      is_featured: data.featured || false,
+      property_type: data.property_type as Property['property_type'],
+      status: data.status as Property['status']
+    };
   } catch (error) {
     console.error("Error fetching property:", error);
-    
-    // Fallback to mock data
-    const property = properties.find(property => property.id === id);
-    if (!property) return null;
-    
-    return {
-      id: property.id,
-      title: property.title,
-      description: property.description,
-      price: property.price,
-      featured: property.featured,
-      status: property.status,
-      bedrooms: property.bedrooms,
-      bathrooms: property.bathrooms,
-      square_feet: property.squareFeet,
-      street: property.address.street,
-      city: property.address.city,
-      state: property.address.state,
-      zip_code: property.address.zipCode,
-      images: property.images,
-      amenities: property.amenities,
-      property_type: property.propertyType as "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial",
-      year_built: property.yearBuilt,
-      agent_id: property.agentId,
-      created_at: property.createdAt,
-    } as Property;
+    return null;
   }
 }
 
@@ -307,17 +183,10 @@ export async function fetchTestimonials(): Promise<Testimonial[]> {
       throw error;
     }
     
-    // If no data is returned from Supabase, use mock data
-    if (!data || data.length === 0) {
-      console.log("No testimonials found in database, using mock data");
-      return testimonials;
-    }
-    
-    return data as Testimonial[];
+    return (data || []) as Testimonial[];
   } catch (error) {
     console.error("Error fetching testimonials:", error);
-    // Fallback to mock data if there's an error
-    return testimonials;
+    return [];
   }
 }
 
@@ -333,28 +202,9 @@ export async function fetchMarketTrends(): Promise<MarketTrend[]> {
       throw error;
     }
     
-    // If no data is returned from Supabase, use mock data
-    if (!data || data.length === 0) {
-      console.log("No market trends found in database, using mock data");
-      return marketTrends.map(trend => ({
-        id: trend.id,
-        title: trend.title,
-        value: trend.value,
-        trend: trend.trend as "up" | "down" | "stable",
-        description: trend.description,
-      }));
-    }
-    
-    return data as MarketTrend[];
+    return (data || []) as MarketTrend[];
   } catch (error) {
     console.error("Error fetching market trends:", error);
-    // Fallback to mock data if there's an error
-    return marketTrends.map(trend => ({
-      id: trend.id,
-      title: trend.title,
-      value: trend.value,
-      trend: trend.trend as "up" | "down" | "stable",
-      description: trend.description,
-    }));
+    return [];
   }
 }

@@ -55,7 +55,7 @@ const Login = () => {
       });
       
       // Redirect to dashboard
-      navigate("/user-dashboard");
+      navigate("/dashboard/user");
     } catch (error) {
       console.error("Login error:", error);
       toast({

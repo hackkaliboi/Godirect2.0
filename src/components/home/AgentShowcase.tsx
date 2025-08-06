@@ -8,54 +8,24 @@ import { Link } from "react-router-dom";
 const AgentShowcase = () => {
   const [activeAgent, setActiveAgent] = useState(0);
 
-  // Mock data for featured agents
-  const agents = [
-    {
-      id: 1,
-      name: "Chioma Okafor",
-      title: "Senior Property Consultant",
-      image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=400&auto=format&fit=crop",
-      rating: 4.9,
-      reviews: 124,
-      experience: "8+ years",
-      specialization: "Luxury Residential",
-      location: "Enugu",
-      properties: 42,
-      phone: "+234 801 234 5678",
-      email: "chioma.o@godirect.com.ng",
-      bio: "Chioma is our top-performing agent with extensive knowledge of the Enugu luxury market. Her attention to detail and negotiation skills have helped hundreds of clients find their dream homes."
-    },
-    {
-      id: 2,
-      name: "Emmanuel Adebayo",
-      title: "Commercial Property Expert",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
-      rating: 4.8,
-      reviews: 98,
-      experience: "10+ years",
-      specialization: "Commercial Real Estate",
-      location: "Calabar",
-      properties: 36,
-      phone: "+234 802 345 6789",
-      email: "emmanuel.a@godirect.com.ng",
-      bio: "With a background in commercial banking, Emmanuel brings unique insights to commercial property investments. He specializes in office spaces and retail properties in Calabar's growing business districts."
-    },
-    {
-      id: 3,
-      name: "Amara Nwachukwu",
-      title: "Investment Advisor",
-      image: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?q=80&w=400&auto=format&fit=crop",
-      rating: 4.7,
-      reviews: 87,
-      experience: "6+ years",
-      specialization: "Investment Properties",
-      location: "Enugu & Calabar",
-      properties: 29,
-      phone: "+234 803 456 7890",
-      email: "amara.n@godirect.com.ng",
-      bio: "Amara helps clients build wealth through strategic real estate investments. Her analytical approach and market knowledge make her the go-to advisor for investors looking to maximize returns in both Enugu and Calabar markets."
-    }
-  ];
+  // Featured agents data will be fetched from Supabase
+  interface Agent {
+    id: string;
+    name: string;
+    title: string;
+    image: string;
+    rating: number;
+    reviews: number;
+    specialization: string;
+    bio: string;
+    experience: string;
+    properties: number;
+    location: string;
+    phone: string;
+    email: string;
+  }
+
+  const agents: Agent[] = [];
 
   const currentAgent = agents[activeAgent];
 

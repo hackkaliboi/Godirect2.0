@@ -6,57 +6,18 @@ import { Link } from "react-router-dom";
 const InteractiveMap = () => {
   const [activeLocation, setActiveLocation] = useState<string | null>("enugu-center");
 
-  // Mock data for map locations
-  const locations = [
-    {
-      id: "enugu-center",
-      name: "Enugu City Center",
-      position: { top: "35%", left: "45%" },
-      properties: 124,
-      priceRange: "₦25M - ₦120M",
-      type: "mixed"
-    },
-    {
-      id: "independence-layout",
-      name: "Independence Layout",
-      position: { top: "45%", left: "55%" },
-      properties: 86,
-      priceRange: "₦45M - ₦180M",
-      type: "residential"
-    },
-    {
-      id: "gra-enugu",
-      name: "GRA Enugu",
-      position: { top: "25%", left: "60%" },
-      properties: 53,
-      priceRange: "₦60M - ₦250M",
-      type: "luxury"
-    },
-    {
-      id: "trans-ekulu",
-      name: "Trans-Ekulu",
-      position: { top: "20%", left: "35%" },
-      properties: 78,
-      priceRange: "₦35M - ₦95M",
-      type: "residential"
-    },
-    {
-      id: "calabar-marina",
-      name: "Calabar Marina",
-      position: { top: "70%", left: "25%" },
-      properties: 42,
-      priceRange: "₦40M - ₦150M",
-      type: "commercial"
-    },
-    {
-      id: "diamond-hill",
-      name: "Diamond Hill",
-      position: { top: "65%", left: "40%" },
-      properties: 67,
-      priceRange: "₦38M - ₦120M",
-      type: "residential"
-    }
-  ];
+  // Map locations data will be fetched from Supabase
+  const locations: {
+    id: string;
+    name: string;
+    type: 'residential' | 'commercial' | 'luxury';
+    position: {
+      top: string;
+      left: string;
+    };
+    properties: number;
+    priceRange: string;
+  }[] = [];
 
   // Get the active location details
   const activeLocationData = locations.find(loc => loc.id === activeLocation);

@@ -34,7 +34,7 @@ const PropertyTypes = () => {
   // Count properties by type and prepare data
   const getPropertyTypes = (): PropertyTypeData[] => {
     if (!properties || properties.length === 0) {
-      return defaultPropertyTypes;
+      return [];
     }
     
     // Count properties by type
@@ -78,44 +78,10 @@ const PropertyTypes = () => {
         url: "/properties?type=Commercial",
         type: "Commercial"
       }
-    ];
+    ].filter(type => type.count > 0); // Only show types with actual properties
   };
 
-  // Default property types for when we have no data
-  const defaultPropertyTypes: PropertyTypeData[] = [
-    {
-      key: 1,
-      title: "Single Family Homes",
-      image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop",
-      count: 0,
-      url: "/properties?type=House",
-      type: "House"
-    },
-    {
-      key: 2,
-      title: "Condos & Apartments",
-      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop",
-      count: 0,
-      url: "/properties?type=Condo,Apartment",
-      type: "Condo"
-    },
-    {
-      key: 3,
-      title: "Luxury Properties",
-      image: "https://images.unsplash.com/photo-1613977257365-aaae5a9817ff?q=80&w=800&auto=format&fit=crop",
-      count: 0,
-      url: "/properties?luxury=true",
-      type: "Luxury"
-    },
-    {
-      key: 4,
-      title: "Commercial Spaces",
-      image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=800&auto=format&fit=crop",
-      count: 0,
-      url: "/properties?type=Commercial",
-      type: "Commercial"
-    }
-  ];
+  // Property types will be generated from Supabase data only
 
   const propertyTypes = getPropertyTypes();
 

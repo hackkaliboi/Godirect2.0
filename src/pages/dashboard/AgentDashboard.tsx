@@ -1,0 +1,97 @@
+import { Routes, Route } from "react-router-dom";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { StatCard } from "@/components/dashboard/StatCard";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { Building, Users, DollarSign, Calendar } from "lucide-react";
+
+// Import agent dashboard pages
+import AgentListings from "../agent/AgentListings";
+import AgentClients from "../agent/AgentClients";
+import AgentMessages from "../agent/AgentMessages";
+import AgentCalendar from "../agent/AgentCalendar";
+import AgentProfile from "../agent/AgentProfile";
+import AgentLeads from "../agent/AgentLeads";
+import AgentCommission from "../agent/AgentCommission";
+import AgentProperties from "../agent/AgentProperties";
+
+function AgentDashboardHome() {
+  // Recent activities will be fetched from Supabase
+  const recentActivities: {
+    id: string;
+    type: "property" | "user" | "transaction" | "message";
+    title: string;
+    description: string;
+    timestamp: Date;
+    status?: "pending" | "completed" | "cancelled";
+  }[] = [];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">Agent Dashboard</h1>
+      </div>
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Active Listings"
+          value="24"
+          description="Properties currently listed"
+          icon={Building}
+        />
+        <StatCard
+          title="Active Clients"
+          value="18"
+          description="Clients currently working with"
+          icon={Users}
+        />
+        <StatCard
+          title="This Month's Commission"
+          value="$12,450"
+          description="Commission earned this month"
+          icon={DollarSign}
+        />
+        <StatCard
+          title="Scheduled Appointments"
+          value="7"
+          description="Upcoming client meetings"
+          icon={Calendar}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+            <h3 className="text-lg font-semibold mb-4">Recent Listings</h3>
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                Your recent property listings will appear here
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="col-span-3">
+          <RecentActivity activities={recentActivities} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AgentDashboard() {
+  return (
+    <DashboardLayout userRole="agent">
+      <Routes>
+        <Route index element={<AgentDashboardHome />} />
+        <Route path="properties" element={<AgentProperties />} />
+        <Route path="listings" element={<AgentListings />} />
+        <Route path="clients" element={<AgentClients />} />
+        <Route path="leads" element={<AgentLeads />} />
+        <Route path="calendar" element={<AgentCalendar />} />
+        <Route path="messages" element={<AgentMessages />} />
+        <Route path="commission" element={<AgentCommission />} />
+        <Route path="profile" element={<AgentProfile />} />
+      </Routes>
+    </DashboardLayout>
+  );
+}
