@@ -1,73 +1,162 @@
-# Welcome to your Lovable project
+# GoDirectly - Real Estate Platform
 
-## Project info
+**Find Your Dream Home in Nigeria** 🏡
 
-**URL**: https://lovable.dev/projects/b76c1612-4587-4505-803d-54ad49b822ce
+GoDirectly is a comprehensive real estate platform that connects buyers, sellers, and agents across Nigeria. Our platform specializes in premium properties in major Nigerian cities including Enugu, Calabar, and Lagos.
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+### For Property Seekers
+- 🔍 **Advanced Property Search** - Filter by location, price, property type, and amenities
+- 🏘️ **Featured Listings** - Handpicked premium properties across Nigeria
+- 📍 **Location Spotlight** - Explore properties in Enugu, Calabar, Lagos, and more
+- 💰 **Investment Calculator** - Calculate potential returns and mortgage estimates
+- 📱 **Interactive Map** - Visual property browsing with location-based search
+- 💌 **Save Favorites** - Keep track of properties you're interested in
 
-**Use Lovable**
+### For Real Estate Agents
+- 📊 **Agent Dashboard** - Comprehensive management tools for listings and clients
+- 👥 **Lead Management** - Track and manage potential buyers
+- 📅 **Calendar Integration** - Schedule and manage property viewings
+- 💵 **Commission Tracking** - Monitor earnings and transaction history
+- 📧 **Client Communication** - Built-in messaging system
+- 📈 **Performance Analytics** - Track your success metrics
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b76c1612-4587-4505-803d-54ad49b822ce) and start prompting.
+### For Administrators
+- 🎛️ **Admin Dashboard** - Complete platform oversight and management
+- ✅ **Property Approval System** - Quality control for all listings
+- 👤 **User Management** - Manage agents, buyers, and platform users
+- 📊 **Analytics & Reporting** - Comprehensive platform insights
+- ⚙️ **System Configuration** - Platform settings and customization
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🚀 Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- Supabase account (for backend services)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. **Clone the repository**
+```bash
+git clone <your-repo-url>
+cd Godirect-realty
+```
 
-Follow these steps:
+2. **Install dependencies**
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. **Set up environment variables**
+```bash
+cp .env.example .env.local
+```
+Add your Supabase credentials and other required environment variables.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. **Start the development server**
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+5. **Open your browser**
+Navigate to `http://localhost:5173` to see the application.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🛠️ Technology Stack
 
-**Use GitHub Codespaces**
+### Frontend
+- **React 18** - Modern React with hooks and concurrent features
+- **TypeScript** - Type-safe development experience
+- **Vite** - Fast build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - Beautiful and accessible UI components
+- **Framer Motion** - Smooth animations and transitions
+- **React Router** - Client-side routing
+- **React Hook Form** - Performant forms with validation
+- **React Query** - Server state management
+- **Recharts** - Data visualization and charts
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Backend & Database
+- **Supabase** - PostgreSQL database with real-time features
+- **Supabase Auth** - User authentication and authorization
+- **Supabase Storage** - File upload and management
 
-## What technologies are used for this project?
+### Development Tools
+- **ESLint** - Code linting and quality checks
+- **TypeScript** - Static type checking
 
-This project is built with:
+## 📁 Project Structure
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+src/
+├── components/          # Reusable UI components
+│   ├── admin/          # Admin-specific components
+│   ├── agents/         # Agent-related components
+│   ├── auth/           # Authentication components
+│   ├── dashboard/      # Dashboard components
+│   ├── home/           # Homepage components
+│   ├── layout/         # Layout components (header, footer)
+│   ├── properties/     # Property-related components
+│   └── ui/             # Base UI components (shadcn/ui)
+├── pages/              # Page components
+│   ├── admin/          # Admin dashboard pages
+│   ├── agent/          # Agent dashboard pages
+│   ├── auth/           # Authentication pages
+│   ├── dashboard/      # User dashboard pages
+│   └── user/           # User-specific pages
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions and configurations
+├── types/              # TypeScript type definitions
+└── styles/             # Global styles and Tailwind config
+```
 
-## How can I deploy this project?
+## 🌟 Key Features in Detail
 
-Simply open [Lovable](https://lovable.dev/projects/b76c1612-4587-4505-803d-54ad49b822ce) and click on Share -> Publish.
+### Multi-Role Authentication
+- **Users**: Browse and save properties, schedule viewings
+- **Agents**: Manage listings, track leads, handle client communications
+- **Admins**: Full platform oversight and management
 
-## Can I connect a custom domain to my Lovable project?
+### Property Management
+- Comprehensive property listing system
+- Image galleries with multiple photos per property
+- Advanced filtering and search capabilities
+- Property comparison tools
+- Detailed property information and amenities
 
-Yes it is!
+### Location Focus
+- **Enugu** - The 'Coal City' with urban amenities and natural beauty
+- **Calabar** - The 'Canaan City' known for cleanliness and cultural heritage
+- **Lagos** - Nigeria's economic hub with premium waterfront properties
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🚀 Available Scripts
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run build:dev` - Build for development environment
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint for code quality
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+If you encounter any issues or have questions, please:
+1. Check the existing issues on GitHub
+2. Create a new issue with detailed information
+3. Contact our support team
+
+---
+
+**GoDirectly** - Making Nigerian real estate accessible to everyone. 🇳🇬
