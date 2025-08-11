@@ -55,7 +55,7 @@ const About = () => {
   return (
     <>
       <Helmet>
-        <title>About Us | HomePulse Realty</title>
+        <title>About Us | Godirect Realty</title>
         <meta name="description" content="Learn about HomePulse Realty, our mission, values, and the team behind our success." />
       </Helmet>
       

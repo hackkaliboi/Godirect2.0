@@ -51,12 +51,13 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {/* Enugu Card */}
             <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-600 to-green-800 z-0"></div>
               <div className="absolute inset-0 bg-gradient-to-t from-realty-900/90 to-realty-900/20 z-10"></div>
-              <img 
-                src="https://images.unsplash.com/photo-1577979538850-f3f88e8e8885?q=80&w=800&auto=format&fit=crop" 
-                alt="Enugu City" 
-                className="w-full h-80 object-cover transition-transform duration-10000 group-hover:scale-110"
-              />
+              <div className="w-full h-80 bg-gradient-to-br from-green-600 to-green-800 relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Building className="h-24 w-24 text-white/30" />
+                </div>
+              </div>
               <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
                 <div className="flex items-center text-white mb-2">
                   <MapPin className="h-5 w-5 mr-2 text-realty-gold" />
@@ -78,12 +79,13 @@ const Index = () => {
             
             {/* Calabar Card */}
             <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 z-0"></div>
               <div className="absolute inset-0 bg-gradient-to-t from-realty-900/90 to-realty-900/20 z-10"></div>
-              <img 
-                src="https://images.unsplash.com/photo-1580392443763-c4a9a8dea3c8?q=80&w=800&auto=format&fit=crop" 
-                alt="Calabar City" 
-                className="w-full h-80 object-cover transition-transform duration-10000 group-hover:scale-110"
-              />
+              <div className="w-full h-80 bg-gradient-to-br from-blue-600 to-blue-800 relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Home className="h-24 w-24 text-white/30" />
+                </div>
+              </div>
               <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
                 <div className="flex items-center text-white mb-2">
                   <MapPin className="h-5 w-5 mr-2 text-realty-gold" />
@@ -105,12 +107,13 @@ const Index = () => {
             
             {/* Lagos Card */}
             <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-600 to-orange-800 z-0"></div>
               <div className="absolute inset-0 bg-gradient-to-t from-realty-900/90 to-realty-900/20 z-10"></div>
-              <img 
-                src="https://images.unsplash.com/photo-1577948000111-9c970dfe3743?q=80&w=800&auto=format&fit=crop" 
-                alt="Lagos City" 
-                className="w-full h-80 object-cover transition-transform duration-10000 group-hover:scale-110"
-              />
+              <div className="w-full h-80 bg-gradient-to-br from-orange-600 to-orange-800 relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <TrendingUp className="h-24 w-24 text-white/30" />
+                </div>
+              </div>
               <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
                 <div className="flex items-center text-white mb-2">
                   <MapPin className="h-5 w-5 mr-2 text-realty-gold" />

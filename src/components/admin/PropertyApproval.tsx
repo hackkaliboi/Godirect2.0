@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -18,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, CheckCircle, XCircle, Eye, DollarSign } from "lucide-react";
+import { Search, MoreHorizontal, CheckCircle, XCircle, Eye, DollarSign, Plus } from "lucide-react";
 
 interface Property {
   id: string;
@@ -36,6 +37,12 @@ interface Property {
 const properties: Property[] = [];
 
 export function PropertyApproval() {
+  const navigate = useNavigate();
+
+  const handleCreateListing = () => {
+    navigate("/admin-dashboard/properties/create");
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved":
@@ -80,6 +87,13 @@ export function PropertyApproval() {
         <div className="flex items-center justify-between">
           <CardTitle>Property Approval</CardTitle>
           <div className="flex items-center space-x-2">
+            <Button 
+              onClick={handleCreateListing}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create Listing
+            </Button>
             <Button variant="outline">
               <Eye className="mr-2 h-4 w-4" />
               View All

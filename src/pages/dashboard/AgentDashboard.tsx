@@ -13,6 +13,7 @@ import AgentProfile from "../agent/AgentProfile";
 import AgentLeads from "../agent/AgentLeads";
 import AgentCommission from "../agent/AgentCommission";
 import AgentProperties from "../agent/AgentProperties";
+import CreateListing from "../agent/CreateListing";
 
 function AgentDashboardHome() {
   // Recent activities will be fetched from Supabase
@@ -85,6 +86,8 @@ export function AgentDashboard() {
         <Route index element={<AgentDashboardHome />} />
         <Route path="properties" element={<AgentProperties />} />
         <Route path="listings" element={<AgentListings />} />
+        <Route path="listings/create" element={<CreateListing />} />
+        <Route path="create-listing" element={<CreateListing />} />
         <Route path="clients" element={<AgentClients />} />
         <Route path="leads" element={<AgentLeads />} />
         <Route path="calendar" element={<AgentCalendar />} />

@@ -11,6 +11,7 @@ import AdminAnalytics from "../admin/AdminAnalytics";
 import AdminUsers from "../admin/AdminUsers";
 import AdminAgents from "../admin/AdminAgents";
 import AdminProperties from "../admin/AdminProperties";
+import AdminCreateListing from "../admin/AdminCreateListing";
 import AdminSettings from "../admin/AdminSettings";
 import AdminTransactions from "../admin/AdminTransactions";
 import AdminReports from "../admin/AdminReports";
@@ -73,6 +74,8 @@ export function AdminDashboard() {
         <Route path="users" element={<AdminUsers />} />
         <Route path="agents" element={<AdminAgents />} />
         <Route path="properties" element={<AdminProperties />} />
+        <Route path="properties/create" element={<AdminCreateListing />} />
+        <Route path="create-listing" element={<AdminCreateListing />} />
         <Route path="transactions" element={<AdminTransactions />} />
         <Route path="reports" element={<AdminReports />} />
         <Route path="system" element={<AdminSystem />} />

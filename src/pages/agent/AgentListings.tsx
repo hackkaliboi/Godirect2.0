@@ -1,8 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, Plus, Eye, Edit, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function AgentListings() {
+  const navigate = useNavigate();
+
+  const handleCreateListing = () => {
+    navigate("create"); // This will navigate to /agent-dashboard/listings/create
+  };
+
   return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -15,7 +22,10 @@ export default function AgentListings() {
               Manage your property listings and track performance
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-primary to-primary-glow">
+          <Button 
+            className="bg-gradient-to-r from-primary to-primary-glow"
+            onClick={handleCreateListing}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add New Listing
           </Button>
@@ -27,7 +37,7 @@ export default function AgentListings() {
           <p className="text-muted-foreground mb-4">
             Start by adding your first property listing to attract potential buyers
           </p>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleCreateListing}>
             <Plus className="mr-2 h-4 w-4" />
             Create Your First Listing
           </Button>

@@ -26,7 +26,7 @@ const HeroSearch = () => {
     navigate(`/properties?${params.toString()}`);
   };
 
-  const recentSearches = ["New York, NY", "Los Angeles, CA", "Chicago, IL", "Miami, FL"];
+  const recentSearches = ["Lagos, Nigeria", "Enugu, Nigeria", "Calabar, Nigeria", "Abuja, Nigeria"];
 
   return (
     <div className="relative w-full">
@@ -34,7 +34,7 @@ const HeroSearch = () => {
       <div 
         className="absolute inset-0 bg-cover bg-center z-0 transition-transform duration-[3000ms] ease-out transform hover:scale-105" 
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2000&auto=format&fit=crop')",
+          backgroundImage: "url('/hero-section/nigeria-city-1.png')",
           height: "100%",
           backgroundAttachment: "fixed"
         }}
