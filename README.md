@@ -1,8 +1,8 @@
-# GoDirectly - Real Estate Platform
+# GoDirect - Real Estate Platform
 
 **Find Your Dream Home in Nigeria** 🏡
 
-GoDirectly is a comprehensive real estate platform that connects buyers, sellers, and agents across Nigeria. Our platform specializes in premium properties in major Nigerian cities including Enugu, Calabar, and Lagos.
+GoDirect is a comprehensive real estate platform that connects buyers, sellers, and agents across Nigeria. Our platform specializes in premium properties in major Nigerian cities including Enugu, Calabar, and Lagos.
 
 ## ✨ Features
 
@@ -159,4 +159,4 @@ If you encounter any issues or have questions, please:
 
 ---
 
-**GoDirectly** - Making Nigerian real estate accessible to everyone. 🇳🇬
+**GoDirect** - Making Nigerian real estate accessible to everyone. 🇳🇬
