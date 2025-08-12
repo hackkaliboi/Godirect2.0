@@ -208,3 +208,66 @@ export async function fetchMarketTrends(): Promise<MarketTrend[]> {
     return [];
   }
 }
+
+// Create a new property
+export async function createProperty(propertyData: {
+  title: string;
+  description?: string;
+  price: number;
+  property_type: string;
+  status: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  square_feet?: number;
+  year_built?: number;
+  street?: string;
+  city: string;
+  state: string;
+  zip_code?: string;
+  amenities: string[];
+  images: string[];
+  featured?: boolean;
+  agent_id?: string;
+}): Promise<Property | null> {
+  console.log("Creating property...", propertyData);
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .insert({
+        title: propertyData.title,
+        description: propertyData.description,
+        price: propertyData.price,
+        property_type: propertyData.property_type,
+        status: propertyData.status,
+        bedrooms: propertyData.bedrooms,
+        bathrooms: propertyData.bathrooms,
+        square_feet: propertyData.square_feet,
+        year_built: propertyData.year_built,
+        street: propertyData.street,
+        city: propertyData.city,
+        state: propertyData.state,
+        zip_code: propertyData.zip_code,
+        amenities: propertyData.amenities || [],
+        images: propertyData.images || [],
+        featured: propertyData.featured || false,
+        agent_id: propertyData.agent_id,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error("Error creating property:", error);
+      throw error;
+    }
+    
+    return {
+      ...data,
+      is_featured: data.featured || false,
+      property_type: data.property_type as Property['property_type'],
+      status: data.status as Property['status']
+    };
+  } catch (error) {
+    console.error("Error creating property:", error);
+    throw error;
+  }
+}

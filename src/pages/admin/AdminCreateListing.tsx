@@ -31,6 +31,7 @@ import {
   Calendar
 } from "lucide-react";
 import { toast } from "sonner";
+import { createProperty } from "@/utils/supabaseData";
 
 // Enhanced validation schema for admin with additional fields
 const adminListingSchema = z.object({
@@ -148,27 +149,40 @@ export default function AdminCreateListing() {
     setIsSubmitting(true);
     
     try {
-      // Here you would typically upload to Supabase
-      const listingData = {
-        ...data,
+      // Map admin form data to property format
+      const propertyData = {
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        property_type: data.propertyType,
+        status: data.listingType === "sale" ? "For Sale" : "For Rent",
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        square_feet: data.squareFootage,
+        year_built: data.yearBuilt,
+        street: data.street,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zipCode,
         amenities: selectedAmenities,
-        images: images.map(img => img.name), // In real app, upload files first
-        createdBy: "admin", // Admin identifier
-        createdAt: new Date().toISOString(),
-        lastModified: new Date().toISOString(),
+        images: images.map(img => img.name), // TODO: Upload files to storage first
+        featured: data.featured,
+        agent_id: data.assignedAgent || null,
       };
 
-      console.log("Admin listing data:", listingData);
+      // Save to Supabase
+      const createdProperty = await createProperty(propertyData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const successMessage = data.status === "published" 
-        ? "Property listing created and published successfully!"
-        : "Property listing created successfully!";
-      
-      toast.success(successMessage);
-      navigate("/admin-dashboard/properties");
+      if (createdProperty) {
+        const successMessage = data.status === "published" 
+          ? "Property listing created and published successfully!"
+          : "Property listing created successfully!";
+        
+        toast.success(successMessage);
+        navigate("/admin-dashboard/properties");
+      } else {
+        throw new Error("Failed to create property");
+      }
       
     } catch (error) {
       toast.error("Failed to create listing. Please try again.");

@@ -27,6 +27,7 @@ import {
   X
 } from "lucide-react";
 import { toast } from "sonner";
+import { createProperty } from "@/utils/supabaseData";
 
 // Validation schema
 const listingSchema = z.object({
@@ -120,23 +121,36 @@ export default function CreateListing() {
     setIsSubmitting(true);
     
     try {
-      // Here you would typically upload to Supabase
-      const listingData = {
-        ...data,
+      // Map form data to property format
+      const propertyData = {
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        property_type: data.propertyType,
+        status: data.listingType === "sale" ? "For Sale" : "For Rent",
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        square_feet: data.squareFootage,
+        year_built: data.yearBuilt,
+        street: data.street,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zipCode,
         amenities: selectedAmenities,
-        images: images.map(img => img.name), // In real app, upload files first
-        agentId: "current-agent-id", // Get from auth context
-        status: "pending", // New listings need approval
-        createdAt: new Date().toISOString(),
+        images: images.map(img => img.name), // TODO: Upload files to storage first
+        featured: false, // Agent listings are not featured by default
+        agent_id: "current-agent-id", // TODO: Get from auth context
       };
 
-      console.log("Listing data:", listingData);
+      // Save to Supabase
+      const createdProperty = await createProperty(propertyData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast.success("Property listing created successfully! It will be reviewed before going live.");
-      navigate("/agent-dashboard/listings");
+      if (createdProperty) {
+        toast.success("Property listing created successfully! It will be reviewed before going live.");
+        navigate("/agent-dashboard/listings");
+      } else {
+        throw new Error("Failed to create property");
+      }
       
     } catch (error) {
       toast.error("Failed to create listing. Please try again.");
