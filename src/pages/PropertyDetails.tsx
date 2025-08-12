@@ -25,6 +25,16 @@ const PropertyDetails = () => {
     enabled: !!id
   });
   
+  // Similar properties (excluding current property)
+  const { data: similarProperties = [] } = useQuery({
+    queryKey: ["similar-properties", property?.id, property?.type],
+    queryFn: async () => {
+      // For now, return empty array - you can implement fetchProperties later
+      return [];
+    },
+    enabled: !!property
+  });
+  
   // If loading
   if (isLoading) {
     return (
@@ -35,16 +45,6 @@ const PropertyDetails = () => {
       </div>
     );
   }
-
-  // Similar properties (excluding current property)
-  const { data: similarProperties = [] } = useQuery({
-    queryKey: ["similar-properties", property?.id, property?.property_type],
-    queryFn: async () => {
-      // For now, return empty array - you can implement fetchProperties later
-      return [];
-    },
-    enabled: !!property
-  });
 
   // If error
   if (error || !property) {
@@ -179,7 +179,7 @@ const PropertyDetails = () => {
                   <div className="text-center p-4 bg-realty-50 dark:bg-realty-700/30 rounded-lg">
                     <Home className="h-6 w-6 mx-auto text-realty-800 dark:text-realty-300 mb-2" />
                     <div className="text-lg font-medium text-realty-900 dark:text-white">
-                      {property.property_type}
+                      {property.type}
                     </div>
                     <div className="text-sm text-realty-600 dark:text-realty-400">
                       Property Type
@@ -214,7 +214,7 @@ const PropertyDetails = () => {
                         Property Type: 
                       </span>
                       <span className="ml-1 text-realty-900 dark:text-white">
-                        {property.property_type}
+                        {property.type || 'Not specified'}
                       </span>
                     </div>
                   </div>

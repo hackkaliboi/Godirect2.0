@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { LayoutGrid, LayoutList, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,33 +32,7 @@ const PropertyListings = () => {
     queryFn: fetchProperties,
   });
 
-  // Parse URL query params on initial load and set filtered properties
-  useEffect(() => {
-    if (properties.length > 0) {
-      setFilteredProperties(properties);
-      
-      const params = new URLSearchParams(location.search);
-      const locationFilter = params.get("location");
-      const typeFilter = params.get("type");
-      const priceFilter = params.get("price");
-      
-      const initialFilters: Partial<FilterState> = {};
-      if (locationFilter) initialFilters.searchTerm = locationFilter;
-      if (typeFilter) initialFilters.propertyTypes = [typeFilter];
-      if (priceFilter) {
-        // Handle price range logic based on your priceFilter format
-      }
-      
-      setInitialFilters(initialFilters);
-      
-      // Apply initial filters if present
-      if (Object.keys(initialFilters).length > 0) {
-        handleApplyFilters(initialFilters as FilterState);
-      }
-    }
-  }, [properties, location.search]);
-
-  const handleApplyFilters = (filters: FilterState) => {
+  const handleApplyFilters = useCallback((filters: FilterState) => {
     // Apply all filters to the properties
     let results = [...properties];
     
@@ -77,7 +51,7 @@ const PropertyListings = () => {
     // Filter by property type
     if (filters.propertyTypes && filters.propertyTypes.length > 0) {
       results = results.filter((property) =>
-        filters.propertyTypes.includes(property.property_type)
+        filters.propertyTypes.includes(property.type)
       );
     }
     
@@ -114,7 +88,33 @@ const PropertyListings = () => {
     }
     
     setFilteredProperties(results);
-  };
+  }, [properties]);
+
+  // Parse URL query params on initial load and set filtered properties
+  useEffect(() => {
+    if (properties.length > 0) {
+      setFilteredProperties(properties);
+      
+      const params = new URLSearchParams(location.search);
+      const locationFilter = params.get("location");
+      const typeFilter = params.get("type");
+      const priceFilter = params.get("price");
+      
+      const initialFilters: Partial<FilterState> = {};
+      if (locationFilter) initialFilters.searchTerm = locationFilter;
+      if (typeFilter) initialFilters.propertyTypes = [typeFilter];
+      if (priceFilter) {
+        // Handle price range logic based on your priceFilter format
+      }
+      
+      setInitialFilters(initialFilters);
+      
+      // Apply initial filters if present
+      if (Object.keys(initialFilters).length > 0) {
+        handleApplyFilters(initialFilters as FilterState);
+      }
+    }
+  }, [properties, location.search, handleApplyFilters]);
 
   // Sort properties
   const sortProperties = (properties: Property[]) => {

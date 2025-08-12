@@ -43,7 +43,7 @@ const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
       searchTerm,
       propertyTypes: selectedTypes,
       amenities: selectedAmenities,
-      priceRange,
+      priceRange: priceRange as [number, number],
       bedrooms,
       bathrooms,
     });
