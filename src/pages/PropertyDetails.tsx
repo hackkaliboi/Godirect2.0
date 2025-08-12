@@ -14,10 +14,15 @@ import PropertyPurchase from "@/components/properties/PropertyPurchase";
 import { Helmet } from "react-helmet-async";
 import { fetchPropertyById, Property } from "@/utils/supabaseData";
 import { useQuery } from "@tanstack/react-query";
+import ChatWidget from "@/components/messaging/ChatWidget";
+import ViewingScheduler from "@/components/viewings/ViewingScheduler";
+import PropertyInquiryForm from "@/components/inquiries/PropertyInquiryForm";
+import { analyticsApi } from "@/lib/api";
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   
   const { data: property, isLoading, error } = useQuery({
     queryKey: ["property", id],
@@ -308,12 +313,31 @@ const PropertyDetails = () => {
                   </div>
                   
                   <div className="space-y-3">
-                    <Button className="w-full bg-realty-800 hover:bg-realty-900 text-white">
-                      Contact Agent
+                    <Button 
+                      className="w-full bg-realty-800 hover:bg-realty-900 text-white"
+                      onClick={() => setIsChatOpen(true)}
+                    >
+                      Chat with Agent
                     </Button>
-                    <Button variant="outline" className="w-full">
-                      Schedule Viewing
-                    </Button>
+                    
+                    {property.agent_id && (
+                      <ViewingScheduler
+                        propertyId={property.id}
+                        agentId={property.agent_id}
+                        property={{
+                          title: property.title,
+                          address: `${property.street}, ${property.city}, ${property.state}`,
+                          price: property.price,
+                          images: property.images
+                        }}
+                        agent={{
+                          id: property.agent_id,
+                          name: 'Agent Name', // This would come from agent data
+                          email: 'agent@example.com',
+                          phone: '+234 800 000 0000'
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
               )}
@@ -326,10 +350,14 @@ const PropertyDetails = () => {
                 <p className="text-sm text-realty-600 dark:text-realty-400 mb-4">
                   Ready to make this property yours? Submit a purchase request and our team will guide you through the process.
                 </p>
-                <PropertyPurchase 
+                <PropertyInquiryForm
                   propertyId={property.id}
-                  propertyTitle={property.title}
-                  propertyPrice={property.price}
+                  property={{
+                    title: property.title,
+                    price: property.price,
+                    address: `${property.street}, ${property.city}, ${property.state}`,
+                    agent_id: property.agent_id
+                  }}
                 />
               </div>
               
@@ -369,6 +397,17 @@ const PropertyDetails = () => {
           </div>
         </div>
       </div>
+      
+      {/* Chat Widget */}
+      {property.agent_id && (
+        <ChatWidget
+          propertyId={property.id}
+          agentId={property.agent_id}
+          isOpen={isChatOpen}
+          onToggle={() => setIsChatOpen(!isChatOpen)}
+          onClose={() => setIsChatOpen(false)}
+        />
+      )}
     </>
   );
 };
