@@ -5,18 +5,18 @@ import { Heart, Eye, MapPin, DollarSign } from "lucide-react";
 export default function UserSaved() {
   return (
     <div>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Heart className="h-8 w-8 text-destructive" />
-              Saved Properties
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold flex flex-wrap items-center gap-2">
+              <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-destructive flex-shrink-0" />
+              <span className="break-words">Saved Properties</span>
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               Properties you've saved for later viewing
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-primary to-primary-glow">
+          <Button className="bg-gradient-to-r from-primary to-primary-glow whitespace-nowrap">
             <Eye className="mr-2 h-4 w-4" />
             Browse Properties
           </Button>

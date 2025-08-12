@@ -25,12 +25,12 @@ function UserDashboardHome() {
   }[] = [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">User Dashboard</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">User Dashboard</h1>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Saved Properties"
           value="12"
@@ -57,9 +57,9 @@ function UserDashboardHome() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <div className="col-span-4">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-7">
+        <div className="lg:col-span-4">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
             <h3 className="text-lg font-semibold mb-4">Saved Properties</h3>
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">
@@ -69,7 +69,7 @@ function UserDashboardHome() {
           </div>
         </div>
         
-        <div className="col-span-3">
+        <div className="lg:col-span-3">
           <RecentActivity activities={recentActivities} />
         </div>
       </div>

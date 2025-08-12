@@ -4,18 +4,18 @@ import { Search, Clock, MapPin, Filter } from "lucide-react";
 
 export default function UserHistory() {
   return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Clock className="h-8 w-8 text-accent" />
-              Search History
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold flex flex-wrap items-center gap-2">
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-accent flex-shrink-0" />
+              <span className="break-words">Search History</span>
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               Review your previous property searches and preferences
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-accent to-warning">
+          <Button className="bg-gradient-to-r from-accent to-warning whitespace-nowrap">
             <Search className="mr-2 h-4 w-4" />
             New Search
           </Button>

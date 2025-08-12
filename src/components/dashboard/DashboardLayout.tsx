@@ -13,10 +13,10 @@ export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
       <div className="min-h-screen flex w-full bg-dashboard-bg">
         <DashboardSidebar userRole={userRole} />
         
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <DashboardHeader userRole={userRole} />
           
-          <main className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 bg-muted/30 overflow-auto">
+          <main className="flex-1 p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6 bg-muted/30 overflow-auto">
             {children}
           </main>
         </div>

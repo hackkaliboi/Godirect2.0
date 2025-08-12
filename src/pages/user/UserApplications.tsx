@@ -5,43 +5,43 @@ import { FileText, CheckCircle, Clock, XCircle } from "lucide-react";
 
 export default function UserApplications() {
   return (
-    <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <FileText className="h-8 w-8 text-warning" />
-              My Applications
+    <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold flex flex-wrap items-center gap-2">
+              <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-warning flex-shrink-0" />
+              <span className="break-words">My Applications</span>
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               Track your rental and purchase applications
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-warning to-accent">
+          <Button className="bg-gradient-to-r from-warning to-accent whitespace-nowrap">
             <FileText className="mr-2 h-4 w-4" />
             Application History
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3 mb-6">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3 mb-4 sm:mb-6">
           <Card>
-            <CardContent className="p-6 text-center">
-              <Clock className="mx-auto h-8 w-8 text-warning mb-2" />
-              <p className="text-2xl font-bold">0</p>
-              <p className="text-sm text-muted-foreground">Pending</p>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <Clock className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-warning mb-2" />
+              <p className="text-xl sm:text-2xl font-bold">0</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Pending</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-center">
-              <CheckCircle className="mx-auto h-8 w-8 text-success mb-2" />
-              <p className="text-2xl font-bold">0</p>
-              <p className="text-sm text-muted-foreground">Approved</p>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <CheckCircle className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-success mb-2" />
+              <p className="text-xl sm:text-2xl font-bold">0</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Approved</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-center">
-              <XCircle className="mx-auto h-8 w-8 text-destructive mb-2" />
-              <p className="text-2xl font-bold">0</p>
-              <p className="text-sm text-muted-foreground">Declined</p>
+            <CardContent className="p-4 sm:p-6 text-center">
+              <XCircle className="mx-auto h-6 w-6 sm:h-8 sm:w-8 text-destructive mb-2" />
+              <p className="text-xl sm:text-2xl font-bold">0</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Declined</p>
             </CardContent>
           </Card>
         </div>
