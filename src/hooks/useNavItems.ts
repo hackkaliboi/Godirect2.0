@@ -31,15 +31,20 @@ import {
   Building2
 } from "lucide-react";
 
+interface IconProps {
+  className?: string;
+  size?: number;
+}
+
 type NavItemWithPath = {
   title: string;
   path: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<IconProps>;
 };
 
 type NavItemWithSubItems = {
   title: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<IconProps>;
   subItems: { title: string; path: string }[];
 };
 

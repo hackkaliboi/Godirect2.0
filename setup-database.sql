@@ -176,6 +176,19 @@ CREATE TABLE IF NOT EXISTS public.support_tickets (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create contact_messages table
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    subject TEXT,
+    message TEXT NOT NULL,
+    status TEXT DEFAULT 'new' CHECK (status IN ('new', 'read', 'replied', 'archived')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_properties_agent_id ON properties(agent_id);
 CREATE INDEX IF NOT EXISTS idx_properties_type ON properties(type);
@@ -190,6 +203,8 @@ CREATE INDEX IF NOT EXISTS idx_testimonials_featured ON testimonials(is_featured
 CREATE INDEX IF NOT EXISTS idx_activity_log_user_id ON activity_log(user_id);
 CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON contact_messages(status);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_created_at ON contact_messages(created_at);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -201,6 +216,7 @@ ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE support_tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist to avoid conflicts
 DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
@@ -294,6 +310,28 @@ CREATE POLICY "Users can view their own activity" ON activity_log
 CREATE POLICY "Testimonials are viewable by everyone" ON testimonials
     FOR SELECT USING (true);
 
+-- Contact messages policies
+CREATE POLICY "Anyone can submit contact messages" ON contact_messages
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Admins and agents can view contact messages" ON contact_messages
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE profiles.id = auth.uid() 
+            AND profiles.role IN ('agent', 'admin')
+        )
+    );
+
+CREATE POLICY "Admins and agents can update contact messages" ON contact_messages
+    FOR UPDATE USING (
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE profiles.id = auth.uid() 
+            AND profiles.role IN ('agent', 'admin')
+        )
+    );
+
 -- Create functions for automatic timestamp updates
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -324,6 +362,16 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+-- Drop existing triggers if they exist to avoid conflicts
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
+DROP TRIGGER IF EXISTS update_agents_updated_at ON agents;
+DROP TRIGGER IF EXISTS update_properties_updated_at ON properties;
+DROP TRIGGER IF EXISTS update_clients_updated_at ON clients;
+DROP TRIGGER IF EXISTS update_testimonials_updated_at ON testimonials;
+DROP TRIGGER IF EXISTS update_market_trends_updated_at ON market_trends;
+DROP TRIGGER IF EXISTS update_support_tickets_updated_at ON support_tickets;
+DROP TRIGGER IF EXISTS update_contact_messages_updated_at ON contact_messages;
+
 -- Create triggers for automatic timestamp updates
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -346,42 +394,14 @@ CREATE TRIGGER update_market_trends_updated_at BEFORE UPDATE ON market_trends
 CREATE TRIGGER update_support_tickets_updated_at BEFORE UPDATE ON support_tickets
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-COMMIT;
+CREATE TRIGGER update_contact_messages_updated_at BEFORE UPDATE ON contact_messages
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Sample agents
-INSERT INTO agents (name, email, phone, title, bio, experience, specializations, listings, sales, reviews, ratings) VALUES
-('Sarah Johnson', 'sarah.johnson@godirect.com', '(555) 123-4567', 'Senior Real Estate Agent', 'Experienced agent specializing in luxury homes and commercial properties.', 8, ARRAY['Luxury Homes', 'Commercial'], 45, 120, 89, 4.8),
-('Michael Chen', 'michael.chen@godirect.com', '(555) 234-5678', 'Real Estate Specialist', 'Expert in residential properties and first-time home buyers.', 5, ARRAY['Residential', 'First-time Buyers'], 32, 85, 67, 4.6),
-('Emily Rodriguez', 'emily.rodriguez@godirect.com', '(555) 345-6789', 'Property Consultant', 'Specializing in investment properties and rental management.', 6, ARRAY['Investment', 'Rentals'], 28, 95, 72, 4.7),
-('David Thompson', 'david.thompson@godirect.com', '(555) 456-7890', 'Commercial Agent', 'Focus on commercial real estate and business properties.', 10, ARRAY['Commercial', 'Business'], 38, 110, 81, 4.9);
-
--- Sample properties
-INSERT INTO properties (title, description, price, type, bedrooms, bathrooms, square_feet, address, city, state, zip_code, agent_id, is_featured) VALUES
-('Modern Downtown Condo', 'Beautiful 2-bedroom condo in the heart of downtown with city views.', 450000, 'condo', 2, 2, 1200, '123 Main St', 'Seattle', 'WA', '98101', (SELECT id FROM agents WHERE email = 'sarah.johnson@godirect.com'), true),
-('Family Home in Suburbs', 'Spacious 4-bedroom family home with large backyard and garage.', 650000, 'house', 4, 3, 2400, '456 Oak Ave', 'Bellevue', 'WA', '98004', (SELECT id FROM agents WHERE email = 'michael.chen@godirect.com'), true),
-('Luxury Waterfront Villa', 'Stunning waterfront property with private dock and panoramic views.', 1200000, 'house', 5, 4, 3800, '789 Lake Dr', 'Kirkland', 'WA', '98033', (SELECT id FROM agents WHERE email = 'sarah.johnson@godirect.com'), true),
-('Investment Duplex', 'Great investment opportunity with two rental units.', 550000, 'house', 6, 4, 2800, '321 Pine St', 'Tacoma', 'WA', '98402', (SELECT id FROM agents WHERE email = 'emily.rodriguez@godirect.com'), false),
-('Commercial Office Space', 'Prime commercial space in business district.', 850000, 'commercial', 0, 2, 4000, '654 Business Blvd', 'Seattle', 'WA', '98102', (SELECT id FROM agents WHERE email = 'david.thompson@godirect.com'), false);
-
--- Sample testimonials
-INSERT INTO testimonials (name, role, content, rating, agent_id, is_featured) VALUES
-('John Smith', 'Home Buyer', 'Sarah helped us find our dream home! Her expertise and dedication made the process smooth and stress-free.', 5, (SELECT id FROM agents WHERE email = 'sarah.johnson@godirect.com'), true),
-('Lisa Wang', 'First-time Buyer', 'Michael was incredibly patient and knowledgeable. He guided us through every step of buying our first home.', 5, (SELECT id FROM agents WHERE email = 'michael.chen@godirect.com'), true),
-('Robert Davis', 'Investor', 'Emily found us an excellent investment property. Her market knowledge is outstanding.', 4, (SELECT id FROM agents WHERE email = 'emily.rodriguez@godirect.com'), true),
-('Amanda Wilson', 'Business Owner', 'David helped us secure the perfect commercial space for our business. Highly recommended!', 5, (SELECT id FROM agents WHERE email = 'david.thompson@godirect.com'), false);
-
--- Sample market trends
-INSERT INTO market_trends (title, value, change, trend, description) VALUES
-('Average Home Price', '$725,000', 5.2, 'up', 'Home prices have increased 5.2% compared to last month'),
-('Days on Market', '18 days', -2.1, 'down', 'Properties are selling 2.1% faster than last month'),
-('Inventory Levels', '2.3 months', -8.5, 'down', 'Housing inventory has decreased by 8.5%'),
-('Mortgage Rates', '6.8%', 0.3, 'up', 'Interest rates have increased slightly this month');
-
--- Sample dashboard stats
+-- Initialize dashboard stats with zero values
 INSERT INTO dashboard_stats (stat_name, stat_value, stat_change, trend, compare_text) VALUES
-('Total Properties', '1,247', 12.5, 'up', '+12.5% from last month'),
-('Active Listings', '342', -5.2, 'down', '-5.2% from last month'),
-('Properties Sold', '89', 18.7, 'up', '+18.7% from last month'),
-('Average Price', '$725,000', 5.2, 'up', '+5.2% from last month');
+('Total Properties', '0', 0.0, 'stable', 'No change'),
+('Active Listings', '0', 0.0, 'stable', 'No change'),
+('Properties Sold', '0', 0.0, 'stable', 'No change'),
+('Average Price', '$0', 0.0, 'stable', 'No change');
 
 COMMIT;

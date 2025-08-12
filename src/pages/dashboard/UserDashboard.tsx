@@ -13,7 +13,10 @@ import UserHistory from "../user/UserHistory";
 import UserApplications from "../user/UserApplications";
 import UserProfile from "../user/UserProfile";
 
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+
 function UserDashboardHome() {
+  const { stats, loading, error } = useDashboardStats();
   // Recent activities will be fetched from Supabase
   const recentActivities: {
     id: string;
@@ -24,6 +27,14 @@ function UserDashboardHome() {
     status?: "pending" | "completed" | "cancelled";
   }[] = [];
 
+  const getStat = (name: string) => {
+    const stat = stats?.find(s => s.stat_name === name);
+    return {
+      value: stat?.stat_value || '0',
+      description: stat?.compare_text || 'No change from last month'
+    };
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -33,27 +44,31 @@ function UserDashboardHome() {
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Saved Properties"
-          value="12"
-          description="Properties in your watchlist"
+          value={getStat('user_saved_properties').value}
+          description={getStat('user_saved_properties').description}
           icon={Heart}
+          loading={loading}
         />
         <StatCard
           title="Property Views"
-          value="45"
-          description="Properties you've viewed"
+          value={getStat('user_property_views').value}
+          description={getStat('user_property_views').description}
           icon={Eye}
+          loading={loading}
         />
         <StatCard
           title="Inquiries Sent"
-          value="8"
-          description="Messages to agents"
+          value={getStat('user_inquiries_sent').value}
+          description={getStat('user_inquiries_sent').description}
           icon={MessageSquare}
+          loading={loading}
         />
         <StatCard
           title="Scheduled Tours"
-          value="3"
-          description="Upcoming property tours"
+          value={getStat('user_scheduled_tours').value}
+          description={getStat('user_scheduled_tours').description}
           icon={Calendar}
+          loading={loading}
         />
       </div>
 

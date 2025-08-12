@@ -17,7 +17,19 @@ import AdminTransactions from "../admin/AdminTransactions";
 import AdminReports from "../admin/AdminReports";
 import AdminSystem from "../admin/AdminSystem";
 
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+
 function AdminDashboardHome() {
+  const { stats, loading, error } = useDashboardStats();
+
+  const getStat = (name: string) => {
+    const stat = stats.find(s => s.stat_name === name);
+    return {
+      value: stat?.stat_value || '0',
+      description: stat?.compare_text || 'No change from last month'
+    };
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -27,27 +39,31 @@ function AdminDashboardHome() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Users"
-          value="1,234"
-          description="+20.1% from last month"
+          value={getStat('total_users').value}
+          description={getStat('total_users').description}
           icon={Users}
+          loading={loading}
         />
         <StatCard
           title="Total Properties"
-          value="567"
-          description="+15.3% from last month"
+          value={getStat('total_properties').value}
+          description={getStat('total_properties').description}
           icon={Building}
+          loading={loading}
         />
         <StatCard
           title="Active Agents"
-          value="89"
-          description="+5.2% from last month"
+          value={getStat('active_agents').value}
+          description={getStat('active_agents').description}
           icon={UserCheck}
+          loading={loading}
         />
         <StatCard
           title="Revenue"
-          value="$45,231"
-          description="+12.5% from last month"
+          value={getStat('total_revenue').value}
+          description={getStat('total_revenue').description}
           icon={DollarSign}
+          loading={loading}
         />
       </div>
       

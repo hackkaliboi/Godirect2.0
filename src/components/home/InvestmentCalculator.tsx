@@ -54,8 +54,13 @@ const InvestmentCalculator = () => {
   const [projectedValue, setProjectedValue] = useState(0);
   
   // Chart data
-  const [mortgageChartData, setMortgageChartData] = useState<any[]>([]);
-  const [roiChartData, setRoiChartData] = useState<any[]>([]);
+  interface ChartDataPoint {
+    year: string;
+    [key: string]: string | number;
+  }
+  
+  const [mortgageChartData, setMortgageChartData] = useState<ChartDataPoint[]>([]);
+  const [roiChartData, setRoiChartData] = useState<ChartDataPoint[]>([]);
 
   // Calculate mortgage results
   useEffect(() => {

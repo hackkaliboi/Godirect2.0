@@ -15,8 +15,10 @@ import AgentCommission from "../agent/AgentCommission";
 import AgentProperties from "../agent/AgentProperties";
 import CreateListing from "../agent/CreateListing";
 
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+
 function AgentDashboardHome() {
-  // Recent activities will be fetched from Supabase
+  const { stats, loading, error } = useDashboardStats();
   const recentActivities: {
     id: string;
     type: "property" | "user" | "transaction" | "message";
@@ -25,6 +27,14 @@ function AgentDashboardHome() {
     timestamp: Date;
     status?: "pending" | "completed" | "cancelled";
   }[] = [];
+
+  const getStat = (name: string) => {
+    const stat = stats.find(s => s.stat_name === name);
+    return {
+      value: stat?.stat_value || '0',
+      description: stat?.compare_text || 'No change from last month'
+    };
+  };
 
   return (
     <div className="space-y-6">
@@ -35,27 +45,31 @@ function AgentDashboardHome() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Active Listings"
-          value="24"
-          description="Properties currently listed"
+          value={getStat('agent_active_listings').value}
+          description={getStat('agent_active_listings').description}
           icon={Building}
+          loading={loading}
         />
         <StatCard
           title="Active Clients"
-          value="18"
-          description="Clients currently working with"
+          value={getStat('agent_active_clients').value}
+          description={getStat('agent_active_clients').description}
           icon={Users}
+          loading={loading}
         />
         <StatCard
           title="This Month's Commission"
-          value="$12,450"
-          description="Commission earned this month"
+          value={getStat('agent_monthly_commission').value}
+          description={getStat('agent_monthly_commission').description}
           icon={DollarSign}
+          loading={loading}
         />
         <StatCard
           title="Scheduled Appointments"
-          value="7"
-          description="Upcoming client meetings"
+          value={getStat('agent_scheduled_appointments').value}
+          description={getStat('agent_scheduled_appointments').description}
           icon={Calendar}
+          loading={loading}
         />
       </div>
 

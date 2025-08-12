@@ -2,6 +2,7 @@
 // Follow this setup guide to integrate the Deno runtime into your application:
 // https://docs.supabase.com/guides/functions/connect-to-supabase
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -52,6 +53,3 @@ serve(async (req) => {
     );
   }
 });
-
-// Helper to create a Supabase client
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";

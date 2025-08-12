@@ -12,7 +12,7 @@ import Agents from "./pages/Agents";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
-import Header from "./components/layout/Header";
+import Navigation from "./components/layout/Navigation";
 import Footer from "./components/layout/Footer";
 
 // Dashboard Pages
@@ -125,7 +125,7 @@ const App = () => {
               path="/"
               element={
                 <div className="flex min-h-screen flex-col">
-                  <Header />
+                  <Navigation />
                   <main className="flex-1">
                     <Index />
                   </main>
@@ -138,7 +138,7 @@ const App = () => {
               path="/properties"
               element={
                 <div className="flex min-h-screen flex-col">
-                  <Header />
+                  <Navigation />
                   <main className="flex-1">
                     <PropertyListings />
                   </main>
@@ -151,7 +151,7 @@ const App = () => {
               path="/properties/:id"
               element={
                 <div className="flex min-h-screen flex-col">
-                  <Header />
+                  <Navigation />
                   <main className="flex-1">
                     <PropertyDetails />
                   </main>
@@ -164,7 +164,7 @@ const App = () => {
               path="/agents"
               element={
                 <div className="flex min-h-screen flex-col">
-                  <Header />
+                  <Navigation />
                   <main className="flex-1">
                     <Agents />
                   </main>
@@ -177,7 +177,7 @@ const App = () => {
               path="/about"
               element={
                 <div className="flex min-h-screen flex-col">
-                  <Header />
+                  <Navigation />
                   <main className="flex-1">
                     <About />
                   </main>
@@ -190,7 +190,7 @@ const App = () => {
               path="/contact"
               element={
                 <div className="flex min-h-screen flex-col">
-                  <Header />
+                  <Navigation />
                   <main className="flex-1">
                     <Contact />
                   </main>
@@ -203,7 +203,7 @@ const App = () => {
               path="*"
               element={
                 <div className="flex min-h-screen flex-col">
-                  <Header />
+                  <Navigation />
                   <main className="flex-1">
                     <NotFound />
                   </main>

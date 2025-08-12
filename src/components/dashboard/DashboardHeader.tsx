@@ -3,12 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, Search, LogOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useContext } from "react";
+import { AuthContext } from "@/types/auth";
 
 interface DashboardHeaderProps {
   userRole: "admin" | "agent" | "user";
 }
 
 export function DashboardHeader({ userRole }: DashboardHeaderProps) {
+  const { signOut } = useContext(AuthContext);
+  
   const getRoleDisplay = () => {
     switch (userRole) {
       case "admin":
@@ -54,7 +58,14 @@ export function DashboardHeader({ userRole }: DashboardHeaderProps) {
               {userRole.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <Button variant="outline" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10"
+            onClick={() => {
+              if (signOut) signOut();
+            }}
+          >
             <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>

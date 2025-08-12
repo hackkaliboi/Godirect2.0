@@ -16,11 +16,22 @@ interface StatData {
   change: number;
 }
 
+interface QueryBuilder {
+  select: (query: string) => QueryBuilder;
+  insert: (data: Record<string, unknown>) => QueryBuilder;
+  update: (data: Record<string, unknown>) => QueryBuilder;
+  eq: (column: string, value: unknown) => QueryBuilder;
+  in: (column: string, values: unknown[]) => QueryBuilder;
+  lt: (column: string, value: string) => QueryBuilder;
+  gte: (column: string, value: string) => QueryBuilder;
+  single: () => QueryBuilder;
+}
+
 interface SupabaseClientWithAuth {
   auth: {
-    getUser: () => Promise<{ data: { user: any } }>;
+    getUser: () => Promise<{ data: { user: { id: string; [key: string]: unknown } | null } }>;
   };
-  from: (table: string) => any;
+  from: (table: string) => QueryBuilder;
 }
 
 // Handle CORS preflight requests
@@ -47,7 +58,7 @@ const createSupabaseClient = (req: Request): SupabaseClientWithAuth => {
 // Authenticate the user and check if they're an admin
 const authenticateAdmin = async (
   supabase: SupabaseClientWithAuth
-): Promise<{ user: any; isAdmin: boolean; error?: string }> => {
+): Promise<{ user: { id: string; [key: string]: unknown } | null; isAdmin: boolean; error?: string }> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
 
