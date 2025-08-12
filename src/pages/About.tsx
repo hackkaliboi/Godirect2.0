@@ -3,28 +3,6 @@ import { Helmet } from "react-helmet-async";
 import { Check } from "lucide-react";
 
 const About = () => {
-  const teamMembers = [
-    {
-      name: "Jennifer Smith",
-      role: "CEO & Founder",
-      image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=400&auto=format&fit=crop"
-    },
-    {
-      name: "Michael Johnson",
-      role: "Chief Operating Officer",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop"
-    },
-    {
-      name: "Emily Davis",
-      role: "Head of Marketing",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop"
-    },
-    {
-      name: "David Wilson",
-      role: "Senior Property Consultant",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop"
-    }
-  ];
 
   const values = [
     {
@@ -56,14 +34,14 @@ const About = () => {
     <>
       <Helmet>
         <title>About Us | Godirect Realty</title>
-        <meta name="description" content="Learn about HomePulse Realty, our mission, values, and the team behind our success." />
+        <meta name="description" content="Learn about Godirect Realty, our mission, values, and the team behind our success." />
       </Helmet>
       
       <section className="bg-realty-50 dark:bg-realty-800/30 py-16 md:py-24">
         <div className="container-custom">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-semibold mb-6 text-realty-900 dark:text-white text-center">
-              About HomePulse Realty
+              About Godirect Realty
             </h1>
             <p className="text-xl text-realty-600 dark:text-realty-300 mb-12 text-center">
               Your trusted partner in finding the perfect place to call home since 2010.
@@ -72,7 +50,7 @@ const About = () => {
             <div className="aspect-video bg-white dark:bg-realty-800 rounded-xl overflow-hidden shadow-lg mb-8">
               <img 
                 src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop" 
-                alt="HomePulse Realty Office" 
+                alt="Godirect Realty Office" 
                 className="w-full h-full object-cover"
               />
             </div>
@@ -88,13 +66,13 @@ const About = () => {
                 Our Story
               </h2>
               <p className="text-realty-600 dark:text-realty-300 mb-4">
-                Founded in 2010, HomePulse Realty began with a simple mission: to transform the real estate experience by putting clients first and leveraging technology to simplify the home buying and selling process.
+                Founded in 2010, Godirect Realty began with a simple mission: to transform the real estate experience by putting clients first and leveraging technology to simplify the home buying and selling process.
               </p>
               <p className="text-realty-600 dark:text-realty-300 mb-4">
                 What started as a small team of passionate real estate professionals has grown into a nationwide network of experts dedicated to helping clients find their perfect home. Our journey has been marked by continuous innovation and an unwavering commitment to client satisfaction.
               </p>
               <p className="text-realty-600 dark:text-realty-300">
-                Today, HomePulse Realty stands as a testament to our founding principles, having facilitated thousands of successful transactions and helped countless families find the place where they truly belong.
+                Today, Godirect Realty stands as a testament to our founding principles, having facilitated thousands of successful transactions and helped countless families find the place where they truly belong.
               </p>
             </div>
             
@@ -165,37 +143,6 @@ const About = () => {
                 <p className="text-realty-600 dark:text-realty-300">
                   {value.description}
                 </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      <section className="py-16 md:py-24 bg-realty-beige dark:bg-realty-800/30">
-        <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4 text-realty-900 dark:text-white">
-              Meet Our Leadership Team
-            </h2>
-            <p className="text-realty-600 dark:text-realty-300 max-w-3xl mx-auto">
-              Experienced professionals dedicated to setting new standards in the real estate industry.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="text-center">
-                <div className="mb-4 aspect-square rounded-full overflow-hidden mx-auto w-48 h-48 border-4 border-white dark:border-realty-700 shadow-md">
-                  <img 
-                    src={member.image} 
-                    alt={member.name} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <h3 className="text-xl font-heading font-semibold text-realty-900 dark:text-white">
-                  {member.name}
-                </h3>
-                <p className="text-realty-600 dark:text-realty-400">{member.role}</p>
               </div>
             ))}
           </div>
