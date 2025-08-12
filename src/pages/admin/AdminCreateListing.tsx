@@ -154,18 +154,18 @@ export default function AdminCreateListing() {
         title: data.title,
         description: data.description,
         price: data.price,
-        property_type: data.propertyType,
-        status: data.listingType === "sale" ? "For Sale" : "For Rent",
+        type: data.propertyType.toLowerCase(), // Database uses 'type' column, not 'property_type'
+        status: "available", // Use 'available' status for consistency with database
         bedrooms: data.bedrooms,
         bathrooms: data.bathrooms,
         square_feet: data.squareFootage,
         year_built: data.yearBuilt,
-        street: data.street,
+        address: `${data.street}, ${data.city}, ${data.state} ${data.zipCode}`,
         city: data.city,
         state: data.state,
         zip_code: data.zipCode,
-        amenities: selectedAmenities,
-        images: images.map(img => img.name), // TODO: Upload files to storage first
+        features: selectedAmenities, // Database uses 'features' column, not 'amenities'
+        images: [], // Start with empty array for now
         featured: data.featured,
         agent_id: data.assignedAgent || null,
       };

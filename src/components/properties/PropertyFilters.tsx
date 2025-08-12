@@ -8,8 +8,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { propertyTypes, amenities } from "@/utils/data";
 import { cn } from "@/lib/utils";
 
+interface FilterState {
+  searchTerm?: string;
+  propertyTypes?: string[];
+  amenities?: string[];
+  priceRange?: [number, number];
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+}
+
 interface PropertyFiltersProps {
-  onApplyFilters: (filters: any) => void;
+  onApplyFilters: (filters: FilterState) => void;
 }
 
 const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {

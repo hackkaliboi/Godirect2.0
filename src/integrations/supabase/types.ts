@@ -107,7 +107,7 @@ export type Database = {
           name: string
           phone: string | null
           price_range: string | null
-          property_type: string | null
+          type: string | null
           status: string
           updated_at: string | null
           user_id: string | null
@@ -125,7 +125,7 @@ export type Database = {
           name: string
           phone?: string | null
           price_range?: string | null
-          property_type?: string | null
+          type?: string | null
           status?: string
           updated_at?: string | null
           user_id?: string | null
@@ -143,7 +143,7 @@ export type Database = {
           name?: string
           phone?: string | null
           price_range?: string | null
-          property_type?: string | null
+          type?: string | null
           status?: string
           updated_at?: string | null
           user_id?: string | null
@@ -455,7 +455,7 @@ export type Database = {
       properties: {
         Row: {
           agent_id: string | null
-          amenities: string[]
+          features: string[]
           bathrooms: number | null
           bedrooms: number | null
           city: string
@@ -465,7 +465,7 @@ export type Database = {
           id: string
           images: string[]
           price: number
-          property_type: string
+          type: string
           square_feet: number | null
           state: string
           status: string
@@ -477,7 +477,7 @@ export type Database = {
         }
         Insert: {
           agent_id?: string | null
-          amenities?: string[]
+          features?: string[]
           bathrooms?: number | null
           bedrooms?: number | null
           city: string
@@ -499,7 +499,7 @@ export type Database = {
         }
         Update: {
           agent_id?: string | null
-          amenities?: string[]
+          features?: string[]
           bathrooms?: number | null
           bedrooms?: number | null
           city?: string

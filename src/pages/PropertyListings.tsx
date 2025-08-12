@@ -6,39 +6,59 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyFilters from "@/components/properties/PropertyFilters";
-import { properties } from "@/utils/data";
+import { Property, fetchProperties } from "@/utils/supabaseData";
 import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
+
+interface FilterState {
+  searchTerm?: string;
+  propertyTypes?: string[];
+  amenities?: string[];
+  priceRange?: [number, number];
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+}
 
 const PropertyListings = () => {
   const location = useLocation();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
-  const [filteredProperties, setFilteredProperties] = useState(properties);
-  const [initialFilters, setInitialFilters] = useState({});
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [initialFilters, setInitialFilters] = useState<Partial<FilterState>>({});
+  
+  // Fetch properties from Supabase
+  const { data: properties = [], isLoading } = useQuery({
+    queryKey: ["properties"],
+    queryFn: fetchProperties,
+  });
 
-  // Parse URL query params on initial load
+  // Parse URL query params on initial load and set filtered properties
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const locationFilter = params.get("location");
-    const typeFilter = params.get("type");
-    const priceFilter = params.get("price");
-    
-    const initialFilters: any = {};
-    if (locationFilter) initialFilters.searchTerm = locationFilter;
-    if (typeFilter) initialFilters.propertyTypes = [typeFilter];
-    if (priceFilter) {
-      // Handle price range logic based on your priceFilter format
+    if (properties.length > 0) {
+      setFilteredProperties(properties);
+      
+      const params = new URLSearchParams(location.search);
+      const locationFilter = params.get("location");
+      const typeFilter = params.get("type");
+      const priceFilter = params.get("price");
+      
+      const initialFilters: Partial<FilterState> = {};
+      if (locationFilter) initialFilters.searchTerm = locationFilter;
+      if (typeFilter) initialFilters.propertyTypes = [typeFilter];
+      if (priceFilter) {
+        // Handle price range logic based on your priceFilter format
+      }
+      
+      setInitialFilters(initialFilters);
+      
+      // Apply initial filters if present
+      if (Object.keys(initialFilters).length > 0) {
+        handleApplyFilters(initialFilters as FilterState);
+      }
     }
-    
-    setInitialFilters(initialFilters);
-    
-    // Apply initial filters if present
-    if (Object.keys(initialFilters).length > 0) {
-      handleApplyFilters(initialFilters);
-    }
-  }, [location.search]);
+  }, [properties, location.search]);
 
-  const handleApplyFilters = (filters: any) => {
+  const handleApplyFilters = (filters: FilterState) => {
     // Apply all filters to the properties
     let results = [...properties];
     
@@ -47,9 +67,9 @@ const PropertyListings = () => {
       const term = filters.searchTerm.toLowerCase();
       results = results.filter(
         (property) =>
-          property.address.city.toLowerCase().includes(term) ||
-          property.address.state.toLowerCase().includes(term) ||
-          property.address.zipCode.toLowerCase().includes(term) ||
+          property.city.toLowerCase().includes(term) ||
+          property.state.toLowerCase().includes(term) ||
+          property.zip_code?.toLowerCase().includes(term) ||
           property.title.toLowerCase().includes(term)
       );
     }
@@ -57,7 +77,7 @@ const PropertyListings = () => {
     // Filter by property type
     if (filters.propertyTypes && filters.propertyTypes.length > 0) {
       results = results.filter((property) =>
-        filters.propertyTypes.includes(property.propertyType)
+        filters.propertyTypes.includes(property.property_type)
       );
     }
     
@@ -97,7 +117,7 @@ const PropertyListings = () => {
   };
 
   // Sort properties
-  const sortProperties = (properties: any[]) => {
+  const sortProperties = (properties: Property[]) => {
     switch (sortBy) {
       case "price_asc":
         return [...properties].sort((a, b) => a.price - b.price);
@@ -106,7 +126,7 @@ const PropertyListings = () => {
       case "newest":
         return [...properties].sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
       default:
         return properties;
@@ -114,11 +134,21 @@ const PropertyListings = () => {
   };
 
   const sortedProperties = sortProperties(filteredProperties);
+  
+  if (isLoading) {
+    return (
+      <div className="container-custom py-16 text-center">
+        <h2 className="text-2xl font-heading font-semibold mb-4">
+          Loading properties...
+        </h2>
+      </div>
+    );
+  }
 
   return (
     <>
       <Helmet>
-        <title>Browse Properties | HomePulse Realty</title>
+        <title>Browse Properties | Godirect Realty</title>
         <meta name="description" content="Browse our extensive collection of properties for sale. Find houses, apartments, condos, and more." />
       </Helmet>
       

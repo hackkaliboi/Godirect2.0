@@ -36,6 +36,16 @@ const PropertyDetails = () => {
     );
   }
 
+  // Similar properties (excluding current property)
+  const { data: similarProperties = [] } = useQuery({
+    queryKey: ["similar-properties", property?.id, property?.property_type],
+    queryFn: async () => {
+      // For now, return empty array - you can implement fetchProperties later
+      return [];
+    },
+    enabled: !!property
+  });
+
   // If error
   if (error || !property) {
     return (
@@ -50,26 +60,11 @@ const PropertyDetails = () => {
       </div>
     );
   }
-  
-  // Similar properties (excluding current property)
-  const { data: similarProperties = [] } = useQuery({
-    queryKey: ["similar-properties", property.id, property.property_type],
-    queryFn: async () => {
-      const allProperties = await fetch('/api/properties')
-        .then(res => res.json())
-        .catch(() => []);
-        
-      return allProperties
-        .filter((p: Property) => p.id !== property.id && p.property_type === property.property_type)
-        .slice(0, 3);
-    },
-    enabled: !!property
-  });
 
   return (
     <>
       <Helmet>
-        <title>{property.title} | HomePulse Realty</title>
+        <title>{property.title} | Godirect Realty</title>
         <meta name="description" content={property.description?.substring(0, 160) || ""} />
       </Helmet>
       

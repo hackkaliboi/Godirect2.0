@@ -33,8 +33,8 @@ export type Property = {
   state: string;
   zip_code?: string;
   images: string[];
-  amenities: string[];
-  property_type: "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial";
+  features: string[];
+  type: "house" | "apartment" | "condo" | "townhouse" | "land" | "commercial";
   year_built?: number;
   agent_id?: string;
   created_at: string;
@@ -112,7 +112,7 @@ export async function fetchProperties(): Promise<Property[]> {
     return (data || []).map(item => ({
       ...item,
       is_featured: item.featured || false,
-      property_type: item.property_type as Property['property_type'],
+      type: item.type as Property['type'],
       status: item.status as Property['status']
     }));
   } catch (error) {
@@ -124,21 +124,26 @@ export async function fetchProperties(): Promise<Property[]> {
 export async function fetchFeaturedProperties(): Promise<Property[]> {
   console.log("Fetching featured properties...");
   try {
+    // First try to fetch all properties and filter client-side
+    // This is a fallback in case the featured column doesn't exist yet
     const { data, error } = await supabase
       .from("properties")
-      .select("*")
-      .eq("featured", true);
+      .select("*");
     
     if (error) {
-      throw error;
+      console.error("Error fetching properties:", error);
+      return [];
     }
     
-    return (data || []).map(item => ({
-      ...item,
-      is_featured: item.featured || false,
-      property_type: item.property_type as Property['property_type'],
-      status: item.status as Property['status']
-    }));
+    // Filter for featured properties and map the data
+    return (data || [])
+      .filter(item => item.featured === true)
+      .map(item => ({
+        ...item,
+        is_featured: item.featured || false,
+        type: item.type as Property['type'],
+        status: item.status as Property['status']
+      }));
   } catch (error) {
     console.error("Error fetching featured properties:", error);
     return [];
@@ -162,7 +167,7 @@ export async function fetchPropertyById(id: string): Promise<Property | null> {
     return {
       ...data,
       is_featured: data.featured || false,
-      property_type: data.property_type as Property['property_type'],
+      type: data.type as Property['type'],
       status: data.status as Property['status']
     };
   } catch (error) {
@@ -214,7 +219,7 @@ export async function createProperty(propertyData: {
   title: string;
   description?: string;
   price: number;
-  property_type: string;
+  type: string;
   status: string;
   bedrooms?: number;
   bathrooms?: number;
@@ -224,50 +229,62 @@ export async function createProperty(propertyData: {
   city: string;
   state: string;
   zip_code?: string;
-  amenities: string[];
+  features: string[];
   images: string[];
   featured?: boolean;
-  agent_id?: string;
+  agent_id?: string | null;
 }): Promise<Property | null> {
-  console.log("Creating property...", propertyData);
+  console.log("Creating property with data:", JSON.stringify(propertyData, null, 2));
+  
   try {
+    const insertData = {
+      title: propertyData.title,
+      description: propertyData.description || null,
+      price: propertyData.price,
+      type: propertyData.type,
+      status: propertyData.status,
+      bedrooms: propertyData.bedrooms || null,
+      bathrooms: propertyData.bathrooms || null,
+      square_feet: propertyData.square_feet || null,
+      year_built: propertyData.year_built || null,
+      street: propertyData.street || null,
+      city: propertyData.city,
+      state: propertyData.state,
+      zip_code: propertyData.zip_code || null,
+      features: propertyData.features || [],
+      images: propertyData.images || [],
+      featured: propertyData.featured || false,
+      agent_id: propertyData.agent_id || null,
+    };
+    
+    console.log("Insert data:", JSON.stringify(insertData, null, 2));
+    
     const { data, error } = await supabase
       .from("properties")
-      .insert({
-        title: propertyData.title,
-        description: propertyData.description,
-        price: propertyData.price,
-        property_type: propertyData.property_type,
-        status: propertyData.status,
-        bedrooms: propertyData.bedrooms,
-        bathrooms: propertyData.bathrooms,
-        square_feet: propertyData.square_feet,
-        year_built: propertyData.year_built,
-        street: propertyData.street,
-        city: propertyData.city,
-        state: propertyData.state,
-        zip_code: propertyData.zip_code,
-        amenities: propertyData.amenities || [],
-        images: propertyData.images || [],
-        featured: propertyData.featured || false,
-        agent_id: propertyData.agent_id,
-      })
+      .insert(insertData)
       .select()
       .single();
     
     if (error) {
-      console.error("Error creating property:", error);
-      throw error;
+      console.error("Supabase error details:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      throw new Error(`Database error: ${error.message}`);
     }
+    
+    console.log("Property created successfully:", data);
     
     return {
       ...data,
       is_featured: data.featured || false,
-      property_type: data.property_type as Property['property_type'],
+      type: data.type as Property['type'],
       status: data.status as Property['status']
     };
   } catch (error) {
-    console.error("Error creating property:", error);
+    console.error("Error in createProperty function:", error);
     throw error;
   }
 }

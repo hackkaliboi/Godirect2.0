@@ -21,7 +21,7 @@ const PropertyTypes = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select("property_type");
+        .select("type");
       
       if (error) {
         throw error;
@@ -40,7 +40,7 @@ const PropertyTypes = () => {
     // Count properties by type
     const typeCounts: Record<string, number> = {};
     properties.forEach(prop => {
-      const type = prop.property_type;
+      const type = prop.type;
       typeCounts[type] = (typeCounts[type] || 0) + 1;
     });
     

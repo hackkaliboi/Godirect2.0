@@ -121,26 +121,31 @@ export default function CreateListing() {
     setIsSubmitting(true);
     
     try {
+      console.log("Form data:", data);
+      console.log("Selected amenities:", selectedAmenities);
+      
       // Map form data to property format
       const propertyData = {
         title: data.title,
         description: data.description,
         price: data.price,
-        property_type: data.propertyType,
-        status: data.listingType === "sale" ? "For Sale" : "For Rent",
+        type: data.propertyType.toLowerCase(), // Database uses 'type' column, not 'property_type'
+        status: "available", // Use 'available' status
         bedrooms: data.bedrooms,
         bathrooms: data.bathrooms,
         square_feet: data.squareFootage,
         year_built: data.yearBuilt,
-        street: data.street,
+        address: `${data.street}, ${data.city}, ${data.state} ${data.zipCode}`,
         city: data.city,
         state: data.state,
         zip_code: data.zipCode,
-        amenities: selectedAmenities,
-        images: images.map(img => img.name), // TODO: Upload files to storage first
+        features: selectedAmenities, // Database uses 'features' column, not 'amenities'
+        images: [], // Start with empty array for now
         featured: false, // Agent listings are not featured by default
-        agent_id: "current-agent-id", // TODO: Get from auth context
+        agent_id: null, // Set to null for now - will be updated when auth is implemented
       };
+
+      console.log("Property data to be sent:", propertyData);
 
       // Save to Supabase
       const createdProperty = await createProperty(propertyData);
@@ -153,8 +158,12 @@ export default function CreateListing() {
       }
       
     } catch (error) {
-      toast.error("Failed to create listing. Please try again.");
-      console.error("Error creating listing:", error);
+      console.error("Detailed error creating listing:", error);
+      if (error instanceof Error) {
+        toast.error(`Failed to create listing: ${error.message}`);
+      } else {
+        toast.error("Failed to create listing. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
