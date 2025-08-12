@@ -33,8 +33,8 @@ export type Property = {
   state: string;
   zip_code?: string;
   images: string[];
-  features: string[];
-  type: "house" | "apartment" | "condo" | "townhouse" | "land" | "commercial";
+  amenities: string[];
+  property_type: "House" | "Apartment" | "Condo" | "Townhouse" | "Land" | "Commercial";
   year_built?: number;
   agent_id?: string;
   created_at: string;
@@ -112,7 +112,7 @@ export async function fetchProperties(): Promise<Property[]> {
     return (data || []).map(item => ({
       ...item,
       is_featured: item.featured || false,
-      type: item.type as Property['type'],
+      property_type: item.property_type as Property['property_type'],
       status: item.status as Property['status']
     }));
   } catch (error) {
@@ -141,7 +141,7 @@ export async function fetchFeaturedProperties(): Promise<Property[]> {
       .map(item => ({
         ...item,
         is_featured: item.featured || false,
-        type: item.type as Property['type'],
+        property_type: item.property_type as Property['property_type'],
         status: item.status as Property['status']
       }));
   } catch (error) {
@@ -167,7 +167,7 @@ export async function fetchPropertyById(id: string): Promise<Property | null> {
     return {
       ...data,
       is_featured: data.featured || false,
-      type: data.type as Property['type'],
+      property_type: data.property_type as Property['property_type'],
       status: data.status as Property['status']
     };
   } catch (error) {
@@ -219,7 +219,7 @@ export async function createProperty(propertyData: {
   title: string;
   description?: string;
   price: number;
-  type: string;
+  property_type: string;
   status: string;
   bedrooms?: number;
   bathrooms?: number;
@@ -229,7 +229,7 @@ export async function createProperty(propertyData: {
   city: string;
   state: string;
   zip_code?: string;
-  features: string[];
+  amenities: string[];
   images: string[];
   featured?: boolean;
   agent_id?: string | null;
@@ -241,7 +241,7 @@ export async function createProperty(propertyData: {
       title: propertyData.title,
       description: propertyData.description || null,
       price: propertyData.price,
-      type: propertyData.type,
+      property_type: propertyData.property_type,
       status: propertyData.status,
       bedrooms: propertyData.bedrooms || null,
       bathrooms: propertyData.bathrooms || null,
@@ -251,7 +251,7 @@ export async function createProperty(propertyData: {
       city: propertyData.city,
       state: propertyData.state,
       zip_code: propertyData.zip_code || null,
-      features: propertyData.features || [],
+      amenities: propertyData.amenities || [],
       images: propertyData.images || [],
       featured: propertyData.featured || false,
       agent_id: propertyData.agent_id || null,
@@ -280,7 +280,7 @@ export async function createProperty(propertyData: {
     return {
       ...data,
       is_featured: data.featured || false,
-      type: data.type as Property['type'],
+      property_type: data.property_type as Property['property_type'],
       status: data.status as Property['status']
     };
   } catch (error) {
