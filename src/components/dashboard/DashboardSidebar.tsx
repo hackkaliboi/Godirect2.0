@@ -41,10 +41,17 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-primary text-primary-foreground font-medium" : "hover:bg-muted/50";
+
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   const getMenuItems = () => {
     const commonItems = [
@@ -139,6 +146,7 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
                       <NavLink 
                         to={item.url} 
                         end 
+                        onClick={handleLinkClick}
                         className={`
                           flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
                           ${active 

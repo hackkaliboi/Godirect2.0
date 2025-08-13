@@ -118,6 +118,15 @@
     }
   }
   
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
   @keyframes gradientX {
     0%, 100% {
       background-size: 200% 200%;
@@ -138,10 +147,36 @@
     }
   }
   
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+  
+  @keyframes slideOutToRight {
+    from {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(20px) scale(0.98);
+    }
+  }
+  
   /* Animation classes */
   .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
     opacity: 0;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 1s ease-in-out forwards;
   }
   
   .animate-gradient-x {
@@ -151,6 +186,14 @@
   
   .animate-float {
     animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-slide-in-left {
+    animation: slideInFromLeft 0.4s ease-out forwards;
+  }
+  
+  .animate-slide-out-right {
+    animation: slideOutToRight 0.4s ease-out forwards;
   }
   
   /* Enhanced hover shadow utility */

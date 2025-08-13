@@ -44,6 +44,8 @@ import DiagnosticTest from "./components/DiagnosticTest";
 import { AuthProvider, RequireAuth } from "./contexts/AuthContext";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { LoadingWrapper } from "./components/layout/LoadingWrapper";
+import RouteWrapper from "./components/layout/RouteWrapper";
 
 const App = () => {
   // Create QueryClient instance inside the component
@@ -54,43 +56,50 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <AuthProvider>
-          <ThemeProvider>
-            <CurrencyProvider>
-              <Routes>
+        <LoadingWrapper initialLoading={true} loadingDelay={2500}>
+          <AuthProvider>
+            <ThemeProvider>
+              <CurrencyProvider>
+                <Routes>
             {/* Authentication routes without header/footer */}
             <Route path="/login" element={<Navigate to="/user-login" replace />} />
-            <Route path="/user-login" element={<UserLogin />} />
-            <Route path="/user-signup" element={<UserSignup />} />
-            <Route path="/agent-login" element={<AgentLogin />} />
-            <Route path="/agent-signup" element={<AgentSignup />} />
-            <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/user-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserLogin /></RouteWrapper>} />
+            <Route path="/user-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserSignup /></RouteWrapper>} />
+            <Route path="/agent-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentLogin /></RouteWrapper>} />
+            <Route path="/agent-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentSignup /></RouteWrapper>} />
+            <Route path="/admin-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AdminLogin /></RouteWrapper>} />
+            <Route path="/forgot-password" element={<RouteWrapper includeNavigation={false} includeFooter={false}><ForgotPassword /></RouteWrapper>} />
+            <Route path="/reset-password" element={<RouteWrapper includeNavigation={false} includeFooter={false}><ResetPassword /></RouteWrapper>} />
             
             {/* Dashboard routes without header/footer */}
             <Route 
               path="/admin-dashboard/*" 
               element={
-                <RequireAuth requiredUserType="admin">
-                  <AdminDashboard />
-                </RequireAuth>
+                <RouteWrapper includeNavigation={false} includeFooter={false}>
+                  <RequireAuth requiredUserType="admin">
+                    <AdminDashboard />
+                  </RequireAuth>
+                </RouteWrapper>
               } 
             />
             <Route 
               path="/user-dashboard/*" 
               element={
-                <RequireAuth requiredUserType="user">
-                  <UserDashboard />
-                </RequireAuth>
+                <RouteWrapper includeNavigation={false} includeFooter={false}>
+                  <RequireAuth requiredUserType="user">
+                    <UserDashboard />
+                  </RequireAuth>
+                </RouteWrapper>
               } 
             />
             <Route 
               path="/agent-dashboard/*" 
               element={
-                <RequireAuth requiredUserType="agent">
-                  <AgentDashboard />
-                </RequireAuth>
+                <RouteWrapper includeNavigation={false} includeFooter={false}>
+                  <RequireAuth requiredUserType="agent">
+                    <AgentDashboard />
+                  </RequireAuth>
+                </RouteWrapper>
               } 
             />
             
@@ -98,139 +107,53 @@ const App = () => {
             <Route 
               path="/dashboard/admin/*" 
               element={
-                <RequireAuth requiredUserType="admin">
-                  <AdminDashboard />
-                </RequireAuth>
+                <RouteWrapper includeNavigation={false} includeFooter={false}>
+                  <RequireAuth requiredUserType="admin">
+                    <AdminDashboard />
+                  </RequireAuth>
+                </RouteWrapper>
               } 
             />
             <Route 
               path="/dashboard/user/*" 
               element={
-                <RequireAuth requiredUserType="user">
-                  <UserDashboard />
-                </RequireAuth>
+                <RouteWrapper includeNavigation={false} includeFooter={false}>
+                  <RequireAuth requiredUserType="user">
+                    <UserDashboard />
+                  </RequireAuth>
+                </RouteWrapper>
               } 
             />
             <Route 
               path="/dashboard/agent/*" 
               element={
-                <RequireAuth requiredUserType="agent">
-                  <AgentDashboard />
-                </RequireAuth>
+                <RouteWrapper includeNavigation={false} includeFooter={false}>
+                  <RequireAuth requiredUserType="agent">
+                    <AgentDashboard />
+                  </RequireAuth>
+                </RouteWrapper>
               } 
             />
             
             {/* Preview routes for dashboards (no authentication required) */}
-            <Route path="/preview/dashboard/admin/*" element={<AdminDashboard />} />
-            <Route path="/preview/dashboard/user/*" element={<UserDashboard />} />
-            <Route path="/preview/dashboard/agent/*" element={<AgentDashboard />} />
+            <Route path="/preview/dashboard/admin/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AdminDashboard /></RouteWrapper>} />
+            <Route path="/preview/dashboard/user/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserDashboard /></RouteWrapper>} />
+            <Route path="/preview/dashboard/agent/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentDashboard /></RouteWrapper>} />
             
             {/* Public routes with header/footer */}
-            <Route
-              path="/"
-              element={
-                <div className="flex min-h-screen flex-col">
-                  <Navigation />
-                  <main className="flex-1">
-                    <Index />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            
-            <Route
-              path="/properties"
-              element={
-                <div className="flex min-h-screen flex-col">
-                  <Navigation />
-                  <main className="flex-1">
-                    <PropertyListings />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            
-            <Route
-              path="/properties/:id"
-              element={
-                <div className="flex min-h-screen flex-col">
-                  <Navigation />
-                  <main className="flex-1">
-                    <PropertyDetails />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            
-            <Route
-              path="/agents"
-              element={
-                <div className="flex min-h-screen flex-col">
-                  <Navigation />
-                  <main className="flex-1">
-                    <Agents />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            
-            <Route
-              path="/about"
-              element={
-                <div className="flex min-h-screen flex-col">
-                  <Navigation />
-                  <main className="flex-1">
-                    <About />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            
-            <Route path="/contact"
-              element={
-                <div className="flex min-h-screen flex-col">
-                  <Navigation />
-                  <main className="flex-1">
-                    <Contact />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            
-            <Route path="/diagnostic"
-              element={
-                <div className="flex min-h-screen flex-col">
-                  <Navigation />
-                  <main className="flex-1 p-8">
-                    <DiagnosticTest />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-            
-            <Route
-              path="*"
-              element={
-                <div className="flex min-h-screen flex-col">
-                  <Navigation />
-                  <main className="flex-1">
-                    <NotFound />
-                  </main>
-                  <Footer />
-                </div>
-              }
-            />
-              </Routes>
-            </CurrencyProvider>
-          </ThemeProvider>
-        </AuthProvider>
+            <Route path="/" element={<RouteWrapper><Index /></RouteWrapper>} />
+            <Route path="/properties" element={<RouteWrapper><PropertyListings /></RouteWrapper>} />
+            <Route path="/properties/:id" element={<RouteWrapper><PropertyDetails /></RouteWrapper>} />
+            <Route path="/agents" element={<RouteWrapper><Agents /></RouteWrapper>} />
+            <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
+            <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
+            <Route path="/diagnostic" element={<RouteWrapper className="p-8"><DiagnosticTest /></RouteWrapper>} />
+            <Route path="*" element={<RouteWrapper><NotFound /></RouteWrapper>} />
+                </Routes>
+              </CurrencyProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </LoadingWrapper>
       </TooltipProvider>
     </QueryClientProvider>
   );
