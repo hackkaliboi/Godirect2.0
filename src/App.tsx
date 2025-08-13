@@ -38,6 +38,7 @@ import AgentSignup from "./pages/auth/AgentSignup";
 import AdminLogin from "./pages/auth/AdminLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import DiagnosticTest from "./components/DiagnosticTest";
 
 // Auth Context
 import { AuthProvider, RequireAuth } from "./contexts/AuthContext";
@@ -189,13 +190,24 @@ const App = () => {
               }
             />
             
-            <Route
-              path="/contact"
+            <Route path="/contact"
               element={
                 <div className="flex min-h-screen flex-col">
                   <Navigation />
                   <main className="flex-1">
                     <Contact />
+                  </main>
+                  <Footer />
+                </div>
+              }
+            />
+            
+            <Route path="/diagnostic"
+              element={
+                <div className="flex min-h-screen flex-col">
+                  <Navigation />
+                  <main className="flex-1 p-8">
+                    <DiagnosticTest />
                   </main>
                   <Footer />
                 </div>
