@@ -9,40 +9,8 @@ import {
 import { cn } from "@/lib/utils";
 
 const PropertyStatistics = () => {
-  const stats = [
-    {
-      id: 1,
-      icon: <Home className="h-8 w-8 text-realty-gold" />,
-      value: "15,000+",
-      label: "Active Listings",
-      description: "Properties available across the country",
-      color: "text-realty-gold"
-    },
-    {
-      id: 2,
-      icon: <BadgeCheck className="h-8 w-8 text-green-500" />,
-      value: "98%",
-      label: "Client Satisfaction",
-      description: "Based on our customer reviews",
-      color: "text-green-500"
-    },
-    {
-      id: 3,
-      icon: <TrendingUp className="h-8 w-8 text-blue-500" />,
-      value: "$4.2B",
-      label: "Property Sales",
-      description: "Total property value sold last year",
-      color: "text-blue-500"
-    },
-    {
-      id: 4,
-      icon: <Users className="h-8 w-8 text-purple-500" />,
-      value: "200+",
-      label: "Expert Agents",
-      description: "Professional agents ready to help you",
-      color: "text-purple-500"
-    }
-  ];
+  // Statistics data will be fetched from Supabase
+  const stats: any[] = [];
 
   return (
     <section className="section-padding bg-white dark:bg-realty-900/70">
@@ -56,30 +24,36 @@ const PropertyStatistics = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map((stat) => (
-            <div 
-              key={stat.id}
-              className="bg-white dark:bg-realty-800 rounded-xl shadow-md p-6 text-center transition-all duration-300 hover:shadow-lg hover:translate-y-[-5px]"
-            >
-              <div className="flex justify-center mb-4">
-                {stat.icon}
+        {stats.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat) => (
+              <div 
+                key={stat.id}
+                className="bg-white dark:bg-realty-800 rounded-xl shadow-md p-6 text-center transition-all duration-300 hover:shadow-lg hover:translate-y-[-5px]"
+              >
+                <div className="flex justify-center mb-4">
+                  {stat.icon}
+                </div>
+                
+                <div className={cn("text-3xl font-bold mb-1", stat.color)}>
+                  {stat.value}
+                </div>
+                
+                <div className="text-lg font-heading font-medium text-realty-800 dark:text-white mb-2">
+                  {stat.label}
+                </div>
+                
+                <p className="text-sm text-realty-600 dark:text-realty-400">
+                  {stat.description}
+                </p>
               </div>
-              
-              <div className={cn("text-3xl font-bold mb-1", stat.color)}>
-                {stat.value}
-              </div>
-              
-              <div className="text-lg font-heading font-medium text-realty-800 dark:text-white mb-2">
-                {stat.label}
-              </div>
-              
-              <p className="text-sm text-realty-600 dark:text-realty-400">
-                {stat.description}
-              </p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-realty-800 rounded-xl shadow-md p-8 text-center">
+            <p className="text-xl text-realty-600 dark:text-realty-400">Statistics will be available soon</p>
+          </div>
+        )}
       </div>
     </section>
   );

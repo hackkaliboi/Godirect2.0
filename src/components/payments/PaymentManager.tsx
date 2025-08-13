@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { paymentsApi } from "@/lib/api";
 import { PaymentTransaction } from "@/types/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +64,8 @@ interface PaymentFormData {
 }
 
 const PaymentManager = () => {
-  const { user } = useAuth();
+  const { user, userType } = useAuth();
+  const { formatPrice, currency } = useCurrency();
   const [transactions, setTransactions] = useState<PaymentWithDetails[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<PaymentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +79,7 @@ const PaymentManager = () => {
     amount: 0,
     payment_type: "deposit",
     payment_method: "card",
-    currency: "NGN",
+    currency: currency,
     description: "",
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -312,7 +314,7 @@ const PaymentManager = () => {
       amount: 0,
       payment_type: "deposit",
       payment_method: "card",
-      currency: "NGN",
+      currency: currency,
       description: "",
     });
   };
@@ -329,13 +331,9 @@ const PaymentManager = () => {
     );
   };
 
-  const formatCurrency = (amount: number, currency: string = "NGN") => {
-    return new Intl.NumberFormat(currency === "NGN" ? "en-NG" : "en-US", {
-      style: "currency",
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  // Use the global currency formatting function
+  const formatCurrency = (amount: number, curr?: string) => {
+    return formatPrice(amount, curr);
   };
 
   const getTransactionStats = () => {
@@ -374,13 +372,15 @@ const PaymentManager = () => {
           </p>
         </div>
         
-        <Button
-          onClick={() => setIsPaymentDialogOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <CreditCard className="h-4 w-4" />
-          New Payment
-        </Button>
+        {userType === 'admin' && (
+          <Button
+            onClick={() => setIsPaymentDialogOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <CreditCard className="h-4 w-4" />
+            New Payment
+          </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -501,10 +501,10 @@ const PaymentManager = () => {
                     : "You don't have any transactions yet"
                   }
                 </p>
-                {searchTerm === "" && filter === "all" && (
+                {searchTerm === "" && filter === "all" && userType === 'admin' && (
                   <Button onClick={() => setIsPaymentDialogOpen(true)}>
                     <CreditCard className="h-4 w-4 mr-2" />
-                    Make Your First Payment
+                    Create Payment Method
                   </Button>
                 )}
               </CardContent>
@@ -742,18 +742,14 @@ const PaymentManager = () => {
 
             <div className="space-y-2">
               <Label>Currency</Label>
-              <Select
-                value={paymentForm.currency}
-                onValueChange={(value: any) => setPaymentForm(prev => ({ ...prev, currency: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="NGN">Nigerian Naira (₦)</SelectItem>
-                  <SelectItem value="USD">US Dollar ($)</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="p-3 bg-muted rounded-md">
+                <span className="text-sm font-medium">
+                  {currency} (Site Default Currency)
+                </span>
+                <p className="text-xs text-muted-foreground mt-1">
+                  All transactions use the site's default currency
+                </p>
+              </div>
             </div>
 
             <div className="space-y-2">

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Moon, Sun, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { CurrencySelector } from "@/components/ui/currency-selector";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -71,6 +72,12 @@ const Header = () => {
 
           {/* Right side actions */}
           <div className="hidden md:flex items-center space-x-4">
+            <CurrencySelector 
+              variant="select" 
+              size="sm" 
+              showFlag={true} 
+              className="w-28"
+            />
             <Button
               variant="ghost"
               size="icon"
@@ -180,6 +187,13 @@ const Header = () => {
               )}
             </nav>
             <div className="pt-4 border-t border-gray-200 dark:border-realty-800 flex flex-col space-y-3">
+              <div className="mb-3">
+                <CurrencySelector 
+                  variant="select" 
+                  size="sm" 
+                  showFlag={true} 
+                />
+              </div>
               {user ? (
                 <Button 
                   variant="outline" 

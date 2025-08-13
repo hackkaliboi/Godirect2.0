@@ -13,6 +13,11 @@ import UserHistory from "../user/UserHistory";
 import UserApplications from "../user/UserApplications";
 import UserProfile from "../user/UserProfile";
 
+// Import new feature components
+import NotificationCenter from "@/components/notifications/NotificationCenter";
+import SavedSearches from "@/components/searches/SavedSearches";
+import PaymentManager from "@/components/payments/PaymentManager";
+
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 function UserDashboardHome() {
@@ -104,6 +109,11 @@ export function UserDashboard() {
         <Route path="history" element={<UserHistory />} />
         <Route path="applications" element={<UserApplications />} />
         <Route path="profile" element={<UserProfile />} />
+        
+        {/* New Feature Routes */}
+        <Route path="notifications" element={<NotificationCenter />} />
+        <Route path="searches" element={<SavedSearches />} />
+        <Route path="payments" element={<PaymentManager />} />
       </Routes>
     </DashboardLayout>
   );

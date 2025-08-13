@@ -52,7 +52,7 @@ const Newsletter = () => {
               </div>
               
               <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-3 text-realty-900 dark:text-white">
-                Stay Updated with HomePulse
+                Stay Updated with Godirect
               </h2>
               
               <p className="text-realty-600 dark:text-realty-300 mb-6">

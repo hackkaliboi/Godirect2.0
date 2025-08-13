@@ -1055,9 +1055,10 @@ const BookingScheduler = () => {
                   <div>
                     <Label className="text-sm text-realty-600">Viewing Type</Label>
                     <div className="flex items-center gap-2">
-                      {getViewingTypeInfo(selectedViewing.type)?.icon && (
-                        <getViewingTypeInfo(selectedViewing.type)!.icon className="h-4 w-4" />
-                      )}
+                      {getViewingTypeInfo(selectedViewing.type)?.icon && (() => {
+                        const IconComponent = getViewingTypeInfo(selectedViewing.type)!.icon;
+                        return <IconComponent className="h-4 w-4" />;
+                      })()}
                       <span>{getViewingTypeInfo(selectedViewing.type)?.label}</span>
                     </div>
                   </div>

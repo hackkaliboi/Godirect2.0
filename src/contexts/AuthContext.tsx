@@ -4,6 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AuthContext, AuthContextType } from "@/types/auth";
 
+// Custom hook to use the AuthContext
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<import('@supabase/supabase-js').Session | null>(null);
   const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);

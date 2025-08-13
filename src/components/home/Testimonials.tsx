@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { fetchTestimonials, Testimonial } from "@/utils/supabaseData";
 import { cn } from "@/lib/utils";
 
-// Additional testimonials will be fetched from Supabase
-const additionalTestimonials: Testimonial[] = [];
+// All testimonials are now fetched from Supabase
 
 const Testimonials = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);

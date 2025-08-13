@@ -41,6 +41,8 @@ import ResetPassword from "./pages/ResetPassword";
 
 // Auth Context
 import { AuthProvider, RequireAuth } from "./contexts/AuthContext";
+// Currency Context
+import { CurrencyProvider } from "./contexts/CurrencyContext";
 
 const App = () => {
   // Create QueryClient instance inside the component
@@ -52,7 +54,8 @@ const App = () => {
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <Routes>
+          <CurrencyProvider>
+            <Routes>
             {/* Authentication routes without header/footer */}
             <Route path="/login" element={<Navigate to="/user-login" replace />} />
             <Route path="/user-login" element={<UserLogin />} />
@@ -211,7 +214,8 @@ const App = () => {
                 </div>
               }
             />
-          </Routes>
+            </Routes>
+          </CurrencyProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

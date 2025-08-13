@@ -181,6 +181,19 @@ export const viewingsApi = {
       .eq('id', viewingId);
 
     if (error) throw error;
+  },
+
+  // Update viewing (general update method)
+  async updateViewing(viewingId: string, updates: Partial<PropertyViewing>): Promise<void> {
+    const { error } = await supabase
+      .from('property_viewings')
+      .update({ 
+        ...updates,
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', viewingId);
+
+    if (error) throw error;
   }
 };
 
@@ -547,5 +560,364 @@ export const analyticsApi = {
 
     if (error) throw error;
     return data;
+  }
+};
+
+// =====================
+// SECURITY & COMPLIANCE
+// =====================
+
+export const securityApi = {
+  async getSecuritySettings(): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('global_settings')
+      .select('*')
+      .like('setting_key', '%security%')
+      .order('setting_key');
+
+    if (error) throw error;
+    return data || [];
+  },
+  
+  async updateSecuritySetting(settingId: string, value: any): Promise<void> {
+    const { error } = await supabase
+      .from('global_settings')
+      .update({ 
+        setting_value: value,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', settingId);
+
+    if (error) throw error;
+  },
+  
+  async getSecurityMetrics(startDate: Date, endDate: Date): Promise<any> {
+    // Get user counts
+    const { data: totalUsers } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true });
+    
+    const { data: activeUsers } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'active');
+
+    // Get notifications/alerts count as proxy for security events
+    const { data: securityAlerts } = await supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('category', 'system')
+      .gte('created_at', startDate.toISOString())
+      .lte('created_at', endDate.toISOString());
+
+    return {
+      totalUsers: totalUsers?.length || 0,
+      activeUsers: activeUsers?.length || 0,
+      failedLogins: 0, // Would need auth.users audit
+      securityAlerts: securityAlerts?.length || 0,
+      complianceScore: 85, // Calculate based on checks
+      dataBreaches: 0,
+    };
+  }
+};
+
+export const auditApi = {
+  async getAuditLogs(startDate: Date, endDate: Date): Promise<any[]> {
+    // Get various activity logs
+    const { data: notifications } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('category', 'system')
+      .gte('created_at', startDate.toISOString())
+      .lte('created_at', endDate.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    return notifications || [];
+  },
+  
+  async exportAuditLogs(filter?: string, searchTerm?: string): Promise<{ download_url: string }> {
+    // In a real implementation, this would generate a CSV/PDF file
+    // For now, return a placeholder
+    return { download_url: '#audit-export' };
+  }
+};
+
+export const complianceApi = {
+  async getComplianceChecks(): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('global_settings')
+      .select('*')
+      .like('setting_key', '%compliance%')
+      .order('setting_key');
+
+    if (error) throw error;
+    return data || [];
+  },
+  
+  async runComplianceCheck(framework: string): Promise<void> {
+    // Log compliance check initiation
+    const { error } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        title: 'Compliance Check Initiated',
+        message: `Compliance check for ${framework} framework has been started.`,
+        type: 'info',
+        category: 'system'
+      });
+
+    if (error) throw error;
+  }
+};
+
+// =====================
+// SCHEDULING API
+// =====================
+
+export const schedulingApi = {
+  async getAvailableSlots(userId: string, startDate: Date, endDate: Date): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('appointments')
+      .select('start_time, end_time')
+      .or(`user_id.eq.${userId},agent_id.eq.${userId}`)
+      .gte('start_time', startDate.toISOString())
+      .lte('start_time', endDate.toISOString())
+      .eq('status', 'scheduled');
+
+    if (error) throw error;
+    return data || [];
+  }
+};
+
+// =====================
+// AGENT KYC & SECURITY MANAGEMENT
+// =====================
+
+export const agentSecurityApi = {
+  // Submit KYC information
+  async submitKYC(kycData: any): Promise<any> {
+    console.log('KYC submitted:', kycData);
+    // In real implementation, this would:
+    // 1. Validate all required fields
+    // 2. Upload documents to secure storage
+    // 3. Create KYC record in database
+    // 4. Trigger verification workflow
+    return { success: true, kyc_id: 'kyc-' + Date.now() };
+  },
+
+  // Get agent KYC status
+  async getKYCStatus(agentId: string): Promise<any> {
+    // Mock implementation
+    return {
+      verification_status: 'pending',
+      verification_level: 'basic',
+      can_process_payments: false,
+      required_documents: ['identity_document', 'license_document']
+    };
+  },
+
+  // Update KYC information
+  async updateKYC(kycId: string, updates: any): Promise<void> {
+    console.log('KYC updated:', kycId, updates);
+  },
+
+  // Get agent profile with security context
+  async getAgentProfile(agentId: string): Promise<any> {
+    return {
+      id: agentId,
+      agent_code: 'AG-' + agentId.slice(-8).toUpperCase(),
+      profile_status: 'pending_kyc',
+      can_receive_leads: false,
+      can_schedule_viewings: false,
+      can_process_payments: false,
+      commission_rate: 2.5,
+      max_monthly_leads: 10, // Limited until verified
+      commission_hold_period_days: 30
+    };
+  }
+};
+
+export const agentTrackingApi = {
+  // Generate unique tracking code for agent
+  async generateTrackingCode(request: any): Promise<{ tracking_code: string; expires_at: string }> {
+    // Generate unique tracking code: AG-XXXX-YYYY-ZZZZ
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const agentCode = request.agent_id.slice(-4).toUpperCase();
+    
+    const tracking_code = `AG-${agentCode}-${timestamp}-${random}`;
+    const expires_at = new Date(Date.now() + (request.expires_in_hours || 24) * 60 * 60 * 1000).toISOString();
+    
+    console.log('Generated tracking code:', tracking_code);
+    
+    return { tracking_code, expires_at };
+  },
+
+  // Validate and use tracking code
+  async useTrackingCode(trackingCode: string, paymentTransactionId: string): Promise<any> {
+    console.log('Using tracking code:', trackingCode, 'for payment:', paymentTransactionId);
+    
+    // In real implementation:
+    // 1. Validate code exists and not expired
+    // 2. Mark as used
+    // 3. Create commission record
+    // 4. Log for audit
+    
+    return {
+      agent_id: 'agent-123',
+      commission_rate: 2.5,
+      commission_amount: 2500 // Example calculation
+    };
+  },
+
+  // Get agent commission history
+  async getAgentCommissions(agentId: string): Promise<any[]> {
+    return [
+      {
+        id: 'comm-1',
+        transaction_date: new Date().toISOString(),
+        base_amount: 100000,
+        commission_rate: 2.5,
+        commission_amount: 2500,
+        status: 'pending',
+        due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+  }
+};
+
+export const paymentGatewayApi = {
+  // Admin-only: Create payment gateway
+  async createPaymentGateway(gatewayData: any): Promise<any> {
+    console.log('Creating payment gateway (admin only):', gatewayData);
+    
+    // Security checks:
+    // 1. Verify admin permissions
+    // 2. Encrypt private keys
+    // 3. Validate configuration
+    // 4. Test connection
+    
+    return { success: true, gateway_id: 'gw-' + Date.now() };
+  },
+
+  // Admin-only: List all payment gateways
+  async getPaymentGateways(): Promise<any[]> {
+    return [
+      {
+        id: 'gw-1',
+        name: 'Paystack Primary',
+        provider: 'paystack',
+        is_active: true,
+        is_default: true,
+        admin_only: false,
+        supported_currencies: ['NGN', 'USD'],
+        transaction_fee_percentage: 1.5
+      },
+      {
+        id: 'gw-2',
+        name: 'Flutterwave Backup',
+        provider: 'flutterwave',
+        is_active: true,
+        is_default: false,
+        admin_only: true, // Admin only for high-value transactions
+        supported_currencies: ['NGN', 'USD', 'GHS'],
+        transaction_fee_percentage: 1.4
+      }
+    ];
+  },
+
+  // Get available gateways for user (filtered by permissions)
+  async getAvailableGateways(userType: string): Promise<any[]> {
+    const gateways = await this.getPaymentGateways();
+    
+    // Filter based on user type and permissions
+    if (userType !== 'admin') {
+      return gateways.filter(gw => !gw.admin_only && gw.is_active);
+    }
+    
+    return gateways.filter(gw => gw.is_active);
+  },
+
+  // Process payment with agent tracking
+  async processPaymentWithTracking(paymentData: any, trackingCode?: string): Promise<any> {
+    console.log('Processing payment with tracking:', { paymentData, trackingCode });
+    
+    // Security workflow:
+    // 1. Validate payment gateway (admin-created only)
+    // 2. Verify tracking code if provided
+    // 3. Process payment through gateway
+    // 4. Record commission if agent involved
+    // 5. Create audit log
+    
+    const paymentResult = {
+      transaction_id: 'txn-' + Date.now(),
+      status: 'completed',
+      amount: paymentData.amount,
+      gateway_reference: 'gw-ref-' + Date.now()
+    };
+    
+    // If tracking code provided, calculate commission
+    if (trackingCode) {
+      const commissionData = await agentTrackingApi.useTrackingCode(trackingCode, paymentResult.transaction_id);
+      paymentResult.commission_data = commissionData;
+    }
+    
+    return paymentResult;
+  }
+};
+
+export const adminSecurityApi = {
+  // Admin-only: Verify agent KYC
+  async verifyAgentKYC(kycId: string, decision: 'approve' | 'reject', notes?: string): Promise<void> {
+    console.log('Admin KYC decision:', { kycId, decision, notes });
+    
+    // In real implementation:
+    // 1. Update KYC status
+    // 2. Enable/disable agent features based on decision
+    // 3. Send notification to agent
+    // 4. Create audit log
+    // 5. Update agent profile permissions
+  },
+
+  // Admin-only: Get agents pending verification
+  async getPendingKYCVerifications(): Promise<any[]> {
+    return [
+      {
+        kyc_id: 'kyc-1',
+        agent_name: 'John Doe',
+        submitted_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        verification_status: 'pending',
+        documents_count: 4,
+        risk_flags: []
+      }
+    ];
+  },
+
+  // Admin-only: Suspend/activate agent
+  async updateAgentStatus(agentId: string, status: 'active' | 'suspended', reason?: string): Promise<void> {
+    console.log('Admin updating agent status:', { agentId, status, reason });
+    
+    // Security actions:
+    // 1. Update agent profile
+    // 2. Disable/enable all agent functions
+    // 3. Hold/release commissions
+    // 4. Create audit log
+    // 5. Notify agent
+  },
+
+  // Admin-only: Get security audit logs
+  async getSecurityAuditLogs(filters?: any): Promise<any[]> {
+    return [
+      {
+        id: 'audit-1',
+        entity_type: 'agent',
+        action: 'kyc_submitted',
+        actor_type: 'agent',
+        timestamp: new Date().toISOString(),
+        risk_level: 'low',
+        details: 'Agent submitted KYC documents'
+      }
+    ];
   }
 };

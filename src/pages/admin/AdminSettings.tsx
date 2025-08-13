@@ -8,6 +8,9 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CurrencySelector, PriceDisplay } from "@/components/ui/currency-selector";
+import { useCurrency } from "@/contexts/CurrencyContext";
+import CurrencyManagementComponent from "@/components/admin/CurrencyManagementComponent";
 import { 
   Settings, 
   Globe, 
@@ -21,7 +24,10 @@ import {
   Sun,
   Moon,
   Monitor,
-  Check
+  Check,
+  DollarSign,
+  TrendingUp,
+  RefreshCw
 } from "lucide-react";
 
 export default function AdminSettings() {
@@ -104,12 +110,13 @@ export default function AdminSettings() {
         </div>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 h-auto">
             <TabsTrigger value="general" className="text-xs sm:text-sm px-2 sm:px-4">General</TabsTrigger>
+            <TabsTrigger value="currency" className="text-xs sm:text-sm px-2 sm:px-4">Currency</TabsTrigger>
             <TabsTrigger value="email" className="text-xs sm:text-sm px-2 sm:px-4">Email</TabsTrigger>
             <TabsTrigger value="security" className="text-xs sm:text-sm px-2 sm:px-4">Security</TabsTrigger>
-            <TabsTrigger value="notifications" className="text-xs sm:text-sm px-2 sm:px-4 col-span-2 sm:col-span-1">Notifications</TabsTrigger>
-            <TabsTrigger value="appearance" className="text-xs sm:text-sm px-2 sm:px-4 col-span-2 sm:col-span-2 lg:col-span-1">Appearance</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-xs sm:text-sm px-2 sm:px-4">Notifications</TabsTrigger>
+            <TabsTrigger value="appearance" className="text-xs sm:text-sm px-2 sm:px-4">Appearance</TabsTrigger>
           </TabsList>
           
           <TabsContent value="general" className="space-y-6">
@@ -167,6 +174,10 @@ export default function AdminSettings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="currency" className="space-y-6">
+            <CurrencyManagementComponent />
           </TabsContent>
           
           <TabsContent value="email">

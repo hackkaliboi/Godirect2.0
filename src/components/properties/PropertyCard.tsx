@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Bed, Bath, Move, MapPin, ArrowRight } from "lucide-react";
 import { Property } from "@/utils/supabaseData";
-import { formatPriceWithCommas } from "@/utils/data";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { cn } from "@/lib/utils";
 
 interface PropertyCardProps {
@@ -11,6 +11,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard = ({ property }: PropertyCardProps) => {
+  const { formatPrice } = useCurrency();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const toggleFavorite = (e: React.MouseEvent) => {
@@ -66,7 +67,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         </div>
         
         <div className="text-2xl font-heading font-semibold text-realty-800 dark:text-realty-gold mb-4">
-          {formatPriceWithCommas(property.price)}
+          {formatPrice(property.price)}
         </div>
         
         {/* Property details */}

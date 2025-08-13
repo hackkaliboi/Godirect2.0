@@ -36,6 +36,24 @@ const InteractiveMap = () => {
     }
   };
 
+  if (locations.length === 0) {
+    return (
+      <div className="container-custom">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
+            Explore <span className="text-realty-gold">Property Hotspots</span>
+          </h2>
+          <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto">
+            Discover prime real estate locations across Enugu and Calabar with our interactive map.
+          </p>
+        </div>
+        <div className="bg-white dark:bg-realty-800/30 rounded-xl shadow-lg p-8 backdrop-blur-sm text-center">
+          <p className="text-xl text-realty-600 dark:text-realty-400">Interactive map will be available soon</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container-custom">
       <div className="text-center mb-12">

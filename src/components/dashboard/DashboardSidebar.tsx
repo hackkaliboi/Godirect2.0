@@ -28,6 +28,10 @@ import {
   Database,
   TrendingUp,
   Activity,
+  Bell,
+  CreditCard,
+  CalendarCheck,
+  UserPlus,
 } from "lucide-react";
 
 interface DashboardSidebarProps {
@@ -58,6 +62,9 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           { title: "Transactions", url: `/dashboard/admin/transactions`, icon: DollarSign },
           { title: "Reports", url: `/dashboard/admin/reports`, icon: FileText },
           { title: "System", url: `/dashboard/admin/system`, icon: Database },
+          { title: "Security", url: `/dashboard/admin/security`, icon: Shield },
+          { title: "Payments", url: `/dashboard/admin/payments`, icon: CreditCard },
+          { title: "Notifications", url: `/dashboard/admin/notifications`, icon: Bell },
           { title: "Settings", url: `/dashboard/admin/settings`, icon: Settings },
         ];
 
@@ -70,6 +77,10 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           { title: "Calendar", url: `/dashboard/agent/calendar`, icon: Calendar },
           { title: "Messages", url: `/dashboard/agent/messages`, icon: MessageSquare },
           { title: "Commission", url: `/dashboard/agent/commission`, icon: DollarSign },
+          { title: "Lead Manager", url: `/dashboard/agent/lead-manager`, icon: UserPlus },
+          { title: "Scheduler", url: `/dashboard/agent/scheduler`, icon: CalendarCheck },
+          { title: "Commission Tracker", url: `/dashboard/agent/payments`, icon: CreditCard },
+          { title: "Notifications", url: `/dashboard/agent/notifications`, icon: Bell },
           { title: "Profile", url: `/dashboard/agent/profile`, icon: Settings },
         ];
 
@@ -81,6 +92,9 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           { title: "Appointments", url: `/dashboard/user/appointments`, icon: Calendar },
           { title: "Messages", url: `/dashboard/user/messages`, icon: MessageSquare },
           { title: "My Applications", url: `/dashboard/user/applications`, icon: FileText },
+          { title: "Saved Searches", url: `/dashboard/user/searches`, icon: Search },
+          { title: "Notifications", url: `/dashboard/user/notifications`, icon: Bell },
+          { title: "Payments", url: `/dashboard/user/payments`, icon: CreditCard },
           { title: "Profile", url: `/dashboard/user/profile`, icon: Settings },
         ];
 

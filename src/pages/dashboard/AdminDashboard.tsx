@@ -17,6 +17,11 @@ import AdminTransactions from "../admin/AdminTransactions";
 import AdminReports from "../admin/AdminReports";
 import AdminSystem from "../admin/AdminSystem";
 
+// Import new feature components
+import SecurityCompliance from "@/components/security/SecurityCompliance";
+import PaymentManager from "@/components/payments/PaymentManager";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
+
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 function AdminDashboardHome() {
@@ -96,6 +101,11 @@ export function AdminDashboard() {
         <Route path="reports" element={<AdminReports />} />
         <Route path="system" element={<AdminSystem />} />
         <Route path="settings" element={<AdminSettings />} />
+        
+        {/* New Feature Routes */}
+        <Route path="security" element={<SecurityCompliance />} />
+        <Route path="payments" element={<PaymentManager />} />
+        <Route path="notifications" element={<NotificationCenter />} />
       </Routes>
     </DashboardLayout>
   );

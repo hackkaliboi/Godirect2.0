@@ -15,6 +15,12 @@ import AgentCommission from "../agent/AgentCommission";
 import AgentProperties from "../agent/AgentProperties";
 import CreateListing from "../agent/CreateListing";
 
+// Import new feature components
+import LeadManagement from "@/components/leads/LeadManagement";
+import BookingScheduler from "@/components/scheduling/BookingScheduler";
+import AgentCommissionTracker from "@/components/agent/AgentCommissionTracker";
+import NotificationCenter from "@/components/notifications/NotificationCenter";
+
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 function AgentDashboardHome() {
@@ -37,12 +43,12 @@ function AgentDashboardHome() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Agent Dashboard</h1>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Agent Dashboard</h1>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Active Listings"
           value={getStat('agent_active_listings').value}
@@ -73,9 +79,9 @@ function AgentDashboardHome() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <div className="col-span-4">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-7">
+        <div className="lg:col-span-4">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
             <h3 className="text-lg font-semibold mb-4">Recent Listings</h3>
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground">
@@ -85,7 +91,7 @@ function AgentDashboardHome() {
           </div>
         </div>
         
-        <div className="col-span-3">
+        <div className="lg:col-span-3">
           <RecentActivity activities={recentActivities} />
         </div>
       </div>
@@ -108,6 +114,12 @@ export function AgentDashboard() {
         <Route path="messages" element={<AgentMessages />} />
         <Route path="commission" element={<AgentCommission />} />
         <Route path="profile" element={<AgentProfile />} />
+        
+        {/* New Feature Routes */}
+        <Route path="lead-manager" element={<LeadManagement />} />
+        <Route path="scheduler" element={<BookingScheduler />} />
+        <Route path="payments" element={<AgentCommissionTracker />} />
+        <Route path="notifications" element={<NotificationCenter />} />
       </Routes>
     </DashboardLayout>
   );

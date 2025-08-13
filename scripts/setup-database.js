@@ -21,8 +21,11 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// NOTE: This script inserts sample/demonstration data into Supabase
+// This is meant for initial setup and development only
+// Run this once to populate your database with example data
 async function insertSampleData() {
-  console.log('🚀 Starting to insert sample data...')
+  console.log('🚀 Starting to insert sample data for development...')
   
   // Sample agents
   const agents = [
