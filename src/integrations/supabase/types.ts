@@ -422,31 +422,34 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           email: string | null
-          first_name: string | null
+          full_name: string | null
           id: string
-          last_name: string | null
           phone: string | null
+          status: string | null
           updated_at: string | null
           user_type: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           email?: string | null
-          first_name?: string | null
+          full_name?: string | null
           id: string
-          last_name?: string | null
           phone?: string | null
+          status?: string | null
           updated_at?: string | null
           user_type?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           email?: string | null
-          first_name?: string | null
+          full_name?: string | null
           id?: string
-          last_name?: string | null
           phone?: string | null
+          status?: string | null
           updated_at?: string | null
           user_type?: string
         }
@@ -695,6 +698,44 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      user_settings: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          setting_key: string
+          setting_value: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          setting_key: string
+          setting_value?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

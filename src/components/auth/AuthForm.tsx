@@ -18,7 +18,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Phone, Sparkles } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
+import { cn } from "@/lib/utils";
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -248,38 +250,123 @@ export default function AuthForm({
   };
 
   return (
-    <Card className="w-full max-w-md shadow-lg border-0 bg-white dark:bg-slate-950">
-      <CardHeader className="space-y-1 pb-6">
-        <Link to="/" className="flex items-center space-x-2 mb-4">
-          <div className="h-10 w-10 bg-realty-900 dark:bg-realty-gold rounded-md flex items-center justify-center">
-            <span className="text-white dark:text-realty-900 font-bold text-lg">GD</span>
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      {/* Left Side - Animations */}
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-white overflow-hidden">
+        {/* Animated background patterns */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full animate-pulse" />
+          <div className="absolute top-1/4 right-20 w-20 h-20 bg-white/5 rounded-full animate-bounce [animation-delay:1s]" />
+          <div className="absolute bottom-1/4 left-1/4 w-16 h-16 bg-white/10 rounded-full animate-ping [animation-delay:2s]" />
+          <div className="absolute bottom-20 right-1/3 w-24 h-24 bg-white/5 rounded-full animate-pulse [animation-delay:3s]" />
+          <div className="absolute top-1/2 left-10 w-12 h-12 bg-white/10 rounded-full animate-bounce [animation-delay:4s]" />
+        </div>
+        
+        {/* Floating geometric shapes */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/3 left-1/4 w-4 h-4 bg-white/20 rotate-45 animate-spin [animation-duration:8s]" />
+          <div className="absolute bottom-1/3 right-1/4 w-6 h-6 bg-white/15 rotate-12 animate-spin [animation-duration:12s] [animation-direction:reverse]" />
+          <div className="absolute top-2/3 left-1/3 w-3 h-3 bg-white/25 rotate-45 animate-pulse [animation-delay:1.5s]" />
+        </div>
+        
+        {/* Main content */}
+        <div className="relative z-10 max-w-md text-center px-8">
+          {/* Animated logo */}
+          <div className="mb-8 flex justify-center">
+            <div className="relative group">
+              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                <span className="text-white font-bold text-3xl">GD</span>
+              </div>
+              <div className="absolute inset-0 rounded-2xl bg-white/10 animate-ping" />
+              <div className="absolute -inset-2 bg-gradient-to-r from-white/20 to-transparent rounded-2xl blur-xl animate-pulse" />
+            </div>
           </div>
-          <span className="text-2xl font-heading font-semibold text-realty-900 dark:text-white">
-            GODIRECT
-          </span>
-        </Link>
-        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
-        <CardDescription className="text-base">
-          {description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-5">
+          
+          <h1 className="text-4xl font-bold mb-4 animate-fade-in-up">
+            Welcome to <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">GODIRECT</span>
+          </h1>
+          
+          <p className="text-xl text-white/90 mb-8 animate-fade-in-up [animation-delay:0.2s]">
+            {mode === "login" 
+              ? "Sign in to access your real estate management platform" 
+              : "Join thousands of professionals managing their real estate business with us"}
+          </p>
+          
+          {/* Feature highlights */}
+          <div className="space-y-4 animate-fade-in-up [animation-delay:0.4s]">
+            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 transform hover:scale-105 transition-all duration-300">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              <span className="text-white/90">Professional Property Management</span>
+            </div>
+            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 transform hover:scale-105 transition-all duration-300">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:0.5s]" />
+              <span className="text-white/90">Advanced Analytics & Reporting</span>
+            </div>
+            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 transform hover:scale-105 transition-all duration-300">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:1s]" />
+              <span className="text-white/90">Seamless Client Communication</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Right Side - Form */}
+      <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative min-h-screen lg:min-h-0">
+        {/* Mobile background for small screens */}
+        <div className="lg:hidden absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10" />
+        
+        <Card className={cn(
+          "w-full max-w-md mx-auto shadow-2xl border-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm relative overflow-hidden",
+          "transform transition-all duration-700 hover:shadow-3xl lg:hover:-translate-y-2"
+        )}>
+          {/* Top accent bar */}
+          <div className="h-1 bg-gradient-to-r from-primary via-primary/80 to-primary animate-gradient-x" />
+          
+          <CardHeader className="space-y-4 pb-6 relative px-4 sm:px-6">
+            {/* Mobile logo for small screens */}
+            <div className="lg:hidden flex justify-center mb-6">
+              <Link to="/" className="flex items-center space-x-3 group">
+                <div className="relative">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                    <span className="text-white font-bold text-lg sm:text-xl">GD</span>
+                  </div>
+                  <div className="absolute inset-0 rounded-xl bg-primary/20 animate-ping" />
+                </div>
+                <span className="text-xl sm:text-2xl font-heading font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                  GODIRECT
+                </span>
+              </Link>
+            </div>
+            
+            <div className="text-center space-y-2">
+              <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                {title}
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base text-muted-foreground px-2">
+                {description}
+              </CardDescription>
+            </div>
+          </CardHeader>
+      <CardContent className="space-y-4 sm:space-y-5 px-4 sm:px-6">
         {mode === "login" ? (
           <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4 sm:space-y-5">
               <FormField
                 control={loginForm.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">Email address</FormLabel>
+                    <FormLabel className="text-sm sm:text-base font-medium">Email address</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Your email address" 
-                        type="email" 
-                        className="h-12 text-base" 
-                        {...field} 
-                      />
+                      <div className="relative group">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Input 
+                          placeholder="Your email address" 
+                          type="email" 
+                          className="h-10 sm:h-12 text-sm sm:text-base pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
+                          {...field} 
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -290,25 +377,26 @@ export default function AuthForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">Password</FormLabel>
+                    <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
                     <FormControl>
-                      <div className="relative">
+                      <div className="relative group">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input 
                           placeholder="Your password" 
                           type={showPassword ? "text" : "password"}
-                          className="h-12 text-base pr-10" 
+                          className="h-10 sm:h-12 text-sm sm:text-base pl-10 pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                           {...field} 
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-12 w-12 p-0"
+                          className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? 
-                            <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
-                            <Eye className="h-5 w-5 text-muted-foreground" />
+                            <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> : 
+                            <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
                           }
                         </Button>
                       </div>
@@ -344,26 +432,46 @@ export default function AuthForm({
               </div>
               <Button 
                 type="submit" 
-                className="w-full h-12 text-base font-medium bg-realty-800 hover:bg-realty-900 dark:bg-realty-gold dark:text-realty-900 dark:hover:bg-realty-gold/90" 
+                className={cn(
+                  "w-full h-10 sm:h-12 text-sm sm:text-base font-medium relative overflow-hidden transition-all duration-300",
+                  "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
+                  "shadow-lg hover:shadow-xl transform hover:-translate-y-0.5",
+                  "disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                )}
                 disabled={isLoading}
               >
-                {isLoading ? "Logging in..." : "Log in"}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader variant="spin" size="sm" />
+                    <span>Logging in...</span>
+                  </div>
+                ) : (
+                  "Log in"
+                )}
               </Button>
             </form>
           </Form>
         ) : (
           <Form {...signupForm}>
-            <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4 sm:space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={signupForm.control}
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium">First Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your first name" className="h-12 text-base" {...field} />
-                      </FormControl>
+                      <FormLabel className="text-sm sm:text-base font-medium">First Name</FormLabel>
+                    <FormControl>
+                      <div className="relative group">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Input 
+                          placeholder="Your first name" 
+                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -373,10 +481,17 @@ export default function AuthForm({
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base font-medium">Last Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your last name" className="h-12 text-base" {...field} />
-                      </FormControl>
+                      <FormLabel className="text-sm sm:text-base font-medium">Last Name</FormLabel>
+                    <FormControl>
+                      <div className="relative group">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Input 
+                          placeholder="Your last name" 
+                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -387,9 +502,17 @@ export default function AuthForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">Email address</FormLabel>
+                    <FormLabel className="text-sm sm:text-base font-medium">Email address</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your email address" type="email" className="h-12 text-base" {...field} />
+                      <div className="relative group">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Input 
+                          placeholder="Your email address" 
+                          type="email" 
+                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
+                          {...field} 
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -400,9 +523,17 @@ export default function AuthForm({
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">Phone Number</FormLabel>
+                    <FormLabel className="text-sm sm:text-base font-medium">Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your phone number" type="tel" className="h-12 text-base" {...field} />
+                      <div className="relative group">
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <Input 
+                          placeholder="Your phone number" 
+                          type="tel" 
+                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
+                          {...field} 
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -413,25 +544,26 @@ export default function AuthForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">Password</FormLabel>
+                    <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
                     <FormControl>
-                      <div className="relative">
+                      <div className="relative group">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input 
                           placeholder="Create a password" 
                           type={showPassword ? "text" : "password"} 
-                          className="h-12 text-base pr-10" 
+                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 pr-10 sm:pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                           {...field} 
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-12 w-12 p-0"
+                          className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? 
-                            <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
-                            <Eye className="h-5 w-5 text-muted-foreground" />
+                            <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> : 
+                            <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
                           }
                         </Button>
                       </div>
@@ -445,25 +577,26 @@ export default function AuthForm({
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-base font-medium">Confirm Password</FormLabel>
+                    <FormLabel className="text-sm sm:text-base font-medium">Confirm Password</FormLabel>
                     <FormControl>
-                      <div className="relative">
+                      <div className="relative group">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input 
                           placeholder="Confirm your password" 
                           type={showConfirmPassword ? "text" : "password"} 
-                          className="h-12 text-base pr-10" 
+                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 pr-10 sm:pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
                           {...field} 
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-12 w-12 p-0"
+                          className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
                           {showConfirmPassword ? 
-                            <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
-                            <Eye className="h-5 w-5 text-muted-foreground" />
+                            <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> : 
+                            <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
                           }
                         </Button>
                       </div>
@@ -501,18 +634,31 @@ export default function AuthForm({
               />
               <Button 
                 type="submit" 
-                className="w-full h-12 text-base font-medium bg-realty-800 hover:bg-realty-900 dark:bg-realty-gold dark:text-realty-900 dark:hover:bg-realty-gold/90" 
+                className={cn(
+                  "w-full h-10 sm:h-12 text-sm sm:text-base font-medium relative overflow-hidden transition-all duration-300 group",
+                  "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
+                  "shadow-lg hover:shadow-xl transform hover:-translate-y-0.5",
+                  "disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                )}
                 disabled={isLoading}
               >
-                {isLoading ? "Creating account..." : "Create account"}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader variant="spin" size="sm" />
+                    <span>Creating account...</span>
+                  </div>
+                ) : (
+                  "Create account"
+                )}
               </Button>
             </form>
           </Form>
         )}
       </CardContent>
-      <CardFooter className="pt-0">
-        <div className="text-center w-full pb-6">
-          <p className="text-base text-muted-foreground">
+      <CardFooter className="pt-0 px-4 sm:px-6">
+        <div className="text-center w-full pb-4 sm:pb-6">
+          <p className="text-sm sm:text-base text-muted-foreground">
             {mode === "login" ? (
               <>
                 Don't have an account?{" "}
@@ -538,5 +684,7 @@ export default function AuthForm({
         </div>
       </CardFooter>
     </Card>
+      </div>
+    </div>
   );
 }
