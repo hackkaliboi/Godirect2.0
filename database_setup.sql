@@ -991,6 +991,105 @@ CREATE POLICY "Users can manage own comparisons" ON property_comparisons
     FOR ALL USING (auth.uid() = user_id);
 
 -- =====================================================
+-- STORAGE BUCKETS
+-- =====================================================
+
+-- Create avatars bucket for profile pictures
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'avatars', 
+  'avatars', 
+  true, 
+  5242880, -- 5MB limit
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+)
+ON CONFLICT (id) DO UPDATE SET
+  public = EXCLUDED.public,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+-- Create properties bucket for property images
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'property-images', 
+  'property-images', 
+  true, 
+  10485760, -- 10MB limit
+  ARRAY['image/jpeg', 'image/png', 'image/webp']
+)
+ON CONFLICT (id) DO UPDATE SET
+  public = EXCLUDED.public,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+-- Create documents bucket for KYC and property documents
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'documents', 
+  'documents', 
+  false, -- Private bucket
+  20971520, -- 20MB limit
+  ARRAY['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+)
+ON CONFLICT (id) DO UPDATE SET
+  public = EXCLUDED.public,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+-- Storage policies for avatars bucket
+CREATE POLICY "Users can upload their own avatars" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'avatars' AND 
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Users can update their own avatars" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'avatars' AND 
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Users can delete their own avatars" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'avatars' AND 
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Public avatar access" ON storage.objects
+  FOR SELECT USING (bucket_id = 'avatars');
+
+-- Storage policies for property images bucket
+CREATE POLICY "Agents can upload property images" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'property-images' AND 
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE id = auth.uid() AND user_type IN ('admin', 'agent')
+    )
+  );
+
+CREATE POLICY "Public property image access" ON storage.objects
+  FOR SELECT USING (bucket_id = 'property-images');
+
+-- Storage policies for documents bucket
+CREATE POLICY "Users can upload their own documents" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'documents' AND 
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Users can view their own documents" ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'documents' AND (
+      auth.uid()::text = (storage.foldername(name))[1] OR
+      EXISTS (
+        SELECT 1 FROM profiles 
+        WHERE id = auth.uid() AND user_type = 'admin'
+      )
+    )
+  );
+
+-- =====================================================
 -- ESSENTIAL CONFIGURATION DATA
 -- =====================================================
 

@@ -125,7 +125,7 @@ export default function AuthForm({
   const onSignupSubmit = async (values: z.infer<typeof signupFormSchema>) => {
     setIsLoading(true);
     try {
-      // First, sign up the user
+      // First, sign up the user with metadata that the trigger will use
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -135,6 +135,7 @@ export default function AuthForm({
             last_name: values.lastName,
             phone: values.phone,
             role: userType,
+            user_type: userType, // Also pass as user_type for consistency
             full_name: `${values.firstName} ${values.lastName}`,
           }
         },
@@ -144,8 +145,11 @@ export default function AuthForm({
         throw signUpError;
       }
       
+      // Wait a moment for the trigger to create the profile
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Since email confirmation is disabled, automatically sign in the user
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
@@ -160,10 +164,65 @@ export default function AuthForm({
         return;
       }
       
+      // If user signed in successfully, ensure profile exists and is complete
+      if (signInData.user) {
+        try {
+          // Check if profile exists
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', signInData.user.id)
+            .single();
+          
+          // If no profile exists, create one manually
+          if (!profileData && profileError?.code === 'PGRST116') {
+            console.log('Profile not found, creating manually...');
+            const { error: createError } = await supabase
+              .from('profiles')
+              .insert({
+                id: signInData.user.id,
+                email: values.email,
+                full_name: `${values.firstName} ${values.lastName}`,
+                phone: values.phone,
+                user_type: userType,
+                status: 'active'
+              });
+            
+            if (createError) {
+              console.warn('Could not create profile manually:', createError);
+            }
+          }
+          
+          // Also create default user settings
+          const defaultSettings = [
+            {
+              user_id: signInData.user.id,
+              setting_key: 'theme',
+              setting_value: 'light',
+              category: 'appearance'
+            },
+            {
+              user_id: signInData.user.id,
+              setting_key: 'notifications_enabled',
+              setting_value: 'true',
+              category: 'notifications'
+            }
+          ];
+          
+          await supabase
+            .from('user_settings')
+            .upsert(defaultSettings, { onConflict: 'user_id,setting_key' });
+          
+        } catch (profileSetupError) {
+          console.warn('Error setting up user profile:', profileSetupError);
+          // Don't fail the signup process for profile setup errors
+        }
+      }
+      
       // Success - user is signed up and logged in
       toast({
         title: "Account created successfully!",
-        description: "Welcome to GODIRECT. You're now logged in.",
+        description: "Welcome to GODIRECT. You're now logged in and your profile has been set up.",
       });
       
       // Redirect to dashboard based on user type
