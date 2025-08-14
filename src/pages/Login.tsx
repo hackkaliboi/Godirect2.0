@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast";
 import { Helmet } from "react-helmet-async";
 import { Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -43,25 +44,78 @@ const Login = () => {
   const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
     setIsLoading(true);
     try {
-      // For now, we'll simulate a login
-      console.log("Login submitted:", values);
+      console.log("🔐 Starting login process for:", values.email);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Sign in with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (authError) {
+        console.error("❌ Authentication failed:", authError.message);
+        throw authError;
+      }
+
+      if (!authData.user) {
+        console.error("❌ No user data returned from authentication");
+        throw new Error("Authentication failed - no user data");
+      }
+
+      console.log("✅ Authentication successful for user:", authData.user.id);
+
+      // Fetch user profile to determine user type
+      console.log("📋 Fetching user profile...");
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_type, full_name')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (profileError) {
+        console.error("❌ Profile fetch failed:", profileError.message);
+        // Default to user dashboard if profile fetch fails
+        console.log("⚠️ Defaulting to user dashboard due to profile fetch failure");
+        navigate("/dashboard/user");
+        return;
+      }
+
+      console.log("✅ Profile fetched successfully:", profile);
+      console.log("👤 User type:", profile.user_type);
+
+      // Redirect based on user type
+      let redirectPath = "/dashboard/user"; // default
+      
+      switch (profile.user_type) {
+        case 'admin':
+          redirectPath = "/dashboard/admin";
+          console.log("🔄 Redirecting to admin dashboard");
+          break;
+        case 'agent':
+          redirectPath = "/dashboard/agent";
+          console.log("🔄 Redirecting to agent dashboard");
+          break;
+        case 'user':
+        default:
+          redirectPath = "/dashboard/user";
+          console.log("🔄 Redirecting to user dashboard");
+          break;
+      }
       
       toast({
         title: "Login successful!",
-        description: "Welcome back to GODIRECT.",
+        description: `Welcome back, ${profile.full_name || values.email}!`,
       });
       
-      // Redirect to dashboard
-      navigate("/dashboard/user");
-    } catch (error) {
-      console.error("Login error:", error);
+      console.log("🎯 Final redirect path:", redirectPath);
+      navigate(redirectPath);
+      
+    } catch (error: any) {
+      console.error("❌ Login error:", error);
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error.message || "Please check your credentials and try again.",
       });
     } finally {
       setIsLoading(false);

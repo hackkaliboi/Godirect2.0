@@ -102,12 +102,41 @@ export default function AuthForm({
         description: `Welcome back to GODIRECT.`,
       });
       
-      // Redirect based on userType
-      if (userType === "admin") {
-        navigate("/dashboard/admin");
-      } else if (userType === "agent") {
-        navigate("/dashboard/agent");
+      // Fetch user's actual role from database and redirect accordingly
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔐 Login Debug - User:', user?.email);
+      
+      if (user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('user_type, email')
+          .eq('id', user.id)
+          .single();
+        
+        console.log('👤 Login Debug - Profile Data:', profileData);
+        console.log('❌ Login Debug - Profile Error:', profileError);
+        
+        if (!profileError && profileData) {
+          console.log(`🔄 Login Debug - Redirecting based on user_type: ${profileData.user_type}`);
+          // Redirect based on actual user role from database
+          if (profileData.user_type === "admin") {
+            console.log('🚀 Login Debug - Redirecting to /dashboard/admin');
+            navigate("/dashboard/admin");
+          } else if (profileData.user_type === "agent") {
+            console.log('🚀 Login Debug - Redirecting to /dashboard/agent');
+            navigate("/dashboard/agent");
+          } else {
+            console.log('🚀 Login Debug - Redirecting to /dashboard/user (default)');
+            navigate("/dashboard/user");
+          }
+        } else {
+          console.log('⚠️ Login Debug - Profile fetch failed, redirecting to user dashboard');
+          // Fallback to user dashboard if profile fetch fails
+          navigate("/dashboard/user");
+        }
       } else {
+        console.log('⚠️ Login Debug - User fetch failed, redirecting to user dashboard');
+        // Fallback to user dashboard if user fetch fails
         navigate("/dashboard/user");
       }
       

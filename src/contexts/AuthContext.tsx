@@ -118,9 +118,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Use explicit typing for the response
       const { data, error } = await supabase
         .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single() as { data: { role: string } | null; error: Error | null };
+        .select('user_type')
+        .eq('id', user.id)
+        .single() as { data: { user_type: string } | null; error: Error | null };
 
       if (error) {
         console.error("Error fetching user profile:", error);
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data) {
-        setUserType(data.role as "admin" | "agent" | "user");
+        setUserType(data.user_type as "admin" | "agent" | "user");
       } else {
         // If no data returned, default to 'user' type
         setUserType("user");

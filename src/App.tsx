@@ -31,6 +31,7 @@ import AdminSystem from "./pages/admin/AdminSystem";
 import AdminProperties from "./pages/admin/AdminProperties";
 
 // Auth Pages
+import Login from "./pages/Login";
 import UserLogin from "./pages/auth/UserLogin";
 import UserSignup from "./pages/auth/UserSignup";
 import AgentLogin from "./pages/auth/AgentLogin";
@@ -62,7 +63,7 @@ const App = () => {
               <CurrencyProvider>
                 <Routes>
             {/* Authentication routes without header/footer */}
-            <Route path="/login" element={<Navigate to="/user-login" replace />} />
+            <Route path="/login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><Login /></RouteWrapper>} />
             <Route path="/user-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserLogin /></RouteWrapper>} />
             <Route path="/user-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserSignup /></RouteWrapper>} />
             <Route path="/agent-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentLogin /></RouteWrapper>} />
