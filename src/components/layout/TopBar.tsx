@@ -25,15 +25,7 @@ const TopBar = () => {
               <span>info@godirectrealty.com</span>
             </div>
             
-            <div className="hidden lg:flex items-center gap-2">
-              <Clock className="h-3 w-3 md:h-4 md:w-4 text-realty-gold" />
-              <span>Mon - Fri: 9:00 AM - 6:00 PM</span>
-            </div>
-            
-            <div className="hidden xl:flex items-center gap-2">
-              <MapPin className="h-3 w-3 md:h-4 md:w-4 text-realty-gold" />
-              <span>Lagos, Nigeria</span>
-            </div>
+
           </div>
 
           {/* Right Side - Social Media Icons */}

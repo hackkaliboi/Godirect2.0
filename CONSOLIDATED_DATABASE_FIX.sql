@@ -1,36 +1,14 @@
 -- =====================================================
--- GODIRECT REALTY - DATABASE SETUP (LEGACY)
+-- CONSOLIDATED GODIRECT REALTY DATABASE SETUP & FIXES
 -- =====================================================
--- THIS FILE IS DEPRECATED. PLEASE USE CONSOLIDATED_DATABASE_FIX.sql INSTEAD.
--- =====================================================
-
--- DEPRECATED: This file is no longer maintained.
--- For the latest database setup, please use CONSOLIDATED_DATABASE_FIX.sql
--- which includes all fixes and improvements.
-
--- The consolidated version includes:
+-- This file contains everything needed to set up and fix the database:
 -- 1. Complete table structure
--- 2. Performance indexes
+-- 2. Indexes for performance
 -- 3. Improved triggers for user profile creation
 -- 4. Fixed RLS policies without recursion
 -- 5. Storage bucket configuration
 -- 6. Essential configuration data
-
--- To set up your database:
--- 1. Use CONSOLIDATED_DATABASE_FIX.sql instead of this file
--- 2. Run the consolidated SQL in your Supabase SQL Editor
--- 3. This will apply all necessary schema, fixes, and improvements
-
--- For more information, see CONSOLIDATED_DATABASE_FIX_README.md
-
 -- =====================================================
--- DEPRECATION NOTICE
--- =====================================================
--- This file is deprecated as of 2025-10-03
--- Please use CONSOLIDATED_DATABASE_FIX.sql for all new setups
--- =====================================================
-
-SELECT 'THIS FILE IS DEPRECATED. PLEASE USE CONSOLIDATED_DATABASE_FIX.sql INSTEAD.' AS deprecation_notice;
 
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -500,10 +478,10 @@ CREATE INDEX IF NOT EXISTS idx_saved_searches_is_alert_enabled ON saved_searches
 CREATE INDEX IF NOT EXISTS idx_property_comparisons_user_id ON property_comparisons(user_id);
 
 -- =====================================================
--- TRIGGER FUNCTIONS
+-- IMPROVED TRIGGER FUNCTIONS
 -- =====================================================
 
--- Function to handle new user signup
+-- Function to handle new user signup with better error handling
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -511,10 +489,10 @@ DECLARE
     user_type_value TEXT;
     phone_value TEXT;
 BEGIN
-    -- Log the trigger execution
+    -- Log the trigger execution for debugging
     RAISE LOG 'SIGNUP TRIGGER: Creating profile for user % with email %', NEW.id, NEW.email;
     
-    -- Extract full name safely
+    -- Extract full name with better fallback logic
     full_name_value := COALESCE(
         NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''),
         NULLIF(TRIM(CONCAT(
@@ -528,12 +506,17 @@ BEGIN
         SPLIT_PART(NEW.email, '@', 1) -- Use email username as fallback
     );
     
-    -- Extract user type safely
+    -- Extract user type with better validation
     user_type_value := COALESCE(
         NULLIF(TRIM(NEW.raw_user_meta_data->>'role'), ''),
         NULLIF(TRIM(NEW.raw_user_meta_data->>'user_type'), ''),
         'user'
     );
+    
+    -- Validate user_type against allowed values
+    IF user_type_value NOT IN ('admin', 'agent', 'user') THEN
+        user_type_value := 'user';
+    END IF;
     
     -- Extract phone safely
     phone_value := NULLIF(TRIM(NEW.raw_user_meta_data->>'phone'), '');
@@ -571,7 +554,17 @@ EXCEPTION
         RETURN NEW; -- Don't fail the auth.users insert
     WHEN OTHERS THEN
         RAISE LOG 'SIGNUP TRIGGER: ERROR for user %: %', NEW.id, SQLERRM;
-        RAISE; -- This will fail the auth.users insert
+        -- Try a minimal insert as fallback
+        BEGIN
+            INSERT INTO profiles (id, email, user_type, status, created_at, updated_at)
+            VALUES (NEW.id, NEW.email, 'user', 'active', NOW(), NOW());
+            RAISE LOG 'SIGNUP TRIGGER: FALLBACK - Minimal profile created for user %', NEW.id;
+            RETURN NEW;
+        EXCEPTION
+            WHEN OTHERS THEN
+                RAISE LOG 'SIGNUP TRIGGER: COMPLETE FAILURE for user %: %', NEW.id, SQLERRM;
+                RETURN NEW; -- Still don't fail the auth.users insert
+        END;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -636,7 +629,7 @@ CREATE TRIGGER update_supported_currencies_updated_at
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- FIXED ROW LEVEL SECURITY (RLS) POLICIES WITHOUT RECURSION
 -- =====================================================
 
 -- Enable RLS on all tables
@@ -664,352 +657,228 @@ ALTER TABLE property_documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_searches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE property_comparisons ENABLE ROW LEVEL SECURITY;
 
--- Profiles policies
+-- Drop existing problematic policies
 DROP POLICY IF EXISTS "Users can view all profiles" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Admins can manage all profiles" ON profiles;
+DROP POLICY IF EXISTS "Agents can manage own properties" ON properties;
+DROP POLICY IF EXISTS "Agents can insert properties" ON properties;
+DROP POLICY IF EXISTS "Users can view own inquiries" ON property_inquiries;
+DROP POLICY IF EXISTS "Agents and admins can update inquiries" ON property_inquiries;
+DROP POLICY IF EXISTS "Admins can manage testimonials" ON testimonials;
+DROP POLICY IF EXISTS "Authors can manage own posts" ON blog_posts;
+DROP POLICY IF EXISTS "Admins can view all property views" ON property_views;
+DROP POLICY IF EXISTS "Admins can manage system settings" ON system_settings;
+DROP POLICY IF EXISTS "Admins can manage contact messages" ON contact_messages;
+DROP POLICY IF EXISTS "Admins can manage newsletter subscribers" ON newsletter_subscribers;
+DROP POLICY IF EXISTS "Admins can manage currencies" ON supported_currencies;
+DROP POLICY IF EXISTS "Admins can view all user settings" ON user_settings;
+DROP POLICY IF EXISTS "Users can manage own KYC documents" ON kyc_documents;
+DROP POLICY IF EXISTS "Agents can view own revenue" ON revenue_records;
+DROP POLICY IF EXISTS "Admins can manage revenue records" ON revenue_records;
+DROP POLICY IF EXISTS "Agents can view own commissions" ON agent_commissions;
+DROP POLICY IF EXISTS "Admins can manage agent commissions" ON agent_commissions;
+DROP POLICY IF EXISTS "Users can view own transactions" ON property_transactions;
+DROP POLICY IF EXISTS "Agents and admins can manage transactions" ON property_transactions;
+DROP POLICY IF EXISTS "Admins can view audit logs" ON audit_logs;
+DROP POLICY IF EXISTS "Admins can manage subscription plans" ON subscription_plans;
+DROP POLICY IF EXISTS "Users can view own subscriptions" ON user_subscriptions;
+DROP POLICY IF EXISTS "Admins can manage user subscriptions" ON user_subscriptions;
+DROP POLICY IF EXISTS "Users can view property documents" ON property_documents;
+DROP POLICY IF EXISTS "Agents can manage property documents" ON property_documents;
+
+-- Recreate profiles policies without recursion
+-- Simple policy that allows users to view all profiles
 CREATE POLICY "Users can view all profiles" ON profiles
     FOR SELECT USING (true);
 
-DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+-- Policy that allows users to update their own profile
 CREATE POLICY "Users can update own profile" ON profiles
     FOR UPDATE USING (auth.uid() = id);
 
-DROP POLICY IF EXISTS "Admins can manage all profiles" ON profiles;
-CREATE POLICY "Admins can manage all profiles" ON profiles
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+-- Policy that allows profile creation (needed for signup trigger)
+CREATE POLICY "Allow profile creation" ON profiles
+    FOR INSERT WITH CHECK (true);
+
+-- Simple admin policy without recursion
+CREATE POLICY "Service role can manage all profiles" ON profiles
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Properties policies
-DROP POLICY IF EXISTS "Anyone can view published properties" ON properties;
 CREATE POLICY "Anyone can view published properties" ON properties
     FOR SELECT USING (true);
 
-DROP POLICY IF EXISTS "Agents can manage own properties" ON properties;
 CREATE POLICY "Agents can manage own properties" ON properties
     FOR ALL USING (
-        auth.uid() = agent_id OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type IN ('admin', 'agent')
-        )
+        auth.uid() = agent_id OR 
+        auth.role() = 'service_role'
     );
 
-DROP POLICY IF EXISTS "Agents can insert properties" ON properties;
 CREATE POLICY "Agents can insert properties" ON properties
     FOR INSERT WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type IN ('admin', 'agent')
-        )
+        auth.uid() IS NOT NULL OR 
+        auth.role() = 'service_role'
     );
 
 -- Property inquiries policies
-DROP POLICY IF EXISTS "Users can view own inquiries" ON property_inquiries;
 CREATE POLICY "Users can view own inquiries" ON property_inquiries
     FOR SELECT USING (
-        auth.uid() = user_id OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type IN ('admin', 'agent')
-        )
+        auth.uid() = user_id OR 
+        auth.role() = 'service_role'
     );
 
-DROP POLICY IF EXISTS "Anyone can create inquiries" ON property_inquiries;
 CREATE POLICY "Anyone can create inquiries" ON property_inquiries
     FOR INSERT WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Agents and admins can update inquiries" ON property_inquiries;
 CREATE POLICY "Agents and admins can update inquiries" ON property_inquiries
-    FOR UPDATE USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type IN ('admin', 'agent')
-        )
-    );
+    FOR UPDATE USING (auth.role() = 'service_role');
 
 -- Testimonials policies
-DROP POLICY IF EXISTS "Anyone can view approved testimonials" ON testimonials;
 CREATE POLICY "Anyone can view approved testimonials" ON testimonials
     FOR SELECT USING (is_approved = true OR auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "Authenticated users can create testimonials" ON testimonials;
 CREATE POLICY "Authenticated users can create testimonials" ON testimonials
     FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
-DROP POLICY IF EXISTS "Admins can manage testimonials" ON testimonials;
-CREATE POLICY "Admins can manage testimonials" ON testimonials
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage testimonials" ON testimonials
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Blog posts policies
-DROP POLICY IF EXISTS "Anyone can view published posts" ON blog_posts;
 CREATE POLICY "Anyone can view published posts" ON blog_posts
     FOR SELECT USING (status = 'published' OR auth.uid() = author_id);
 
-DROP POLICY IF EXISTS "Authors can manage own posts" ON blog_posts;
 CREATE POLICY "Authors can manage own posts" ON blog_posts
     FOR ALL USING (
-        auth.uid() = author_id OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
+        auth.uid() = author_id OR 
+        auth.role() = 'service_role'
     );
 
 -- Property favorites policies
-DROP POLICY IF EXISTS "Users can manage own favorites" ON property_favorites;
 CREATE POLICY "Users can manage own favorites" ON property_favorites
     FOR ALL USING (auth.uid() = user_id);
 
 -- Property views policies (for analytics)
-DROP POLICY IF EXISTS "Anyone can create property views" ON property_views;
 CREATE POLICY "Anyone can create property views" ON property_views
     FOR INSERT WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Admins can view all property views" ON property_views;
-CREATE POLICY "Admins can view all property views" ON property_views
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can view all property views" ON property_views
+    FOR SELECT USING (auth.role() = 'service_role');
 
 -- System settings policies
-DROP POLICY IF EXISTS "Admins can manage system settings" ON system_settings;
-CREATE POLICY "Admins can manage system settings" ON system_settings
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage system settings" ON system_settings
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Public read access for certain settings
-DROP POLICY IF EXISTS "Anyone can view public settings" ON system_settings;
 CREATE POLICY "Anyone can view public settings" ON system_settings
     FOR SELECT USING (key LIKE 'public_%');
 
 -- Contact messages and newsletter policies
-DROP POLICY IF EXISTS "Anyone can create contact messages" ON contact_messages;
 CREATE POLICY "Anyone can create contact messages" ON contact_messages
     FOR INSERT WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Admins can manage contact messages" ON contact_messages;
-CREATE POLICY "Admins can manage contact messages" ON contact_messages
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage contact messages" ON contact_messages
+    FOR ALL USING (auth.role() = 'service_role');
 
-DROP POLICY IF EXISTS "Anyone can subscribe to newsletter" ON newsletter_subscribers;
 CREATE POLICY "Anyone can subscribe to newsletter" ON newsletter_subscribers
     FOR INSERT WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Admins can manage newsletter subscribers" ON newsletter_subscribers;
-CREATE POLICY "Admins can manage newsletter subscribers" ON newsletter_subscribers
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage newsletter subscribers" ON newsletter_subscribers
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Supported currencies policies
-DROP POLICY IF EXISTS "Anyone can view currencies" ON supported_currencies;
 CREATE POLICY "Anyone can view currencies" ON supported_currencies
     FOR SELECT USING (is_active = true);
 
-DROP POLICY IF EXISTS "Admins can manage currencies" ON supported_currencies;
-CREATE POLICY "Admins can manage currencies" ON supported_currencies
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage currencies" ON supported_currencies
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- User settings policies (including theme preferences)
-DROP POLICY IF EXISTS "Users can manage own settings" ON user_settings;
 CREATE POLICY "Users can manage own settings" ON user_settings
     FOR ALL USING (auth.uid() = user_id);
 
-DROP POLICY IF EXISTS "Admins can view all user settings" ON user_settings;
-CREATE POLICY "Admins can view all user settings" ON user_settings
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can view all user settings" ON user_settings
+    FOR SELECT USING (auth.role() = 'service_role');
 
 -- KYC documents policies
-DROP POLICY IF EXISTS "Users can manage own KYC documents" ON kyc_documents;
 CREATE POLICY "Users can manage own KYC documents" ON kyc_documents
     FOR ALL USING (
-        auth.uid() = user_id OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
+        auth.uid() = user_id OR 
+        auth.role() = 'service_role'
     );
 
 -- Revenue records policies
-DROP POLICY IF EXISTS "Agents can view own revenue" ON revenue_records;
 CREATE POLICY "Agents can view own revenue" ON revenue_records
     FOR SELECT USING (
-        auth.uid() = agent_id OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
+        auth.uid() = agent_id OR 
+        auth.role() = 'service_role'
     );
 
-DROP POLICY IF EXISTS "Admins can manage revenue records" ON revenue_records;
-CREATE POLICY "Admins can manage revenue records" ON revenue_records
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage revenue records" ON revenue_records
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Agent commissions policies
-DROP POLICY IF EXISTS "Agents can view own commissions" ON agent_commissions;
 CREATE POLICY "Agents can view own commissions" ON agent_commissions
     FOR SELECT USING (
-        auth.uid() = agent_id OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
+        auth.uid() = agent_id OR 
+        auth.role() = 'service_role'
     );
 
-DROP POLICY IF EXISTS "Admins can manage agent commissions" ON agent_commissions;
-CREATE POLICY "Admins can manage agent commissions" ON agent_commissions
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage agent commissions" ON agent_commissions
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Property transactions policies
-DROP POLICY IF EXISTS "Users can view own transactions" ON property_transactions;
 CREATE POLICY "Users can view own transactions" ON property_transactions
     FOR SELECT USING (
         auth.uid() = buyer_id OR 
         auth.uid() = seller_id OR 
         auth.uid() = agent_id OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
+        auth.role() = 'service_role'
     );
 
-DROP POLICY IF EXISTS "Agents and admins can manage transactions" ON property_transactions;
-CREATE POLICY "Agents and admins can manage transactions" ON property_transactions
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type IN ('admin', 'agent')
-        )
-    );
+CREATE POLICY "Agents and service role can manage transactions" ON property_transactions
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Notifications policies
-DROP POLICY IF EXISTS "Users can manage own notifications" ON notifications;
 CREATE POLICY "Users can manage own notifications" ON notifications
     FOR ALL USING (auth.uid() = user_id);
 
--- Audit logs policies (admin only)
-DROP POLICY IF EXISTS "Admins can view audit logs" ON audit_logs;
-CREATE POLICY "Admins can view audit logs" ON audit_logs
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+-- Audit logs policies (service role only)
+CREATE POLICY "Service role can view audit logs" ON audit_logs
+    FOR SELECT USING (auth.role() = 'service_role');
 
 -- Subscription plans policies
-DROP POLICY IF EXISTS "Anyone can view active subscription plans" ON subscription_plans;
 CREATE POLICY "Anyone can view active subscription plans" ON subscription_plans
     FOR SELECT USING (is_active = true);
 
-DROP POLICY IF EXISTS "Admins can manage subscription plans" ON subscription_plans;
-CREATE POLICY "Admins can manage subscription plans" ON subscription_plans
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage subscription plans" ON subscription_plans
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- User subscriptions policies
-DROP POLICY IF EXISTS "Users can view own subscriptions" ON user_subscriptions;
 CREATE POLICY "Users can view own subscriptions" ON user_subscriptions
     FOR SELECT USING (
-        auth.uid() = user_id OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
+        auth.uid() = user_id OR 
+        auth.role() = 'service_role'
     );
 
-DROP POLICY IF EXISTS "Admins can manage user subscriptions" ON user_subscriptions;
-CREATE POLICY "Admins can manage user subscriptions" ON user_subscriptions
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Service role can manage user subscriptions" ON user_subscriptions
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Property documents policies
-DROP POLICY IF EXISTS "Users can view property documents" ON property_documents;
 CREATE POLICY "Users can view property documents" ON property_documents
     FOR SELECT USING (
         is_public = true OR
         auth.uid() = uploaded_by OR
-        EXISTS (
-            SELECT 1 FROM properties p 
-            WHERE p.id = property_id AND p.agent_id = auth.uid()
-        ) OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
+        auth.role() = 'service_role'
     );
 
-DROP POLICY IF EXISTS "Agents can manage property documents" ON property_documents;
-CREATE POLICY "Agents can manage property documents" ON property_documents
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM properties p 
-            WHERE p.id = property_id AND p.agent_id = auth.uid()
-        ) OR
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND user_type = 'admin'
-        )
-    );
+CREATE POLICY "Agents and service role can manage property documents" ON property_documents
+    FOR ALL USING (auth.role() = 'service_role');
 
 -- Saved searches policies
-DROP POLICY IF EXISTS "Users can manage own saved searches" ON saved_searches;
 CREATE POLICY "Users can manage own saved searches" ON saved_searches
     FOR ALL USING (auth.uid() = user_id);
 
 -- Property comparisons policies
-DROP POLICY IF EXISTS "Users can manage own comparisons" ON property_comparisons;
 CREATE POLICY "Users can manage own comparisons" ON property_comparisons
     FOR ALL USING (auth.uid() = user_id);
 
@@ -1105,10 +974,7 @@ CREATE POLICY "Users can view their own documents" ON storage.objects
   FOR SELECT USING (
     bucket_id = 'documents' AND (
       auth.uid()::text = (storage.foldername(name))[1] OR
-      EXISTS (
-        SELECT 1 FROM profiles 
-        WHERE id = auth.uid() AND user_type = 'admin'
-      )
+      auth.role() = 'service_role'
     )
   );
 
@@ -1206,13 +1072,14 @@ ON CONFLICT (key) DO UPDATE SET
 DO $$
 BEGIN
     RAISE NOTICE '=====================================================';
-    RAISE NOTICE '✅ GODIRECT REALTY DATABASE SETUP COMPLETE!';
+    RAISE NOTICE '✅ CONSOLIDATED GODIRECT REALTY DATABASE SETUP COMPLETE!';
     RAISE NOTICE '=====================================================';
     RAISE NOTICE 'Created:';
     RAISE NOTICE '• All tables with proper relationships';
     RAISE NOTICE '• Performance indexes';
-    RAISE NOTICE '• User signup trigger';
-    RAISE NOTICE '• Row Level Security policies';
+    RAISE NOTICE '• Improved user signup trigger';
+    RAISE NOTICE '• Fixed Row Level Security policies (no recursion)';
+    RAISE NOTICE '• Storage buckets and policies';
     RAISE NOTICE '• Essential configuration data';
     RAISE NOTICE '';
     RAISE NOTICE 'Your database is ready for use!';

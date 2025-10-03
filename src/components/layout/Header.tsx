@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Moon, Sun, User } from "lucide-react";
@@ -11,6 +10,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, userType, signOut } = useAuth();
 
   const toggleDarkMode = () => {
@@ -21,9 +21,7 @@ const Header = () => {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Properties", path: "/properties" },
-    { name: "Agents", path: "/agents" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
+    { name: "List Your Property", path: "/list-property" },
   ];
 
   // Determine which dashboard to link to based on user type
@@ -72,10 +70,10 @@ const Header = () => {
 
           {/* Right side actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <CurrencySelector 
-              variant="select" 
-              size="sm" 
-              showFlag={true} 
+            <CurrencySelector
+              variant="select"
+              size="sm"
+              showFlag={true}
               className="w-28"
             />
             <Button
@@ -90,9 +88,9 @@ const Header = () => {
 
             {user ? (
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="rounded-full border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300"
                   asChild
                 >
@@ -101,8 +99,8 @@ const Header = () => {
                     Dashboard
                   </Link>
                 </Button>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={signOut}
                 >
@@ -111,16 +109,16 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   className="border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300"
                   asChild
                 >
                   <Link to="/login">Sign In</Link>
                 </Button>
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   size="sm"
                   className="bg-gradient-to-r from-realty-800 to-realty-900 hover:from-realty-700 hover:to-realty-800 text-white shadow-sm hover:shadow transition-all duration-300 dark:from-realty-gold dark:to-realty-gold/90 dark:text-realty-900"
                   asChild
@@ -142,7 +140,7 @@ const Header = () => {
             >
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
-            
+
             <Button
               variant="ghost"
               size="icon"
@@ -175,7 +173,7 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
-              
+
               {user && (
                 <Link
                   to={getDashboardLink()}
@@ -188,16 +186,16 @@ const Header = () => {
             </nav>
             <div className="pt-4 border-t border-gray-200 dark:border-realty-800 flex flex-col space-y-3">
               <div className="mb-3">
-                <CurrencySelector 
-                  variant="select" 
-                  size="sm" 
-                  showFlag={true} 
+                <CurrencySelector
+                  variant="select"
+                  size="sm"
+                  showFlag={true}
                 />
               </div>
               {user ? (
-                <Button 
-                  variant="outline" 
-                  className="justify-center" 
+                <Button
+                  variant="outline"
+                  className="justify-center"
                   onClick={() => {
                     signOut();
                     setIsMenuOpen(false);
@@ -207,9 +205,9 @@ const Header = () => {
                 </Button>
               ) : (
                 <>
-                  <Button 
-                    variant="outline" 
-                    className="justify-center border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300" 
+                  <Button
+                    variant="outline"
+                    className="justify-center border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300"
                     asChild
                   >
                     <Link to="/login" onClick={() => setIsMenuOpen(false)}>
@@ -217,8 +215,8 @@ const Header = () => {
                       Sign In
                     </Link>
                   </Button>
-                  <Button 
-                    className="justify-center bg-gradient-to-r from-realty-800 to-realty-900 hover:from-realty-700 hover:to-realty-800 text-white shadow-sm hover:shadow transition-all duration-300 dark:from-realty-gold dark:to-realty-gold/90 dark:text-realty-900" 
+                  <Button
+                    className="justify-center bg-gradient-to-r from-realty-800 to-realty-900 hover:from-realty-700 hover:to-realty-800 text-white shadow-sm hover:shadow transition-all duration-300 dark:from-realty-gold dark:to-realty-gold/90 dark:text-realty-900"
                     asChild
                   >
                     <Link to="/user-signup" onClick={() => setIsMenuOpen(false)}>

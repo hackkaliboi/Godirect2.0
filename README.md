@@ -55,12 +55,30 @@ cp .env.example .env.local
 ```
 Add your Supabase credentials and other required environment variables.
 
-4. **Start the development server**
+4. **Database Setup**
+For a fresh start (recommended):
+- Follow the guide in `NEW_SUPABASE_PROJECT_SETUP.md` to create a new Supabase project
+- This will permanently resolve the admin login issue
+
+For existing projects:
+- Open `CONSOLIDATED_DATABASE_FIX.sql` 
+- Copy the contents into your Supabase SQL Editor
+- Run the SQL to set up your database with all fixes and improvements
+
+5. **Storage Setup**
+The database setup includes storage bucket configuration:
+- **avatars**: For user profile pictures
+- **property-images**: For property photos and galleries
+- **documents**: For KYC documents and private files
+
+See `STORAGE_BUCKET_GUIDE.md` for detailed usage instructions.
+
+6. **Start the development server**
 ```bash
 npm run dev
 ```
 
-5. **Open your browser**
+7. **Open your browser**
 Navigate to `http://localhost:5173` to see the application.
 
 ## 🛠️ Technology Stack

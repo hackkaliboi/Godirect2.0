@@ -1,4 +1,3 @@
-
 import React, { useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -23,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check if we're accessing preview routes specifically
     const isPreviewRoute = window.location.pathname.startsWith('/preview/');
-    
+
     if (isPreviewRoute) {
       // For preview routes only, create a mock user and determine type from URL
       const mockUser = {
@@ -41,9 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
-      
+
       setUser(mockUser as import('@supabase/supabase-js').User);
-      
+
       // Determine user type from URL
       if (window.location.pathname.includes('admin')) {
         setUserType("admin");
@@ -100,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function fetchUserProfile(userId: string) {
     // Check if we're in preview mode
     const isPreviewMode = window.location.pathname.startsWith('/preview/');
-    
+
     if (isPreviewMode) {
       // For preview mode, determine user type from URL
       if (window.location.pathname.includes('/admin')) {
@@ -119,19 +118,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from('profiles')
         .select('user_type')
-        .eq('id', user.id)
+        .eq('id', userId) // Use the userId parameter instead of user.id
         .single() as { data: { user_type: string } | null; error: Error | null };
 
       if (error) {
         console.error("Error fetching user profile:", error);
-        // If profile doesn't exist, default to 'user' type
+        // If profile doesn't exist, this might be a new user
+        // Create a minimal profile and default to 'user' type
+        try {
+          const { error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              email: user?.email || 'unknown@example.com',
+              user_type: 'user',
+              status: 'active',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+
+          if (createError) {
+            console.error("Error creating fallback profile:", createError);
+          } else {
+            console.log("Created fallback profile for user:", userId);
+          }
+        } catch (createProfileError) {
+          console.error("Error in fallback profile creation:", createProfileError);
+        }
+
+        // Default to 'user' type
         setUserType("user");
         setLoading(false);
         return;
       }
 
       if (data) {
-        setUserType(data.user_type as "admin" | "agent" | "user");
+        // Validate the user_type value
+        const validUserTypes = ["admin", "agent", "user"];
+        const userTypeValue = data.user_type as "admin" | "agent" | "user";
+
+        if (validUserTypes.includes(userTypeValue)) {
+          setUserType(userTypeValue);
+        } else {
+          // If user_type is invalid, default to 'user' and log warning
+          console.warn(`Invalid user_type '${data.user_type}' for user ${userId}, defaulting to 'user'`);
+          setUserType("user");
+        }
       } else {
         // If no data returned, default to 'user' type
         setUserType("user");
@@ -165,11 +197,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function RequireAuth({ 
-  children, 
-  requiredUserType 
-}: { 
-  children: JSX.Element; 
+export function RequireAuth({
+  children,
+  requiredUserType
+}: {
+  children: JSX.Element;
   requiredUserType?: "admin" | "agent" | "user";
 }) {
   const context = useContext(AuthContext);
@@ -191,7 +223,7 @@ export function RequireAuth({
     if (userType === null && user) {
       return <div className="flex justify-center items-center h-screen">Verifying access...</div>;
     }
-    
+
     // Redirect to the appropriate dashboard if logged in but wrong type
     if (userType === "admin") {
       return <Navigate to="/dashboard/admin" replace />;

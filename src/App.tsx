@@ -8,9 +8,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import PropertyListings from "./pages/PropertyListings";
 import PropertyDetails from "./pages/PropertyDetails";
-import Agents from "./pages/Agents";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
+import ListProperty from "./pages/ListProperty";
 import NotFound from "./pages/NotFound";
 import Navigation from "./components/layout/Navigation";
 import Footer from "./components/layout/Footer";
@@ -62,94 +60,91 @@ const App = () => {
             <ThemeProvider>
               <CurrencyProvider>
                 <Routes>
-            {/* Authentication routes without header/footer */}
-            <Route path="/login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><Login /></RouteWrapper>} />
-            <Route path="/user-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserLogin /></RouteWrapper>} />
-            <Route path="/user-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserSignup /></RouteWrapper>} />
-            <Route path="/agent-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentLogin /></RouteWrapper>} />
-            <Route path="/agent-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentSignup /></RouteWrapper>} />
-            <Route path="/admin-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AdminLogin /></RouteWrapper>} />
-            <Route path="/forgot-password" element={<RouteWrapper includeNavigation={false} includeFooter={false}><ForgotPassword /></RouteWrapper>} />
-            <Route path="/reset-password" element={<RouteWrapper includeNavigation={false} includeFooter={false}><ResetPassword /></RouteWrapper>} />
-            
-            {/* Dashboard routes without header/footer */}
-            <Route 
-              path="/admin-dashboard/*" 
-              element={
-                <RouteWrapper includeNavigation={false} includeFooter={false}>
-                  <RequireAuth requiredUserType="admin">
-                    <AdminDashboard />
-                  </RequireAuth>
-                </RouteWrapper>
-              } 
-            />
-            <Route 
-              path="/user-dashboard/*" 
-              element={
-                <RouteWrapper includeNavigation={false} includeFooter={false}>
-                  <RequireAuth requiredUserType="user">
-                    <UserDashboard />
-                  </RequireAuth>
-                </RouteWrapper>
-              } 
-            />
-            <Route 
-              path="/agent-dashboard/*" 
-              element={
-                <RouteWrapper includeNavigation={false} includeFooter={false}>
-                  <RequireAuth requiredUserType="agent">
-                    <AgentDashboard />
-                  </RequireAuth>
-                </RouteWrapper>
-              } 
-            />
-            
-            {/* New dashboard routes matching sidebar structure */}
-            <Route 
-              path="/dashboard/admin/*" 
-              element={
-                <RouteWrapper includeNavigation={false} includeFooter={false}>
-                  <RequireAuth requiredUserType="admin">
-                    <AdminDashboard />
-                  </RequireAuth>
-                </RouteWrapper>
-              } 
-            />
-            <Route 
-              path="/dashboard/user/*" 
-              element={
-                <RouteWrapper includeNavigation={false} includeFooter={false}>
-                  <RequireAuth requiredUserType="user">
-                    <UserDashboard />
-                  </RequireAuth>
-                </RouteWrapper>
-              } 
-            />
-            <Route 
-              path="/dashboard/agent/*" 
-              element={
-                <RouteWrapper includeNavigation={false} includeFooter={false}>
-                  <RequireAuth requiredUserType="agent">
-                    <AgentDashboard />
-                  </RequireAuth>
-                </RouteWrapper>
-              } 
-            />
-            
-            {/* Preview routes for dashboards (no authentication required) */}
-            <Route path="/preview/dashboard/admin/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AdminDashboard /></RouteWrapper>} />
-            <Route path="/preview/dashboard/user/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserDashboard /></RouteWrapper>} />
-            <Route path="/preview/dashboard/agent/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentDashboard /></RouteWrapper>} />
-            
-            {/* Public routes with header/footer */}
-            <Route path="/" element={<RouteWrapper><Index /></RouteWrapper>} />
-            <Route path="/properties" element={<RouteWrapper><PropertyListings /></RouteWrapper>} />
-            <Route path="/properties/:id" element={<RouteWrapper><PropertyDetails /></RouteWrapper>} />
-            <Route path="/agents" element={<RouteWrapper><Agents /></RouteWrapper>} />
-            <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
-            <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
-            <Route path="/diagnostic" element={<RouteWrapper className="p-8"><DiagnosticTest /></RouteWrapper>} />
-            <Route path="*" element={<RouteWrapper><NotFound /></RouteWrapper>} />
+                  {/* Authentication routes without header/footer */}
+                  <Route path="/login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><Login /></RouteWrapper>} />
+                  <Route path="/user-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserLogin /></RouteWrapper>} />
+                  <Route path="/user-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserSignup /></RouteWrapper>} />
+                  <Route path="/agent-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentLogin /></RouteWrapper>} />
+                  <Route path="/agent-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentSignup /></RouteWrapper>} />
+                  <Route path="/admin-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AdminLogin /></RouteWrapper>} />
+                  <Route path="/forgot-password" element={<RouteWrapper includeNavigation={false} includeFooter={false}><ForgotPassword /></RouteWrapper>} />
+                  <Route path="/reset-password" element={<RouteWrapper includeNavigation={false} includeFooter={false}><ResetPassword /></RouteWrapper>} />
+
+                  {/* Dashboard routes without header/footer */}
+                  <Route
+                    path="/admin-dashboard/*"
+                    element={
+                      <RouteWrapper includeNavigation={false} includeFooter={false}>
+                        <RequireAuth requiredUserType="admin">
+                          <AdminDashboard />
+                        </RequireAuth>
+                      </RouteWrapper>
+                    }
+                  />
+                  <Route
+                    path="/user-dashboard/*"
+                    element={
+                      <RouteWrapper includeNavigation={false} includeFooter={false}>
+                        <RequireAuth requiredUserType="user">
+                          <UserDashboard />
+                        </RequireAuth>
+                      </RouteWrapper>
+                    }
+                  />
+                  <Route
+                    path="/agent-dashboard/*"
+                    element={
+                      <RouteWrapper includeNavigation={false} includeFooter={false}>
+                        <RequireAuth requiredUserType="agent">
+                          <AgentDashboard />
+                        </RequireAuth>
+                      </RouteWrapper>
+                    }
+                  />
+
+                  {/* New dashboard routes matching sidebar structure */}
+                  <Route
+                    path="/dashboard/admin/*"
+                    element={
+                      <RouteWrapper includeNavigation={false} includeFooter={false}>
+                        <RequireAuth requiredUserType="admin">
+                          <AdminDashboard />
+                        </RequireAuth>
+                      </RouteWrapper>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/user/*"
+                    element={
+                      <RouteWrapper includeNavigation={false} includeFooter={false}>
+                        <RequireAuth requiredUserType="user">
+                          <UserDashboard />
+                        </RequireAuth>
+                      </RouteWrapper>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/agent/*"
+                    element={
+                      <RouteWrapper includeNavigation={false} includeFooter={false}>
+                        <RequireAuth requiredUserType="agent">
+                          <AgentDashboard />
+                        </RequireAuth>
+                      </RouteWrapper>
+                    }
+                  />
+
+                  {/* Preview routes for dashboards (no authentication required) */}
+                  <Route path="/preview/dashboard/admin/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AdminDashboard /></RouteWrapper>} />
+                  <Route path="/preview/dashboard/user/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserDashboard /></RouteWrapper>} />
+                  <Route path="/preview/dashboard/agent/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentDashboard /></RouteWrapper>} />
+
+                  {/* Public routes with header/footer */}
+                  <Route path="/" element={<RouteWrapper><Index /></RouteWrapper>} />
+                  <Route path="/properties" element={<RouteWrapper><PropertyListings /></RouteWrapper>} />
+                  <Route path="/properties/:id" element={<RouteWrapper><PropertyDetails /></RouteWrapper>} />
+                  <Route path="/list-property" element={<RouteWrapper><ListProperty /></RouteWrapper>} />
+                  <Route path="*" element={<RouteWrapper><NotFound /></RouteWrapper>} />
                 </Routes>
               </CurrencyProvider>
             </ThemeProvider>

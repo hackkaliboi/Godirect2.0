@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,7 +44,7 @@ const Login = () => {
     setIsLoading(true);
     try {
       console.log("🔐 Starting login process for:", values.email);
-      
+
       // Sign in with Supabase
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: values.email,
@@ -72,10 +71,19 @@ const Login = () => {
         .eq('id', authData.user.id)
         .single();
 
+      // Log the raw profile data for debugging
+      console.log("🔍 Raw profile data:", profile);
+      console.log("❌ Profile error (if any):", profileError);
+
       if (profileError) {
         console.error("❌ Profile fetch failed:", profileError.message);
         // Default to user dashboard if profile fetch fails
         console.log("⚠️ Defaulting to user dashboard due to profile fetch failure");
+        toast({
+          variant: "destructive",
+          title: "Profile fetch failed",
+          description: "Could not retrieve your profile. Defaulting to user dashboard.",
+        });
         navigate("/dashboard/user");
         return;
       }
@@ -85,7 +93,7 @@ const Login = () => {
 
       // Redirect based on user type
       let redirectPath = "/dashboard/user"; // default
-      
+
       switch (profile.user_type) {
         case 'admin':
           redirectPath = "/dashboard/admin";
@@ -101,15 +109,15 @@ const Login = () => {
           console.log("🔄 Redirecting to user dashboard");
           break;
       }
-      
+
       toast({
         title: "Login successful!",
         description: `Welcome back, ${profile.full_name || values.email}!`,
       });
-      
+
       console.log("🎯 Final redirect path:", redirectPath);
       navigate(redirectPath);
-      
+
     } catch (error: any) {
       console.error("❌ Login error:", error);
       toast({
@@ -127,7 +135,7 @@ const Login = () => {
       <Helmet>
         <title>Login | GODIRECT Realty</title>
       </Helmet>
-      
+
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-950 flex items-center justify-center py-10 px-4">
         <Card className="w-full max-w-md shadow-lg border-0 bg-white dark:bg-slate-950">
           <CardHeader className="space-y-1 pb-6">
@@ -168,11 +176,11 @@ const Login = () => {
                       <FormLabel className="text-base font-medium">Password</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Input 
-                            placeholder="Your password" 
-                            type={showPassword ? "text" : "password"} 
-                            className="h-12 text-base pr-10" 
-                            {...field} 
+                          <Input
+                            placeholder="Your password"
+                            type={showPassword ? "text" : "password"}
+                            className="h-12 text-base pr-10"
+                            {...field}
                           />
                           <Button
                             type="button"
@@ -181,8 +189,8 @@ const Login = () => {
                             className="absolute right-0 top-0 h-12 w-12 p-0"
                             onClick={() => setShowPassword(!showPassword)}
                           >
-                            {showPassword ? 
-                              <EyeOff className="h-5 w-5 text-muted-foreground" /> : 
+                            {showPassword ?
+                              <EyeOff className="h-5 w-5 text-muted-foreground" /> :
                               <Eye className="h-5 w-5 text-muted-foreground" />
                             }
                           </Button>
@@ -217,9 +225,9 @@ const Login = () => {
                     Forgot password?
                   </Link>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 text-base font-medium bg-realty-800 hover:bg-realty-900 dark:bg-realty-gold dark:text-realty-900 dark:hover:bg-realty-gold/90" 
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base font-medium bg-realty-800 hover:bg-realty-900 dark:bg-realty-gold dark:text-realty-900 dark:hover:bg-realty-gold/90"
                   disabled={isLoading}
                 >
                   {isLoading ? "Logging in..." : "Log in"}

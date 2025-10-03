@@ -7,7 +7,6 @@ import { MapPin, Building, Home, TrendingUp, Users, ChevronRight } from "lucide-
 import HeroSearch from "@/components/home/HeroSearch";
 import FeaturedListings from "@/components/home/FeaturedListings";
 import PropertyTypes from "@/components/home/PropertyTypes";
-import HowItWorks from "@/components/home/HowItWorks";
 import Testimonials from "@/components/home/Testimonials";
 import Newsletter from "@/components/home/Newsletter";
 import ScrollToTop from "@/components/ui/scroll-to-top";
@@ -29,10 +28,10 @@ const Index = () => {
         <meta name="description" content="Find your dream home with GoDirectly. Browse thousands of premium properties for sale and rent in Enugu and Calabar, Nigeria." />
         <meta name="keywords" content="real estate, property, Nigeria, Enugu, Calabar, buy home, rent apartment, luxury properties" />
       </Helmet>
-      
+
       {/* Main hero section with search */}
       <HeroSearch />
-      
+
       {/* Featured Locations */}
       <section className="py-16 bg-gradient-to-r from-realty-50 to-white dark:from-realty-900/40 dark:to-realty-900/20">
         <div className="container-custom">
@@ -47,7 +46,7 @@ const Index = () => {
               Discover exceptional properties in Nigeria's most sought-after locations.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {/* Enugu Card */}
             <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
@@ -76,7 +75,7 @@ const Index = () => {
                 </Button>
               </div>
             </div>
-            
+
             {/* Calabar Card */}
             <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800 z-0"></div>
@@ -104,7 +103,7 @@ const Index = () => {
                 </Button>
               </div>
             </div>
-            
+
             {/* Lagos Card */}
             <div className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-600 to-orange-800 z-0"></div>
@@ -135,7 +134,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-      
+
       {/* Featured property listings */}
       <section className="py-16">
         <div className="container-custom">
@@ -153,7 +152,7 @@ const Index = () => {
           <FeaturedListings />
         </div>
       </section>
-      
+
       {/* Property types */}
       <section className="py-16 bg-gradient-to-r from-realty-50 to-white dark:from-realty-900/40 dark:to-realty-900/20">
         <div className="container-custom">
@@ -171,96 +170,7 @@ const Index = () => {
           <PropertyTypes />
         </div>
       </section>
-      
-      {/* Why Choose Us */}
-      <section className="py-16">
-        <div className="container-custom">
-          <div className="text-center mb-12 animate-fade-up">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
-              Why Choose <span className="text-realty-gold relative inline-block">
-                <span className="relative z-10">GoDirectly</span>
-                <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
-              </span>
-            </h2>
-            <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto">
-              We're committed to providing exceptional service and value to our clients across Nigeria.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Card 1 */}
-            <Card className="border-realty-100 dark:border-realty-800 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-realty-50 dark:bg-realty-800/50 flex items-center justify-center">
-                  <Building className="h-8 w-8 text-realty-gold" />
-                </div>
-                <h3 className="text-lg font-semibold text-realty-900 dark:text-white mb-2">Premium Properties</h3>
-                <p className="text-realty-600 dark:text-realty-400 text-sm">
-                  Curated selection of high-quality properties that meet our strict standards for quality and value.
-                </p>
-              </CardContent>
-            </Card>
-            
-            {/* Card 2 */}
-            <Card className="border-realty-100 dark:border-realty-800 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-realty-50 dark:bg-realty-800/50 flex items-center justify-center">
-                  <MapPin className="h-8 w-8 text-realty-gold" />
-                </div>
-                <h3 className="text-lg font-semibold text-realty-900 dark:text-white mb-2">Prime Locations</h3>
-                <p className="text-realty-600 dark:text-realty-400 text-sm">
-                  Properties in the most sought-after neighborhoods with excellent amenities and investment potential.
-                </p>
-              </CardContent>
-            </Card>
-            
-            {/* Card 3 */}
-            <Card className="border-realty-100 dark:border-realty-800 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-realty-50 dark:bg-realty-800/50 flex items-center justify-center">
-                  <Users className="h-8 w-8 text-realty-gold" />
-                </div>
-                <h3 className="text-lg font-semibold text-realty-900 dark:text-white mb-2">Expert Agents</h3>
-                <p className="text-realty-600 dark:text-realty-400 text-sm">
-                  Our team of experienced professionals provides personalized guidance throughout your journey.
-                </p>
-              </CardContent>
-            </Card>
-            
-            {/* Card 4 */}
-            <Card className="border-realty-100 dark:border-realty-800 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-realty-50 dark:bg-realty-800/50 flex items-center justify-center">
-                  <TrendingUp className="h-8 w-8 text-realty-gold" />
-                </div>
-                <h3 className="text-lg font-semibold text-realty-900 dark:text-white mb-2">Market Insights</h3>
-                <p className="text-realty-600 dark:text-realty-400 text-sm">
-                  Access to exclusive market data and trends to help you make informed investment decisions.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-      
-      {/* How it works */}
-      <section className="py-16 bg-gradient-to-r from-realty-50 to-white dark:from-realty-900/40 dark:to-realty-900/20">
-        <div className="container-custom">
-          <div className="text-center mb-8 animate-fade-up">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
-              How It <span className="text-realty-gold relative inline-block">
-                <span className="relative z-10">Works</span>
-                <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
-              </span>
-            </h2>
-            <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto">
-              Our simple process makes finding and purchasing your dream property easy and stress-free.
-            </p>
-          </div>
-          <HowItWorks />
-        </div>
-      </section>
-      
+
       {/* Testimonials with enhanced styling */}
       <section className="py-16 bg-gradient-to-r from-realty-900 to-realty-800 text-white">
         <div className="container-custom">
@@ -278,12 +188,12 @@ const Index = () => {
           <Testimonials />
         </div>
       </section>
-      
+
       {/* Call to Action */}
       <section className="py-20 bg-realty-900 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-realty-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-realty-gold/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-        
+
         <div className="container-custom relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
@@ -303,14 +213,14 @@ const Index = () => {
           </div>
         </div>
       </section>
-      
+
       {/* Newsletter */}
       <section className="py-16 bg-gradient-to-b from-realty-50 to-white dark:from-realty-900/30 dark:to-realty-900/10">
         <div className="container-custom">
           <Newsletter />
         </div>
       </section>
-      
+
       {/* Scroll to top button */}
       <ScrollToTop />
     </>
