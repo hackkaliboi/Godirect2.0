@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, MapPin, Building, ArrowRight } from "lucide-react";
@@ -6,12 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { propertyTypes, priceRanges } from "@/utils/data";
+import ImageSlider from "@/components/ui/slider/ImageSlider";
 
 const HeroSearch = () => {
   const navigate = useNavigate();
   const [location, setLocation] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [priceRange, setPriceRange] = useState("");
+
+  // Define slider images
+  const sliderImages = [
+    "/hero-section/nigeria-city-1.png",
+    "/hero-section/nigeria-city-2.png",
+    "/hero-section/nigeria-city-3.png",
+    "/hero-section/nigeria-city-4.png"
+  ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,21 +38,23 @@ const HeroSearch = () => {
 
   return (
     <div className="relative w-full">
-      {/* Background Image with Parallax Effect */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center z-0 transition-transform duration-[3000ms] ease-out transform hover:scale-105" 
-        style={{
-          backgroundImage: "url('/hero-section/nigeria-city-1.png')",
-          height: "100%",
-          backgroundAttachment: "fixed"
-        }}
-      />
+      {/* Image Slider - This should be the background */}
+      <div className="absolute inset-0 z-0">
+        <ImageSlider 
+          images={sliderImages}
+          autoPlay={true}
+          autoPlayInterval={7000}
+          showIndicators={true}
+          showArrows={true}
+          height="h-full"
+        />
+      </div>
       
       {/* Enhanced Overlay with Multiple Gradients */}
       <div className="absolute inset-0 bg-gradient-to-r from-realty-900/90 via-realty-800/70 to-realty-900/60 z-10" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-realty-900/10 to-realty-900/30 z-10" />
       
-      {/* Content */}
+      {/* Content - This should be on top */}
       <div className="relative z-20 container-custom min-h-[700px] flex flex-col justify-center items-center text-center py-20">
         <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-bold text-white mb-6 animate-fade-up tracking-tight">
           Find Your <span className="text-realty-gold relative inline-block">
@@ -56,22 +66,22 @@ const HeroSearch = () => {
           Discover thousands of properties for sale and rent across the country. Let us help you find the perfect place to call home.
         </p>
         
-        {/* Enhanced Animated elements */}
-        <div className="absolute hidden md:block top-40 -left-4 animate-bounce opacity-70">
+        {/* Enhanced Animated elements - fixed z-index values */}
+        <div className="absolute hidden md:block top-40 -left-4 animate-bounce opacity-70" style={{ zIndex: 30 }}>
           <div className="h-16 w-16 rounded-full bg-realty-gold/20 backdrop-blur-sm border border-realty-gold/30"></div>
         </div>
-        <div className="absolute hidden md:block bottom-40 -right-10 animate-bounce opacity-70" style={{ animationDelay: "0.5s", animationDuration: "3s" }}>
+        <div className="absolute hidden md:block bottom-40 -right-10 animate-bounce opacity-70" style={{ zIndex: 30, animationDelay: "0.5s", animationDuration: "3s" }}>
           <div className="h-20 w-20 rounded-full bg-realty-gold/20 backdrop-blur-sm border border-realty-gold/30"></div>
         </div>
-        <div className="absolute hidden md:block top-1/4 right-20 animate-pulse opacity-50" style={{ animationDuration: "4s" }}>
+        <div className="absolute hidden md:block top-1/4 right-20 animate-pulse opacity-50" style={{ zIndex: 30, animationDuration: "4s" }}>
           <div className="h-24 w-24 rounded-full bg-realty-gold/10 backdrop-blur-sm border border-realty-gold/20"></div>
         </div>
-        <div className="absolute hidden md:block bottom-1/3 left-16 animate-pulse opacity-40" style={{ animationDuration: "5s" }}>
+        <div className="absolute hidden md:block bottom-1/3 left-16 animate-pulse opacity-40" style={{ zIndex: 30, animationDuration: "5s" }}>
           <div className="h-32 w-32 rounded-full bg-realty-gold/5 backdrop-blur-sm border border-realty-gold/10"></div>
         </div>
         
         {/* Search Form */}
-        <div className="w-full max-w-4xl animate-fade-up" style={{ animationDelay: "0.2s" }}>
+        <div className="w-full max-w-4xl animate-fade-up" style={{ zIndex: 30, animationDelay: "0.2s" }}>
           <form 
             onSubmit={handleSearch}
             className="bg-white/95 dark:bg-realty-800/95 backdrop-blur-md rounded-xl shadow-2xl p-4 md:p-6 border border-white/20 dark:border-realty-700/20 transition-all duration-300 hover:shadow-realty-gold/10"

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +33,41 @@ const PropertyTypes = () => {
   // Count properties by type and prepare data
   const getPropertyTypes = (): PropertyTypeData[] => {
     if (!properties || properties.length === 0) {
-      return [];
+      // Return default property types with local images when no data is available
+      return [
+        {
+          key: 1,
+          title: "Single Family Homes",
+          image: "/property-types/type-1.jpg",
+          count: 0,
+          url: "/properties?type=House",
+          type: "House"
+        },
+        {
+          key: 2,
+          title: "Condos & Apartments",
+          image: "/property-types/type-2.jpg",
+          count: 0,
+          url: "/properties?type=Condo,Apartment",
+          type: "Condo"
+        },
+        {
+          key: 3,
+          title: "Luxury Properties",
+          image: "/property-types/type-3.jpg",
+          count: 0,
+          url: "/properties?luxury=true",
+          type: "Luxury"
+        },
+        {
+          key: 4,
+          title: "Commercial Spaces",
+          image: "/property-types/type-4.jpg",
+          count: 0,
+          url: "/properties?type=Commercial",
+          type: "Commercial"
+        }
+      ];
     }
     
     // Count properties by type
@@ -49,7 +82,7 @@ const PropertyTypes = () => {
       {
         key: 1,
         title: "Single Family Homes",
-        image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop",
+        image: "/property-types/type-1.jpg",
         count: typeCounts["House"] || 0,
         url: "/properties?type=House",
         type: "House"
@@ -57,7 +90,7 @@ const PropertyTypes = () => {
       {
         key: 2,
         title: "Condos & Apartments",
-        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=800&auto=format&fit=crop",
+        image: "/property-types/type-2.jpg",
         count: (typeCounts["Condo"] || 0) + (typeCounts["Apartment"] || 0),
         url: "/properties?type=Condo,Apartment",
         type: "Condo"
@@ -65,7 +98,7 @@ const PropertyTypes = () => {
       {
         key: 3,
         title: "Luxury Properties",
-        image: "https://images.unsplash.com/photo-1613977257365-aaae5a9817ff?q=80&w=800&auto=format&fit=crop",
+        image: "/property-types/type-3.jpg",
         count: properties.length > 5 ? Math.floor(properties.length / 5) : 0, // Estimate luxury properties
         url: "/properties?luxury=true",
         type: "Luxury"
@@ -73,7 +106,7 @@ const PropertyTypes = () => {
       {
         key: 4,
         title: "Commercial Spaces",
-        image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=800&auto=format&fit=crop",
+        image: "/property-types/type-4.jpg",
         count: typeCounts["Commercial"] || 0,
         url: "/properties?type=Commercial",
         type: "Commercial"
