@@ -51,12 +51,12 @@ type AuthFormProps = {
   redirectPath: string;
 };
 
-export default function AuthForm({ 
-  mode, 
-  userType, 
-  title, 
-  description, 
-  redirectPath 
+export default function AuthForm({
+  mode,
+  userType,
+  title,
+  description,
+  redirectPath
 }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -92,7 +92,7 @@ export default function AuthForm({
         email: values.email,
         password: values.password,
       });
-      
+
       if (error) {
         throw error;
       }
@@ -101,21 +101,21 @@ export default function AuthForm({
         title: "Login successful!",
         description: `Welcome back to GODIRECT.`,
       });
-      
+
       // Fetch user's actual role from database and redirect accordingly
       const { data: { user } } = await supabase.auth.getUser();
       console.log('🔐 Login Debug - User:', user?.email);
-      
+
       if (user) {
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('user_type, email')
           .eq('id', user.id)
           .single();
-        
+
         console.log('👤 Login Debug - Profile Data:', profileData);
         console.log('❌ Login Debug - Profile Error:', profileError);
-        
+
         if (!profileError && profileData) {
           console.log(`🔄 Login Debug - Redirecting based on user_type: ${profileData.user_type}`);
           // Redirect based on actual user role from database
@@ -139,7 +139,7 @@ export default function AuthForm({
         // Fallback to user dashboard if user fetch fails
         navigate("/dashboard/user");
       }
-      
+
     } catch (error) {
       console.error("Login error:", error);
       const errorMessage = error instanceof Error ? error.message : "Please check your credentials and try again.";
@@ -171,20 +171,20 @@ export default function AuthForm({
           }
         },
       });
-      
+
       if (signUpError) {
         throw signUpError;
       }
-      
+
       // Wait a moment for the trigger to create the profile
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Since email confirmation is disabled, automatically sign in the user
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
-      
+
       if (signInError) {
         // If sign in fails, it might be because email confirmation is still required
         toast({
@@ -194,7 +194,7 @@ export default function AuthForm({
         navigate(redirectPath);
         return;
       }
-      
+
       // If user signed in successfully, ensure profile exists and is complete
       if (signInData.user) {
         try {
@@ -204,7 +204,7 @@ export default function AuthForm({
             .select('*')
             .eq('id', signInData.user.id)
             .single();
-          
+
           // If no profile exists, create one manually
           if (!profileData && profileError?.code === 'PGRST116') {
             console.log('Profile not found, creating manually...');
@@ -218,12 +218,12 @@ export default function AuthForm({
                 user_type: userType,
                 status: 'active'
               });
-            
+
             if (createError) {
               console.warn('Could not create profile manually:', createError);
             }
           }
-          
+
           // Also create default user settings
           const defaultSettings = [
             {
@@ -239,23 +239,23 @@ export default function AuthForm({
               category: 'notifications'
             }
           ];
-          
+
           await supabase
             .from('user_settings')
             .upsert(defaultSettings, { onConflict: 'user_id,setting_key' });
-          
+
         } catch (profileSetupError) {
           console.warn('Error setting up user profile:', profileSetupError);
           // Don't fail the signup process for profile setup errors
         }
       }
-      
+
       // Success - user is signed up and logged in
       toast({
         title: "Account created successfully!",
         description: "Welcome to GODIRECT. You're now logged in and your profile has been set up.",
       });
-      
+
       // Redirect to dashboard based on user type
       if (userType === "admin") {
         navigate("/dashboard/admin");
@@ -280,77 +280,48 @@ export default function AuthForm({
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      {/* Left Side - Animations */}
+      {/* Left Side - Image with GD Logo Animation */}
       <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-white overflow-hidden">
-        {/* Animated background patterns */}
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full animate-pulse" />
-          <div className="absolute top-1/4 right-20 w-20 h-20 bg-white/5 rounded-full animate-bounce [animation-delay:1s]" />
-          <div className="absolute bottom-1/4 left-1/4 w-16 h-16 bg-white/10 rounded-full animate-ping [animation-delay:2s]" />
-          <div className="absolute bottom-20 right-1/3 w-24 h-24 bg-white/5 rounded-full animate-pulse [animation-delay:3s]" />
-          <div className="absolute top-1/2 left-10 w-12 h-12 bg-white/10 rounded-full animate-bounce [animation-delay:4s]" />
-        </div>
-        
-        {/* Floating geometric shapes */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/3 left-1/4 w-4 h-4 bg-white/20 rotate-45 animate-spin [animation-duration:8s]" />
-          <div className="absolute bottom-1/3 right-1/4 w-6 h-6 bg-white/15 rotate-12 animate-spin [animation-duration:12s] [animation-direction:reverse]" />
-          <div className="absolute top-2/3 left-1/3 w-3 h-3 bg-white/25 rotate-45 animate-pulse [animation-delay:1.5s]" />
-        </div>
-        
-        {/* Main content */}
-        <div className="relative z-10 max-w-md text-center px-8">
-          {/* Animated logo */}
-          <div className="mb-8 flex justify-center">
-            <div className="relative group">
-              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                <span className="text-white font-bold text-3xl">GD</span>
-              </div>
-              <div className="absolute inset-0 rounded-2xl bg-white/10 animate-ping" />
-              <div className="absolute -inset-2 bg-gradient-to-r from-white/20 to-transparent rounded-2xl blur-xl animate-pulse" />
+        {/* Background image */}
+        <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('/auth/auth-bg.jpg')" }} />
+
+        {/* Overlay for better text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
+
+        {/* Animated GD Logo */}
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="relative group mb-8">
+            <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl transform transition-all duration-500 group-hover:scale-110">
+              <span className="text-white font-bold text-4xl">GD</span>
             </div>
+            <div className="absolute inset-0 rounded-2xl bg-white/10 animate-ping" />
+            <div className="absolute -inset-2 bg-gradient-to-r from-white/20 to-transparent rounded-2xl blur-xl animate-pulse" />
           </div>
-          
-          <h1 className="text-4xl font-bold mb-4 animate-fade-in-up">
+
+          <h1 className="text-4xl font-bold mb-4 text-center">
             Welcome to <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">GODIRECT</span>
           </h1>
-          
-          <p className="text-xl text-white/90 mb-8 animate-fade-in-up [animation-delay:0.2s]">
-            {mode === "login" 
-              ? "Sign in to access your real estate management platform" 
+
+          <p className="text-xl text-white/90 text-center max-w-md">
+            {mode === "login"
+              ? "Sign in to access your real estate management platform"
               : "Join thousands of professionals managing their real estate business with us"}
           </p>
-          
-          {/* Feature highlights */}
-          <div className="space-y-4 animate-fade-in-up [animation-delay:0.4s]">
-            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 transform hover:scale-105 transition-all duration-300">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              <span className="text-white/90">Professional Property Management</span>
-            </div>
-            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 transform hover:scale-105 transition-all duration-300">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:0.5s]" />
-              <span className="text-white/90">Advanced Analytics & Reporting</span>
-            </div>
-            <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm rounded-lg p-3 transform hover:scale-105 transition-all duration-300">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse [animation-delay:1s]" />
-              <span className="text-white/90">Seamless Client Communication</span>
-            </div>
-          </div>
         </div>
       </div>
-      
+
       {/* Right Side - Form */}
       <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative min-h-screen lg:min-h-0">
         {/* Mobile background for small screens */}
         <div className="lg:hidden absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10" />
-        
+
         <Card className={cn(
           "w-full max-w-md mx-auto shadow-2xl border-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm relative overflow-hidden",
           "transform transition-all duration-700 hover:shadow-3xl lg:hover:-translate-y-2"
         )}>
           {/* Top accent bar */}
           <div className="h-1 bg-gradient-to-r from-primary via-primary/80 to-primary animate-gradient-x" />
-          
+
           <CardHeader className="space-y-4 pb-6 relative px-4 sm:px-6">
             {/* Mobile logo for small screens */}
             <div className="lg:hidden flex justify-center mb-6">
@@ -366,7 +337,7 @@ export default function AuthForm({
                 </span>
               </Link>
             </div>
-            
+
             <div className="text-center space-y-2">
               <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                 {title}
@@ -376,343 +347,343 @@ export default function AuthForm({
               </CardDescription>
             </div>
           </CardHeader>
-      <CardContent className="space-y-4 sm:space-y-5 px-4 sm:px-6">
-        {mode === "login" ? (
-          <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4 sm:space-y-5">
-              <FormField
-                control={loginForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm sm:text-base font-medium">Email address</FormLabel>
-                    <FormControl>
-                      <div className="relative group">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="Your email address" 
-                          type="email" 
-                          className="h-10 sm:h-12 text-sm sm:text-base pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={loginForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
-                    <FormControl>
-                      <div className="relative group">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="Your password" 
-                          type={showPassword ? "text" : "password"}
-                          className="h-10 sm:h-12 text-sm sm:text-base pl-10 pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                          {...field} 
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? 
-                            <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> : 
-                            <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
-                          }
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex items-center justify-between">
-                <FormField
-                  control={loginForm.control}
-                  name="rememberMe"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm">Remember me</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                <Link
-                  to="/forgot-password"
-                  className="text-sm font-medium text-realty-600 hover:text-realty-800 transition-colors"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <Button 
-                type="submit" 
-                className={cn(
-                  "w-full h-10 sm:h-12 text-sm sm:text-base font-medium relative overflow-hidden transition-all duration-300",
-                  "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
-                  "shadow-lg hover:shadow-xl transform hover:-translate-y-0.5",
-                  "disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-                )}
-                disabled={isLoading}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <Loader variant="spin" size="sm" />
-                    <span>Logging in...</span>
-                  </div>
-                ) : (
-                  "Log in"
-                )}
-              </Button>
-            </form>
-          </Form>
-        ) : (
-          <Form {...signupForm}>
-            <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4 sm:space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                  control={signupForm.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm sm:text-base font-medium">First Name</FormLabel>
-                    <FormControl>
-                      <div className="relative group">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="Your first name" 
-                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={signupForm.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm sm:text-base font-medium">Last Name</FormLabel>
-                    <FormControl>
-                      <div className="relative group">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="Your last name" 
-                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={signupForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm sm:text-base font-medium">Email address</FormLabel>
-                    <FormControl>
-                      <div className="relative group">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="Your email address" 
-                          type="email" 
-                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={signupForm.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm sm:text-base font-medium">Phone Number</FormLabel>
-                    <FormControl>
-                      <div className="relative group">
-                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="Your phone number" 
-                          type="tel" 
-                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                          {...field} 
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={signupForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
-                    <FormControl>
-                      <div className="relative group">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="Create a password" 
-                          type={showPassword ? "text" : "password"} 
-                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 pr-10 sm:pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                          {...field} 
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? 
-                            <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> : 
-                            <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
-                          }
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={signupForm.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm sm:text-base font-medium">Confirm Password</FormLabel>
-                    <FormControl>
-                      <div className="relative group">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="Confirm your password" 
-                          type={showConfirmPassword ? "text" : "password"} 
-                          className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 pr-10 sm:pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary" 
-                          {...field} 
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? 
-                            <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> : 
-                            <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
-                          }
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={signupForm.control}
-                name="agreeTerms"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="text-sm">
-                        I agree to the{" "}
-                        <Link to="/terms" className="text-realty-600 hover:text-realty-800 font-medium">
-                          Terms and Conditions
-                        </Link>{" "}
-                        and{" "}
-                        <Link to="/privacy" className="text-realty-600 hover:text-realty-800 font-medium">
-                          Privacy Policy
-                        </Link>
-                      </FormLabel>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-              <Button 
-                type="submit" 
-                className={cn(
-                  "w-full h-10 sm:h-12 text-sm sm:text-base font-medium relative overflow-hidden transition-all duration-300 group",
-                  "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
-                  "shadow-lg hover:shadow-xl transform hover:-translate-y-0.5",
-                  "disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-                )}
-                disabled={isLoading}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <Loader variant="spin" size="sm" />
-                    <span>Creating account...</span>
-                  </div>
-                ) : (
-                  "Create account"
-                )}
-              </Button>
-            </form>
-          </Form>
-        )}
-      </CardContent>
-      <CardFooter className="pt-0 px-4 sm:px-6">
-        <div className="text-center w-full pb-4 sm:pb-6">
-          <p className="text-sm sm:text-base text-muted-foreground">
+          <CardContent className="space-y-4 sm:space-y-5 px-4 sm:px-6">
             {mode === "login" ? (
-              <>
-                Don't have an account?{" "}
-                <Link
-                  to={`${redirectPath.replace("login", "signup")}`}
-                  className="text-realty-600 hover:text-realty-800 font-medium"
-                >
-                  Sign up
-                </Link>
-              </>
+              <Form {...loginForm}>
+                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4 sm:space-y-5">
+                  <FormField
+                    control={loginForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base font-medium">Email address</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                              placeholder="Your email address"
+                              type="email"
+                              className="h-10 sm:h-12 text-sm sm:text-base pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                              placeholder="Your password"
+                              type={showPassword ? "text" : "password"}
+                              className="h-10 sm:h-12 text-sm sm:text-base pl-10 pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ?
+                                <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> :
+                                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
+                              }
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex items-center justify-between">
+                    <FormField
+                      control={loginForm.control}
+                      name="rememberMe"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm">Remember me</FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm font-medium text-realty-600 hover:text-realty-800 transition-colors"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <Button
+                    type="submit"
+                    className={cn(
+                      "w-full h-10 sm:h-12 text-sm sm:text-base font-medium relative overflow-hidden transition-all duration-300",
+                      "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
+                      "shadow-lg hover:shadow-xl transform hover:-translate-y-0.5",
+                      "disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                    )}
+                    disabled={isLoading}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {isLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <Loader variant="spin" size="sm" />
+                        <span>Logging in...</span>
+                      </div>
+                    ) : (
+                      "Log in"
+                    )}
+                  </Button>
+                </form>
+              </Form>
             ) : (
-              <>
-                Already have an account?{" "}
-                <Link
-                  to={redirectPath}
-                  className="text-realty-600 hover:text-realty-800 font-medium"
-                >
-                  Log in
-                </Link>
-              </>
+              <Form {...signupForm}>
+                <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4 sm:space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={signupForm.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base font-medium">First Name</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                              <Input
+                                placeholder="Your first name"
+                                className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={signupForm.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base font-medium">Last Name</FormLabel>
+                          <FormControl>
+                            <div className="relative group">
+                              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                              <Input
+                                placeholder="Your last name"
+                                className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={signupForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base font-medium">Email address</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                              placeholder="Your email address"
+                              type="email"
+                              className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signupForm.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base font-medium">Phone Number</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                              placeholder="Your phone number"
+                              type="tel"
+                              className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signupForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                              placeholder="Create a password"
+                              type={showPassword ? "text" : "password"}
+                              className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 pr-10 sm:pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ?
+                                <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> :
+                                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
+                              }
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signupForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base font-medium">Confirm Password</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                              placeholder="Confirm your password"
+                              type={showConfirmPassword ? "text" : "password"}
+                              className="h-10 sm:h-12 text-sm sm:text-base pl-9 sm:pl-10 pr-10 sm:pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            >
+                              {showConfirmPassword ?
+                                <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> :
+                                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
+                              }
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signupForm.control}
+                    name="agreeTerms"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-sm">
+                            I agree to the{" "}
+                            <Link to="/terms" className="text-realty-600 hover:text-realty-800 font-medium">
+                              Terms and Conditions
+                            </Link>{" "}
+                            and{" "}
+                            <Link to="/privacy" className="text-realty-600 hover:text-realty-800 font-medium">
+                              Privacy Policy
+                            </Link>
+                          </FormLabel>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className={cn(
+                      "w-full h-10 sm:h-12 text-sm sm:text-base font-medium relative overflow-hidden transition-all duration-300 group",
+                      "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
+                      "shadow-lg hover:shadow-xl transform hover:-translate-y-0.5",
+                      "disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                    )}
+                    disabled={isLoading}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {isLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <Loader variant="spin" size="sm" />
+                        <span>Creating account...</span>
+                      </div>
+                    ) : (
+                      "Create account"
+                    )}
+                  </Button>
+                </form>
+              </Form>
             )}
-          </p>
-        </div>
-      </CardFooter>
-    </Card>
+          </CardContent>
+          <CardFooter className="pt-0 px-4 sm:px-6">
+            <div className="text-center w-full pb-4 sm:pb-6">
+              <p className="text-sm sm:text-base text-muted-foreground">
+                {mode === "login" ? (
+                  <>
+                    Don't have an account?{" "}
+                    <Link
+                      to={`${redirectPath.replace("login", "signup")}`}
+                      className="text-realty-600 hover:text-realty-800 font-medium"
+                    >
+                      Sign up
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{" "}
+                    <Link
+                      to={redirectPath}
+                      className="text-realty-600 hover:text-realty-800 font-medium"
+                    >
+                      Log in
+                    </Link>
+                  </>
+                )}
+              </p>
+            </div>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );

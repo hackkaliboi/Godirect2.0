@@ -17,8 +17,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast";
 import { Helmet } from "react-helmet-async";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -136,119 +137,185 @@ const Login = () => {
         <title>Login | GODIRECT Realty</title>
       </Helmet>
 
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-950 flex items-center justify-center py-10 px-4">
-        <Card className="w-full max-w-md shadow-lg border-0 bg-white dark:bg-slate-950">
-          <CardHeader className="space-y-1 pb-6">
-            <Link to="/" className="flex items-center space-x-2 mb-4">
-              <div className="h-10 w-10 bg-realty-900 dark:bg-realty-gold rounded-md flex items-center justify-center">
-                <span className="text-white dark:text-realty-900 font-bold text-lg">GD</span>
+      <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+        {/* Left Side - Image with GD Logo Animation */}
+        <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-white overflow-hidden">
+          {/* Background image */}
+          <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('/auth/auth-bg.jpg')" }} />
+
+          {/* Overlay for better text visibility */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
+
+          {/* Animated GD Logo */}
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="relative group mb-8">
+              <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl transform transition-all duration-500 group-hover:scale-110">
+                <span className="text-white font-bold text-4xl">GD</span>
               </div>
-              <span className="text-2xl font-heading font-semibold text-realty-900 dark:text-white">
-                GODIRECT
-              </span>
-            </Link>
-            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-            <CardDescription className="text-base">
-              Enter your credentials to access your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-base font-medium">Email address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Your email address" type="email" className="h-12 text-base" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-base font-medium">Password</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            placeholder="Your password"
-                            type={showPassword ? "text" : "password"}
-                            className="h-12 text-base pr-10"
-                            {...field}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-12 w-12 p-0"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ?
-                              <EyeOff className="h-5 w-5 text-muted-foreground" /> :
-                              <Eye className="h-5 w-5 text-muted-foreground" />
-                            }
-                          </Button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex items-center justify-between">
+              <div className="absolute inset-0 rounded-2xl bg-white/10 animate-ping" />
+              <div className="absolute -inset-2 bg-gradient-to-r from-white/20 to-transparent rounded-2xl blur-xl animate-pulse" />
+            </div>
+
+            <h1 className="text-4xl font-bold mb-4 text-center">
+              Welcome to <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">GODIRECT</span>
+            </h1>
+
+            <p className="text-xl text-white/90 text-center max-w-md">
+              Sign in to access your real estate management platform
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side - Form */}
+        <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-12 relative min-h-screen lg:min-h-0">
+          {/* Mobile background for small screens */}
+          <div className="lg:hidden absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10" />
+
+          <Card className={cn(
+            "w-full max-w-md mx-auto shadow-2xl border-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm relative overflow-hidden",
+            "transform transition-all duration-700 hover:shadow-3xl lg:hover:-translate-y-2"
+          )}>
+            {/* Top accent bar */}
+            <div className="h-1 bg-gradient-to-r from-primary via-primary/80 to-primary animate-gradient-x" />
+
+            <CardHeader className="space-y-4 pb-6 relative px-4 sm:px-6">
+              {/* Mobile logo for small screens */}
+              <div className="lg:hidden flex justify-center mb-6">
+                <Link to="/" className="flex items-center space-x-3 group">
+                  <div className="relative">
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                      <span className="text-white font-bold text-lg sm:text-xl">GD</span>
+                    </div>
+                    <div className="absolute inset-0 rounded-xl bg-primary/20 animate-ping" />
+                  </div>
+                  <span className="text-xl sm:text-2xl font-heading font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                    GODIRECT
+                  </span>
+                </Link>
+              </div>
+
+              <div className="text-center space-y-2">
+                <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  Welcome back
+                </CardTitle>
+                <CardDescription className="text-sm sm:text-base text-muted-foreground px-2">
+                  Enter your credentials to access your account
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 sm:space-y-5 px-4 sm:px-6">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5">
                   <FormField
                     control={form.control}
-                    name="rememberMe"
+                    name="email"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base font-medium">Email address</FormLabel>
                         <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <div className="relative group">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                              placeholder="Your email address"
+                              type="email"
+                              className="h-10 sm:h-12 text-sm sm:text-base pl-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                              {...field}
+                            />
+                          </div>
                         </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="text-sm">Remember me</FormLabel>
-                        </div>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm font-medium text-realty-600 hover:text-realty-800 transition-colors"
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
+                        <FormControl>
+                          <div className="relative group">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Input
+                              placeholder="Your password"
+                              type={showPassword ? "text" : "password"}
+                              className="h-10 sm:h-12 text-sm sm:text-base pl-10 pr-10 transition-all duration-300 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-10 sm:h-12 w-10 sm:w-12 p-0 hover:bg-primary/10 transition-colors"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ?
+                                <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" /> :
+                                <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground hover:text-primary transition-colors" />
+                              }
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex items-center justify-between">
+                    <FormField
+                      control={form.control}
+                      name="rememberMe"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm">Remember me</FormLabel>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm font-medium text-realty-600 hover:text-realty-800 transition-colors"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <Button
+                    type="submit"
+                    className={cn(
+                      "w-full h-10 sm:h-12 text-sm sm:text-base font-medium relative overflow-hidden transition-all duration-300",
+                      "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
+                      "shadow-lg hover:shadow-xl transform hover:-translate-y-0.5",
+                      "disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                    )}
+                    disabled={isLoading}
                   >
-                    Forgot password?
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {isLoading ? "Logging in..." : "Log in"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+            <CardFooter className="pt-0 px-4 sm:px-6">
+              <div className="text-center w-full pb-4 sm:pb-6">
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/signup"
+                    className="text-realty-600 hover:text-realty-800 font-medium"
+                  >
+                    Sign up
                   </Link>
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full h-12 text-base font-medium bg-realty-800 hover:bg-realty-900 dark:bg-realty-gold dark:text-realty-900 dark:hover:bg-realty-gold/90"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Logging in..." : "Log in"}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-          <CardFooter className="pt-0">
-            <div className="text-center w-full pb-6">
-              <p className="text-base text-muted-foreground">
-                Don't have an account?{" "}
-                <Link
-                  to="/signup"
-                  className="text-realty-600 hover:text-realty-800 font-medium"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </div>
-          </CardFooter>
-        </Card>
+                </p>
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     </>
   );

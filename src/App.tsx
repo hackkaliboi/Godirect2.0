@@ -65,15 +65,15 @@ const App = () => {
             <ThemeProvider>
               <CurrencyProvider>
                 <Routes>
-                  {/* Authentication routes without header/footer */}
-                  <Route path="/login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><Login /></RouteWrapper>} />
-                  <Route path="/user-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserLogin /></RouteWrapper>} />
-                  <Route path="/user-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserSignup /></RouteWrapper>} />
-                  <Route path="/agent-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentLogin /></RouteWrapper>} />
-                  <Route path="/agent-signup" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentSignup /></RouteWrapper>} />
-                  <Route path="/admin-login" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AdminLogin /></RouteWrapper>} />
-                  <Route path="/forgot-password" element={<RouteWrapper includeNavigation={false} includeFooter={false}><ForgotPassword /></RouteWrapper>} />
-                  <Route path="/reset-password" element={<RouteWrapper includeNavigation={false} includeFooter={false}><ResetPassword /></RouteWrapper>} />
+                  {/* Authentication routes with navigation but no footer */}
+                  <Route path="/login" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><Login /></RouteWrapper>} />
+                  <Route path="/user-login" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><UserLogin /></RouteWrapper>} />
+                  <Route path="/user-signup" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><UserSignup /></RouteWrapper>} />
+                  <Route path="/agent-login" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><AgentLogin /></RouteWrapper>} />
+                  <Route path="/agent-signup" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><AgentSignup /></RouteWrapper>} />
+                  <Route path="/admin-login" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><AdminLogin /></RouteWrapper>} />
+                  <Route path="/forgot-password" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><ForgotPassword /></RouteWrapper>} />
+                  <Route path="/reset-password" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><ResetPassword /></RouteWrapper>} />
 
                   {/* Dashboard routes without header/footer */}
                   <Route
