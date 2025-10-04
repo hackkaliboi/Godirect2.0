@@ -8,6 +8,7 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
+  console.log("DashboardLayout rendering:", { userRole });
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-dashboard-bg">

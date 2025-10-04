@@ -40,7 +40,7 @@ function AdminDashboardHome() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Users"
@@ -71,7 +71,7 @@ function AdminDashboardHome() {
           loading={loading}
         />
       </div>
-      
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-4">
           <AnalyticsCharts />
@@ -80,13 +80,14 @@ function AdminDashboardHome() {
           <RecentActivity activities={[]} />
         </div>
       </div>
-      
+
       <SystemAlerts />
     </div>
   );
 }
 
 export function AdminDashboard() {
+  console.log("AdminDashboard rendering");
   return (
     <DashboardLayout userRole="admin">
       <Routes>

@@ -46,7 +46,15 @@ This guide will help you set up a fresh Supabase project with the consolidated d
 2. Check that the `profiles` table exists
 3. Verify that RLS policies are applied
 
-### 7. Test User Signup
+### 7. Verify Storage Buckets
+1. Go to "Storage" in Supabase dashboard
+2. Verify that three buckets were created:
+   - `avatars` - for profile pictures
+   - `property-images` - for property photos
+   - `documents` - for private documents
+3. Check that bucket policies are applied correctly
+
+### 8. Test User Signup
 1. Start your application:
    ```bash
    npm run dev
@@ -57,7 +65,7 @@ This guide will help you set up a fresh Supabase project with the consolidated d
    - Create a new admin account
    - Verify the profile is created with correct user_type
 
-### 8. Test Admin Login
+### 9. Test Admin Login
 1. Log out if you're logged in
 2. Go to Admin Login page
 3. Log in with your admin credentials
@@ -79,6 +87,30 @@ This guide will help you set up a fresh Supabase project with the consolidated d
 - Optimized database schema
 - Proper indexing
 - Efficient queries
+
+## Storage Configuration
+
+The consolidated database setup includes three storage buckets:
+
+### Avatars Bucket
+- **Purpose**: User profile pictures
+- **Visibility**: Public
+- **Size Limit**: 5MB
+- **File Types**: JPEG, PNG, WebP, GIF
+
+### Property Images Bucket
+- **Purpose**: Property photos and galleries
+- **Visibility**: Public
+- **Size Limit**: 10MB
+- **File Types**: JPEG, PNG, WebP
+
+### Documents Bucket
+- **Purpose**: KYC documents, contracts, and private files
+- **Visibility**: Private
+- **Size Limit**: 20MB
+- **File Types**: PDF, JPEG, PNG, DOC, DOCX
+
+See `STORAGE_BUCKET_GUIDE.md` for detailed usage instructions.
 
 ## Troubleshooting
 
@@ -103,6 +135,11 @@ This guide will help you set up a fresh Supabase project with the consolidated d
 2. Ensure you're using the latest version of `CONSOLIDATED_DATABASE_FIX.sql`
 3. Try running the SQL in smaller chunks if the full file fails
 
+### If Storage Buckets Are Missing
+1. Verify the SQL was executed completely
+2. Check the "Storage" section in Supabase dashboard
+3. Manually create buckets if needed using the configuration in `CONSOLIDATED_DATABASE_FIX.sql`
+
 ## Next Steps
 
 ### 1. Configure Auth Settings
@@ -124,7 +161,13 @@ This guide will help you set up a fresh Supabase project with the consolidated d
 2. Verify each can log in and is redirected correctly
 3. Test functionality specific to each role
 
-### 4. Monitor for Issues
+### 4. Test Storage Functionality
+1. Upload profile pictures
+2. Upload property images (as agent)
+3. Upload documents (private storage)
+4. Verify access controls work correctly
+
+### 5. Monitor for Issues
 1. Check application logs for errors
 2. Monitor database performance
 3. Verify all features work as expected

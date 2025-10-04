@@ -205,20 +205,27 @@ export function RequireAuth({
   requiredUserType?: "admin" | "agent" | "user";
 }) {
   const context = useContext(AuthContext);
+  console.log("RequireAuth context:", context);
+  console.log("Required user type:", requiredUserType);
+  
   if (context === undefined) {
     throw new Error("RequireAuth must be used within an AuthProvider");
   }
   const { user, userType, loading } = context;
+
+  console.log("Auth state:", { user, userType, loading });
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   if (!user) {
+    console.log("No user, redirecting to login");
     return <Navigate to="/login" replace />;
   }
 
   if (requiredUserType && userType !== requiredUserType) {
+    console.log("User type mismatch:", { userType, requiredUserType });
     // If userType is null but user exists, it might still be loading
     if (userType === null && user) {
       return <div className="flex justify-center items-center h-screen">Verifying access...</div>;
@@ -234,5 +241,6 @@ export function RequireAuth({
     }
   }
 
+  console.log("Access granted to protected route");
   return children;
 }

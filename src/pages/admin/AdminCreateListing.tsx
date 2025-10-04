@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,15 +12,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Building2, 
-  MapPin, 
-  DollarSign, 
-  Camera, 
-  Home, 
-  Bed, 
-  Bath, 
-  Square, 
+import {
+  Building2,
+  MapPin,
+  DollarSign,
+  Camera,
+  Home,
+  Bed,
+  Bath,
+  Square,
   Car,
   ArrowLeft,
   Plus,
@@ -28,10 +28,12 @@ import {
   Shield,
   CheckCircle,
   UserCheck,
-  Calendar
+  Calendar,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
-import { createProperty } from "@/utils/supabaseData";
+import { createProperty, fetchAgents, Agent } from "@/utils/supabaseData";
+import { supabase } from "@/integrations/supabase/client";
 
 // Enhanced validation schema for admin with additional fields
 const adminListingSchema = z.object({
@@ -67,8 +69,7 @@ const adminListingSchema = z.object({
 type AdminListingFormData = z.infer<typeof adminListingSchema>;
 
 const propertyTypes = [
-  "House", "Apartment", "Condo", "Townhouse", "Villa", "Duplex", 
-  "Land", "Commercial", "Office", "Warehouse", "Shop", "Studio"
+  "House", "Apartment", "Condo", "Townhouse", "Land", "Commercial"
 ];
 
 const amenitiesList = [
@@ -80,19 +81,11 @@ const amenitiesList = [
 ];
 
 const nigerianStates = [
-  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", 
-  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", 
-  "FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", 
-  "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", 
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
+  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
+  "FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi",
+  "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun",
   "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"
-];
-
-// Mock agents for dropdown
-const availableAgents = [
-  { id: "1", name: "John Okafor", email: "john@example.com" },
-  { id: "2", name: "Mary Adebayo", email: "mary@example.com" },
-  { id: "3", name: "David Okwu", email: "david@example.com" },
-  { id: "4", name: "Sarah Usman", email: "sarah@example.com" },
 ];
 
 export default function AdminCreateListing() {
@@ -100,6 +93,32 @@ export default function AdminCreateListing() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availableAgents, setAvailableAgents] = useState<Agent[]>([]);
+  const [loadingAgents, setLoadingAgents] = useState(true);
+
+  // Fetch agents when component mounts
+  useEffect(() => {
+    const loadAgents = async () => {
+      try {
+        const agents = await fetchAgents();
+        setAvailableAgents(agents);
+      } catch (error) {
+        console.error("Error fetching agents:", error);
+        toast.error("Failed to load agents. Using mock data.");
+        // Fallback to mock data if fetch fails
+        setAvailableAgents([
+          { id: "12345678-1234-1234-1234-123456789012", name: "John Okafor", email: "john@example.com" } as Agent,
+          { id: "23456789-2345-2345-2345-234567890123", name: "Mary Adebayo", email: "mary@example.com" } as Agent,
+          { id: "34567890-3456-3456-3456-345678901234", name: "David Okwu", email: "david@example.com" } as Agent,
+          { id: "45678901-4567-4567-4567-456789012345", name: "Sarah Usman", email: "sarah@example.com" } as Agent,
+        ]);
+      } finally {
+        setLoadingAgents(false);
+      }
+    };
+
+    loadAgents();
+  }, []);
 
   const {
     register,
@@ -129,8 +148,8 @@ export default function AdminCreateListing() {
   const priority = watch("priority");
 
   const handleAmenityToggle = (amenity: string) => {
-    setSelectedAmenities(prev => 
-      prev.includes(amenity) 
+    setSelectedAmenities(prev =>
+      prev.includes(amenity)
         ? prev.filter(a => a !== amenity)
         : [...prev, amenity]
     );
@@ -147,45 +166,98 @@ export default function AdminCreateListing() {
 
   const onSubmit = async (data: AdminListingFormData) => {
     setIsSubmitting(true);
-    
+
     try {
+      // Map the property type to match database constraints
+      let propertyType = data.propertyType.toLowerCase();
+      // Map unsupported types to supported ones
+      switch (propertyType) {
+        case "villa":
+        case "duplex":
+        case "studio":
+          propertyType = "house";
+          break;
+        case "office":
+        case "warehouse":
+        case "shop":
+          propertyType = "commercial";
+          break;
+        default:
+          // Keep the original value if it's already supported
+          break;
+      }
+
+      // Upload images to Supabase storage
+      const imageUrls: string[] = [];
+      if (images.length > 0) {
+        for (const image of images) {
+          const fileExt = image.name.split('.').pop();
+          const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+          const { data: uploadData, error: uploadError } = await supabase
+            .storage
+            .from('property-images')
+            .upload(fileName, image, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (uploadError) {
+            console.error('Error uploading image:', uploadError);
+            toast.error(`Failed to upload image: ${uploadError.message}`);
+            continue; // Continue with other images
+          }
+
+          // Get public URL for the uploaded image
+          const { data: { publicUrl } } = supabase
+            .storage
+            .from('property-images')
+            .getPublicUrl(fileName);
+
+          imageUrls.push(publicUrl);
+        }
+      }
+
       // Map admin form data to property format
       const propertyData = {
         title: data.title,
         description: data.description,
         price: data.price,
-        type: data.propertyType.toLowerCase(), // Database uses 'type' column, not 'property_type'
+        type: propertyType, // This will be mapped to property_type in createProperty
         status: "available", // Use 'available' status for consistency with database
         bedrooms: data.bedrooms,
         bathrooms: data.bathrooms,
         square_feet: data.squareFootage,
         year_built: data.yearBuilt,
-        address: `${data.street}, ${data.city}, ${data.state} ${data.zipCode}`,
+        street: `${data.street}, ${data.city}, ${data.state} ${data.zipCode}`, // This will be mapped to address in createProperty
         city: data.city,
         state: data.state,
         zip_code: data.zipCode,
-        features: selectedAmenities, // Database uses 'features' column, not 'amenities'
-        images: [], // Start with empty array for now
+        features: selectedAmenities, // This will be mapped correctly
+        images: imageUrls, // Use the uploaded image URLs
         featured: data.featured,
-        agent_id: data.assignedAgent || null,
+        agent_id: data.assignedAgent && !loadingAgents ? data.assignedAgent : null, // Use agent_id only when not loading
       };
+
+      console.log("Sending property data to createProperty:", propertyData);
 
       // Save to Supabase
       const createdProperty = await createProperty(propertyData);
-      
+
       if (createdProperty) {
-        const successMessage = data.status === "published" 
+        const successMessage = data.status === "published"
           ? "Property listing created and published successfully!"
           : "Property listing created successfully!";
-        
+
         toast.success(successMessage);
         navigate("/admin-dashboard/properties");
       } else {
-        throw new Error("Failed to create property");
+        throw new Error("Failed to create property - no data returned");
       }
-      
+
     } catch (error) {
-      toast.error("Failed to create listing. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(`Failed to create listing: ${errorMessage}. Please try again.`);
       console.error("Error creating listing:", error);
     } finally {
       setIsSubmitting(false);
@@ -219,8 +291,8 @@ export default function AdminCreateListing() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => navigate("/admin-dashboard/properties")}
             >
@@ -251,7 +323,7 @@ export default function AdminCreateListing() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="status">Listing Status</Label>
-                <Select 
+                <Select
                   defaultValue="draft"
                   onValueChange={(value: "draft" | "pending" | "approved" | "published" | "archived") => setValue("status", value)}
                 >
@@ -270,7 +342,7 @@ export default function AdminCreateListing() {
 
               <div>
                 <Label htmlFor="priority">Priority Level</Label>
-                <Select 
+                <Select
                   defaultValue="medium"
                   onValueChange={(value: "low" | "medium" | "high" | "urgent") => setValue("priority", value)}
                 >
@@ -293,14 +365,23 @@ export default function AdminCreateListing() {
                     <SelectValue placeholder="Select agent" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableAgents.map((agent) => (
-                      <SelectItem key={agent.id} value={agent.id}>
+                    {loadingAgents ? (
+                      <SelectItem value="loading" disabled>
                         <div className="flex items-center gap-2">
-                          <UserCheck className="h-4 w-4" />
-                          {agent.name}
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Loading agents...
                         </div>
                       </SelectItem>
-                    ))}
+                    ) : (
+                      availableAgents.map((agent) => (
+                        <SelectItem key={agent.id} value={agent.id}>
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="h-4 w-4" />
+                            {agent.name}
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -410,7 +491,7 @@ export default function AdminCreateListing() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="listingType">Listing Type *</Label>
-                <Select 
+                <Select
                   defaultValue="sale"
                   onValueChange={(value: "sale" | "rent") => setValue("listingType", value)}
                 >
@@ -733,15 +814,15 @@ export default function AdminCreateListing() {
 
         {/* Submit Buttons */}
         <div className="flex justify-end space-x-4">
-          <Button 
-            type="button" 
+          <Button
+            type="button"
             variant="outline"
             onClick={() => navigate("/admin-dashboard/properties")}
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >

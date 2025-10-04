@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 // Pages
 import Index from "./pages/Index";
@@ -49,6 +49,10 @@ import RouteWrapper from "./components/layout/RouteWrapper";
 const App = () => {
   // Create QueryClient instance inside the component
   const queryClient = new QueryClient();
+  
+  // Add debugging to see which routes are being matched
+  const location = useLocation();
+  console.log("Current location:", location.pathname);
 
   return (
     <QueryClientProvider client={queryClient}>
