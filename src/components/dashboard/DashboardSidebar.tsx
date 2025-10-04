@@ -65,7 +65,6 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           ...commonItems,
           { title: "Analytics", url: `/dashboard/admin/analytics`, icon: BarChart3 },
           { title: "Users", url: `/dashboard/admin/users`, icon: Users },
-          { title: "Agents", url: `/dashboard/admin/agents`, icon: UserCheck },
           { title: "Transactions", url: `/dashboard/admin/transactions`, icon: DollarSign },
           { title: "Reports", url: `/dashboard/admin/reports`, icon: FileText },
           { title: "System", url: `/dashboard/admin/system`, icon: Database },
@@ -78,17 +77,16 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
       case "agent":
         return [
           ...commonItems,
-          { title: "My Listings", url: `/dashboard/agent/listings`, icon: Building2 },
-          { title: "Clients", url: `/dashboard/agent/clients`, icon: Users },
-          { title: "Leads", url: `/dashboard/agent/leads`, icon: Search },
-          { title: "Calendar", url: `/dashboard/agent/calendar`, icon: Calendar },
-          { title: "Messages", url: `/dashboard/agent/messages`, icon: MessageSquare },
-          { title: "Commission", url: `/dashboard/agent/commission`, icon: DollarSign },
-          { title: "Lead Manager", url: `/dashboard/agent/lead-manager`, icon: UserPlus },
-          { title: "Scheduler", url: `/dashboard/agent/scheduler`, icon: CalendarCheck },
-          { title: "Commission Tracker", url: `/dashboard/agent/payments`, icon: CreditCard },
-          { title: "Notifications", url: `/dashboard/agent/notifications`, icon: Bell },
-          { title: "Profile", url: `/dashboard/agent/profile`, icon: Settings },
+          { title: "My Listings", url: `/dashboard/user/listings`, icon: Building2 },
+          { title: "Saved Properties", url: `/dashboard/user/saved`, icon: Heart },
+          { title: "Search History", url: `/dashboard/user/history`, icon: Search },
+          { title: "Appointments", url: `/dashboard/user/appointments`, icon: Calendar },
+          { title: "Messages", url: `/dashboard/user/messages`, icon: MessageSquare },
+          { title: "My Applications", url: `/dashboard/user/applications`, icon: FileText },
+          { title: "Saved Searches", url: `/dashboard/user/searches`, icon: Search },
+          { title: "Notifications", url: `/dashboard/user/notifications`, icon: Bell },
+          { title: "Payments", url: `/dashboard/user/payments`, icon: CreditCard },
+          { title: "Profile", url: `/dashboard/user/profile`, icon: Settings },
         ];
 
       case "user":
@@ -113,8 +111,8 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
   const menuItems = getMenuItems();
 
   return (
-    <Sidebar 
-      className="border-r bg-card" 
+    <Sidebar
+      className="border-r bg-card"
       collapsible="icon"
     >
       <SidebarContent className="bg-card">
@@ -139,18 +137,18 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
               {menuItems.map((item) => {
                 const IconComponent = item.icon;
                 const active = isActive(item.url);
-                
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        end 
+                      <NavLink
+                        to={item.url}
+                        end
                         onClick={handleLinkClick}
                         className={`
                           flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                          ${active 
-                            ? "bg-primary text-primary-foreground shadow-sm" 
+                          ${active
+                            ? "bg-primary text-primary-foreground shadow-sm"
                             : "text-foreground hover:bg-muted/60 hover:text-foreground"
                           }
                         `}

@@ -9,7 +9,7 @@ const Footer = () => {
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-realty-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-realty-gold/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-      
+
       <div className="container-custom py-16 md:py-20 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
@@ -51,14 +51,8 @@ const Footer = () => {
             </h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/properties" className="text-realty-300 hover:text-white transition-colors flex items-center group">
-                  <span className="w-0 h-0.5 bg-realty-gold group-hover:w-2 transition-all duration-300 mr-0 group-hover:mr-2"></span>
+                <Link to="/properties" className="text-realty-300 hover:text-white transition-colors">
                   Browse Properties
-                </Link>
-              </li>
-              <li>
-                <Link to="/agents" className="text-realty-300 hover:text-white transition-colors">
-                  Our Agents
                 </Link>
               </li>
               <li>

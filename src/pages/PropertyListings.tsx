@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { LayoutGrid, LayoutList, ArrowUpDown } from "lucide-react";
@@ -25,7 +24,7 @@ const PropertyListings = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [initialFilters, setInitialFilters] = useState<Partial<FilterState>>({});
-  
+
   // Fetch properties from Supabase
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
@@ -35,7 +34,7 @@ const PropertyListings = () => {
   const handleApplyFilters = useCallback((filters: FilterState) => {
     // Apply all filters to the properties
     let results = [...properties];
-    
+
     // Filter by search term
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
@@ -47,28 +46,28 @@ const PropertyListings = () => {
           property.title.toLowerCase().includes(term)
       );
     }
-    
+
     // Filter by property type
     if (filters.propertyTypes && filters.propertyTypes.length > 0) {
       results = results.filter((property) =>
-        filters.propertyTypes.includes(property.type)
+        filters.propertyTypes.includes(property.property_type)
       );
     }
-    
+
     // Filter by bedrooms
     if (filters.bedrooms !== null) {
       results = results.filter(
         (property) => property.bedrooms >= filters.bedrooms
       );
     }
-    
+
     // Filter by bathrooms
     if (filters.bathrooms !== null) {
       results = results.filter(
         (property) => property.bathrooms >= filters.bathrooms
       );
     }
-    
+
     // Filter by price range
     if (filters.priceRange) {
       results = results.filter(
@@ -77,7 +76,7 @@ const PropertyListings = () => {
           property.price <= filters.priceRange[1]
       );
     }
-    
+
     // Filter by amenities
     if (filters.amenities && filters.amenities.length > 0) {
       results = results.filter((property) =>
@@ -86,7 +85,7 @@ const PropertyListings = () => {
         )
       );
     }
-    
+
     setFilteredProperties(results);
   }, [properties]);
 
@@ -94,21 +93,21 @@ const PropertyListings = () => {
   useEffect(() => {
     if (properties.length > 0) {
       setFilteredProperties(properties);
-      
+
       const params = new URLSearchParams(location.search);
       const locationFilter = params.get("location");
       const typeFilter = params.get("type");
       const priceFilter = params.get("price");
-      
+
       const initialFilters: Partial<FilterState> = {};
       if (locationFilter) initialFilters.searchTerm = locationFilter;
       if (typeFilter) initialFilters.propertyTypes = [typeFilter];
       if (priceFilter) {
         // Handle price range logic based on your priceFilter format
       }
-      
+
       setInitialFilters(initialFilters);
-      
+
       // Apply initial filters if present
       if (Object.keys(initialFilters).length > 0) {
         handleApplyFilters(initialFilters as FilterState);
@@ -134,7 +133,7 @@ const PropertyListings = () => {
   };
 
   const sortedProperties = sortProperties(filteredProperties);
-  
+
   if (isLoading) {
     return (
       <div className="container-custom py-16 text-center">
@@ -151,7 +150,7 @@ const PropertyListings = () => {
         <title>Browse Properties | Godirect Realty</title>
         <meta name="description" content="Browse our extensive collection of properties for sale. Find houses, apartments, condos, and more." />
       </Helmet>
-      
+
       <div className="bg-realty-50 dark:bg-realty-800/30 py-12">
         <div className="container-custom">
           <h1 className="text-3xl md:text-4xl font-heading font-semibold text-realty-900 dark:text-white mb-2">
@@ -160,16 +159,16 @@ const PropertyListings = () => {
           <p className="text-realty-600 dark:text-realty-400 mb-8">
             Find your next home from our carefully curated property listings.
           </p>
-          
-          <PropertyFilters 
-            onApplyFilters={handleApplyFilters} 
+
+          <PropertyFilters
+            onApplyFilters={handleApplyFilters}
           />
-          
+
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
             <p className="text-realty-600 dark:text-realty-400 mb-4 sm:mb-0">
               Showing <span className="font-medium text-realty-900 dark:text-white">{sortedProperties.length}</span> properties
             </p>
-            
+
             <div className="flex space-x-3">
               <div className="flex items-center">
                 <ArrowUpDown className="mr-2 h-4 w-4 text-realty-500" />
@@ -184,7 +183,7 @@ const PropertyListings = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex rounded-md overflow-hidden">
                 <Button
                   variant={view === "grid" ? "default" : "outline"}
@@ -205,7 +204,7 @@ const PropertyListings = () => {
               </div>
             </div>
           </div>
-          
+
           {sortedProperties.length > 0 ? (
             <div className={view === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col space-y-6"}>
               {sortedProperties.map((property) => (
@@ -222,7 +221,7 @@ const PropertyListings = () => {
               </p>
             </div>
           )}
-          
+
           {/* Pagination placeholder */}
           {sortedProperties.length > 0 && (
             <div className="flex justify-center mt-12">

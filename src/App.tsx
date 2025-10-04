@@ -17,13 +17,11 @@ import Footer from "./components/layout/Footer";
 // Dashboard Pages
 import { AdminDashboard } from "./pages/dashboard/AdminDashboard";
 import { UserDashboard } from "./pages/dashboard/UserDashboard";
-import { AgentDashboard } from "./pages/dashboard/AgentDashboard";
 
 // Admin Pages
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminUsers from "./pages/admin/AdminUsers";
-import AdminAgents from "./pages/admin/AdminAgents";
 import AdminTransactions from "./pages/admin/AdminTransactions";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminSystem from "./pages/admin/AdminSystem";
@@ -33,8 +31,6 @@ import AdminProperties from "./pages/admin/AdminProperties";
 import Login from "./pages/Login";
 import UserLogin from "./pages/auth/UserLogin";
 import UserSignup from "./pages/auth/UserSignup";
-import AgentLogin from "./pages/auth/AgentLogin";
-import AgentSignup from "./pages/auth/AgentSignup";
 import AdminLogin from "./pages/auth/AdminLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -69,8 +65,6 @@ const App = () => {
                   <Route path="/login" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><Login /></RouteWrapper>} />
                   <Route path="/user-login" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><UserLogin /></RouteWrapper>} />
                   <Route path="/user-signup" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><UserSignup /></RouteWrapper>} />
-                  <Route path="/agent-login" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><AgentLogin /></RouteWrapper>} />
-                  <Route path="/agent-signup" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><AgentSignup /></RouteWrapper>} />
                   <Route path="/admin-login" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><AdminLogin /></RouteWrapper>} />
                   <Route path="/forgot-password" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><ForgotPassword /></RouteWrapper>} />
                   <Route path="/reset-password" element={<RouteWrapper includeAuthNavigation={true} includeFooter={false}><ResetPassword /></RouteWrapper>} />
@@ -92,16 +86,6 @@ const App = () => {
                       <RouteWrapper includeNavigation={false} includeFooter={false}>
                         <RequireAuth requiredUserType="user">
                           <UserDashboard />
-                        </RequireAuth>
-                      </RouteWrapper>
-                    }
-                  />
-                  <Route
-                    path="/agent-dashboard/*"
-                    element={
-                      <RouteWrapper includeNavigation={false} includeFooter={false}>
-                        <RequireAuth requiredUserType="agent">
-                          <AgentDashboard />
                         </RequireAuth>
                       </RouteWrapper>
                     }
@@ -128,21 +112,10 @@ const App = () => {
                       </RouteWrapper>
                     }
                   />
-                  <Route
-                    path="/dashboard/agent/*"
-                    element={
-                      <RouteWrapper includeNavigation={false} includeFooter={false}>
-                        <RequireAuth requiredUserType="agent">
-                          <AgentDashboard />
-                        </RequireAuth>
-                      </RouteWrapper>
-                    }
-                  />
 
                   {/* Preview routes for dashboards (no authentication required) */}
                   <Route path="/preview/dashboard/admin/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AdminDashboard /></RouteWrapper>} />
                   <Route path="/preview/dashboard/user/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><UserDashboard /></RouteWrapper>} />
-                  <Route path="/preview/dashboard/agent/*" element={<RouteWrapper includeNavigation={false} includeFooter={false}><AgentDashboard /></RouteWrapper>} />
 
                   {/* Public routes with header/footer */}
                   <Route path="/" element={<RouteWrapper><Index /></RouteWrapper>} />

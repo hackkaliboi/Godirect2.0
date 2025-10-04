@@ -1,44 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Property as DatabaseProperty } from "@/types/database";
 
 // Types
-export type Agent = {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  image?: string;
-  title?: string;
-  bio?: string;
-  ratings?: number;
-  reviews?: number;
-  specializations: string[];
-  listings?: number;
-  sales?: number;
-  experience?: number;
-};
+// Remove Agent type since users act as their own agents
 
-export type Property = {
-  id: string;
-  title: string;
-  description?: string;
-  price: number;
-  is_featured: boolean;
-  status: "For Sale" | "For Rent" | "Sold";
-  bedrooms?: number;
-  bathrooms?: number;
-  square_feet?: number;
-  street?: string;
-  city: string;
-  state: string;
-  zip_code?: string;
-  images: string[];
-  features: string[];
-  amenities: string[];
-  type: "house" | "apartment" | "condo" | "townhouse" | "land" | "commercial";
-  year_built?: number;
-  agent_id?: string;
-  created_at: string;
-};
+export type Property = DatabaseProperty;
 
 export type Testimonial = {
   id: string;
@@ -56,47 +22,6 @@ export type MarketTrend = {
   trend: "up" | "down" | "stable";
   description?: string;
 };
-
-// Fetch all agents
-export async function fetchAgents(): Promise<Agent[]> {
-  console.log("Fetching agents...");
-  try {
-    const { data, error } = await supabase
-      .from("agents")
-      .select("*");
-
-    if (error) {
-      console.error("Error fetching agents:", error);
-      return [];
-    }
-
-    return (data || []) as Agent[];
-  } catch (error) {
-    console.error("Error fetching agents:", error);
-    return [];
-  }
-}
-
-// Fetch agent by ID
-export async function fetchAgentById(id: string): Promise<Agent | null> {
-  console.log(`Fetching agent with id: ${id}`);
-  try {
-    const { data, error } = await supabase
-      .from("agents")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      throw error;
-    }
-
-    return data as Agent;
-  } catch (error) {
-    console.error("Error fetching agent:", error);
-    return null;
-  }
-}
 
 // Fetch all properties
 export async function fetchProperties(): Promise<Property[]> {
@@ -118,17 +43,7 @@ export async function fetchProperties(): Promise<Property[]> {
 
     console.log("Raw properties data:", data);
 
-    const mappedData = (data || []).map(item => ({
-      ...item,
-      is_featured: item.featured || false,
-      amenities: item.features || [],
-      images: item.images || [],
-      type: item.type as Property['type'],
-      status: item.status as Property['status']
-    }));
-
-    console.log("Mapped properties data:", mappedData);
-    return mappedData;
+    return (data || []) as Property[];
   } catch (error) {
     console.error("Error fetching properties:", error);
     return [];
@@ -157,17 +72,7 @@ export async function fetchPendingProperties(): Promise<Property[]> {
 
     console.log("Raw pending properties data:", data);
 
-    const mappedData = (data || []).map(item => ({
-      ...item,
-      is_featured: item.featured || false,
-      amenities: item.features || [],
-      images: item.images || [],
-      type: item.type as Property['type'],
-      status: item.status as Property['status']
-    }));
-
-    console.log("Mapped pending properties data:", mappedData);
-    return mappedData;
+    return (data || []) as Property[];
   } catch (error) {
     console.error("Error fetching pending properties:", error);
     return [];
@@ -178,27 +83,17 @@ export async function fetchPendingProperties(): Promise<Property[]> {
 export async function fetchFeaturedProperties(): Promise<Property[]> {
   console.log("Fetching featured properties...");
   try {
-    // First try to fetch all properties and filter client-side
-    // This is a fallback in case the featured column doesn't exist yet
     const { data, error } = await supabase
       .from("properties")
-      .select("*");
+      .select("*")
+      .eq("is_featured", true);
 
     if (error) {
-      console.error("Error fetching properties:", error);
+      console.error("Error fetching featured properties:", error);
       return [];
     }
 
-    // Filter for featured properties and map the data
-    return (data || [])
-      .filter(item => item.featured === true)
-      .map(item => ({
-        ...item,
-        is_featured: item.featured || false,
-        amenities: item.features || [],
-        type: item.type as Property['type'],
-        status: item.status as Property['status']
-      }));
+    return (data || []) as Property[];
   } catch (error) {
     console.error("Error fetching featured properties:", error);
     return [];
@@ -219,13 +114,7 @@ export async function fetchPropertyById(id: string): Promise<Property | null> {
       throw error;
     }
 
-    return {
-      ...data,
-      is_featured: data.featured || false,
-      amenities: data.features || [],
-      type: data.type as Property['type'],
-      status: data.status as Property['status']
-    };
+    return data as Property;
   } catch (error) {
     console.error("Error fetching property:", error);
     return null;
@@ -276,20 +165,23 @@ export async function createProperty(propertyData: {
   title: string;
   description?: string;
   price: number;
-  type: string;
+  property_type: string;
   status: string;
   bedrooms?: number;
   bathrooms?: number;
   square_feet?: number;
+  lot_size?: number;
   year_built?: number;
-  street?: string;
+  street: string;
   city: string;
   state: string;
   zip_code?: string;
+  country: string;
   features: string[];
+  amenities: string[];
   images: string[];
-  featured?: boolean;
-  agent_id?: string | null;
+  is_featured?: boolean;
+  owner_id?: string | null;
 }): Promise<Property | null> {
   console.log("Creating property with data:", JSON.stringify(propertyData, null, 2));
 
@@ -298,20 +190,24 @@ export async function createProperty(propertyData: {
       title: propertyData.title,
       description: propertyData.description || null,
       price: propertyData.price,
-      property_type: propertyData.type, // Database column name
+      property_type: propertyData.property_type,
       status: propertyData.status,
       bedrooms: propertyData.bedrooms || null,
       bathrooms: propertyData.bathrooms || null,
       square_feet: propertyData.square_feet || null,
+      lot_size: propertyData.lot_size || null,
       year_built: propertyData.year_built || null,
-      address: propertyData.street || null, // Database column name
+      street: propertyData.street,
       city: propertyData.city,
       state: propertyData.state,
       zip_code: propertyData.zip_code || null,
+      country: propertyData.country,
       features: propertyData.features || [],
+      amenities: propertyData.amenities || [],
       images: propertyData.images || [],
-      is_featured: propertyData.featured || false, // Database column name
-      agent_id: propertyData.agent_id || null,
+      is_featured: propertyData.is_featured || false,
+      owner_id: propertyData.owner_id || null,
+      address: `${propertyData.street}, ${propertyData.city}, ${propertyData.state}`
     };
 
     console.log("Insert data:", JSON.stringify(insertData, null, 2));
@@ -336,14 +232,7 @@ export async function createProperty(propertyData: {
 
     console.log("Property created successfully:", data);
 
-    // Map the database response to the TypeScript type (following the same pattern as other functions)
-    return {
-      ...data,
-      is_featured: data.featured || false, // Map 'featured' to 'is_featured'
-      amenities: data.features || [],
-      type: data.type as Property['type'],
-      status: data.status as Property['status']
-    };
+    return data as Property;
   } catch (error) {
     console.error("Error in createProperty function:", error);
     throw error;

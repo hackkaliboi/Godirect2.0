@@ -7,10 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 /**
  * Update a user's type in the database
  * @param userId - The UUID of the user
- * @param userType - The new user type ('admin', 'agent', or 'user')
+ * @param userType - The new user type ('admin' or 'user')
  * @returns Promise<void>
  */
-export const updateUserType = async (userId: string, userType: "admin" | "agent" | "user"): Promise<void> => {
+export const updateUserType = async (userId: string, userType: "admin" | "user"): Promise<void> => {
     try {
         const { error } = await supabase
             .from('profiles')

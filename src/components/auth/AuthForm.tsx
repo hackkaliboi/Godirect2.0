@@ -266,9 +266,8 @@ export default function AuthForm({
       // Redirect to dashboard based on user type
       if (userType === "admin") {
         navigate("/dashboard/admin");
-      } else if (userType === "agent") {
-        navigate("/dashboard/agent");
       } else {
+        // All other users (including former "agent" users) go to user dashboard
         navigate("/dashboard/user");
       }
 

@@ -15,7 +15,7 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<import('@supabase/supabase-js').Session | null>(null);
   const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
-  const [userType, setUserType] = useState<"admin" | "agent" | "user" | null>(null);
+  const [userType, setUserType] = useState<"admin" | "user" | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -33,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email_confirmed_at: new Date().toISOString(),
         phone: '',
         confirmed_at: new Date().toISOString(),
-        last_sign_in_at: new Date().toISOString(),
         app_metadata: {},
         user_metadata: {},
         identities: [],
@@ -46,9 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Determine user type from URL
       if (window.location.pathname.includes('admin')) {
         setUserType("admin");
-      } else if (window.location.pathname.includes('agent')) {
-        setUserType("agent");
       } else {
+        // All other users are now just "user" type since we removed agents
         setUserType("user");
       }
       setLoading(false);
@@ -104,9 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // For preview mode, determine user type from URL
       if (window.location.pathname.includes('/admin')) {
         setUserType("admin");
-      } else if (window.location.pathname.includes('/agent')) {
-        setUserType("agent");
       } else {
+        // All other users are now just "user" type since we removed agents
         setUserType("user");
       }
       setLoading(false);
@@ -154,8 +151,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data) {
         // Validate the user_type value
-        const validUserTypes = ["admin", "agent", "user"];
-        const userTypeValue = data.user_type as "admin" | "agent" | "user";
+        // Remove "agent" from valid user types since we're removing agents
+        const validUserTypes = ["admin", "user"];
+        const userTypeValue = data.user_type as "admin" | "user";
 
         if (validUserTypes.includes(userTypeValue)) {
           setUserType(userTypeValue);
@@ -202,12 +200,12 @@ export function RequireAuth({
   requiredUserType
 }: {
   children: JSX.Element;
-  requiredUserType?: "admin" | "agent" | "user";
+  requiredUserType?: "admin" | "user"; // Remove "agent" from requiredUserType
 }) {
   const context = useContext(AuthContext);
   console.log("RequireAuth context:", context);
   console.log("Required user type:", requiredUserType);
-  
+
   if (context === undefined) {
     throw new Error("RequireAuth must be used within an AuthProvider");
   }
@@ -234,8 +232,6 @@ export function RequireAuth({
     // Redirect to the appropriate dashboard if logged in but wrong type
     if (userType === "admin") {
       return <Navigate to="/dashboard/admin" replace />;
-    } else if (userType === "agent") {
-      return <Navigate to="/dashboard/agent" replace />;
     } else if (userType === "user") {
       return <Navigate to="/dashboard/user" replace />;
     }

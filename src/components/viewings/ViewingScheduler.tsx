@@ -9,12 +9,12 @@ import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  CalendarDays, 
-  Clock, 
-  MapPin, 
-  Users, 
-  Video, 
+import {
+  CalendarDays,
+  Clock,
+  MapPin,
+  Users,
+  Video,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -26,22 +26,15 @@ import { ViewingWithDetails, CreateViewingRequest } from '@/types/database';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { format, addHours, isAfter, isBefore, startOfDay } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ViewingSchedulerProps {
   propertyId: string;
-  agentId: string;
   property: {
     title: string;
     address: string;
     price: number;
     images: string[];
-  };
-  agent: {
-    id: string;
-    name: string;
-    image?: string;
-    phone?: string;
-    email: string;
   };
 }
 
@@ -51,11 +44,16 @@ interface TimeSlot {
   booked?: boolean;
 }
 
-const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({ 
-  propertyId, 
-  agentId, 
-  property, 
-  agent 
+interface UserProfile {
+  avatar_url: string | null;
+  full_name: string | null;
+  phone: string | null;
+  email: string | null;
+}
+
+const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
+  propertyId,
+  property
 }) => {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -67,6 +65,32 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [existingViewings, setExistingViewings] = useState<ViewingWithDetails[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    avatar_url: null,
+    full_name: null,
+    phone: null,
+    email: null
+  });
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('avatar_url, full_name, phone, email')
+          .eq('id', user.id)
+          .single();
+
+        if (!error && data) {
+          setUserProfile(data);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user?.id]);
 
   // Generate time slots (9 AM to 6 PM)
   const generateTimeSlots = (): TimeSlot[] => {
@@ -87,44 +111,48 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
   };
 
   // Load existing viewings for the selected date
+  const loadExistingViewings = async () => {
+    if (selectedDate && user) {
+      try {
+        setLoading(true);
+        // Use getUserViewings since there are no agents
+        const viewings = await viewingsApi.getUserViewings(user.id);
+        const dateViewings = viewings.filter(viewing => {
+          const viewingDate = new Date(viewing.viewing_date);
+          return viewingDate.toDateString() === selectedDate.toDateString();
+        });
+
+        setExistingViewings(dateViewings);
+
+        // Update available slots based on existing bookings
+        const slots = generateTimeSlots();
+        const updatedSlots = slots.map(slot => {
+          const isBooked = dateViewings.some(viewing => {
+            const viewingTime = format(new Date(viewing.viewing_date), 'HH:mm');
+            return viewingTime === slot.time;
+          });
+
+          return {
+            ...slot,
+            available: !isBooked,
+            booked: isBooked
+          };
+        });
+
+        setAvailableSlots(updatedSlots);
+      } catch (error) {
+        console.error('Error loading existing viewings:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   useEffect(() => {
     if (selectedDate) {
       loadExistingViewings();
     }
   }, [selectedDate]);
-
-  const loadExistingViewings = async () => {
-    if (!selectedDate || !agentId) return;
-
-    try {
-      const viewings = await viewingsApi.getAgentViewings(agentId);
-      const dateViewings = viewings.filter(viewing => {
-        const viewingDate = new Date(viewing.viewing_date);
-        return viewingDate.toDateString() === selectedDate.toDateString();
-      });
-      
-      setExistingViewings(dateViewings);
-      
-      // Update available slots based on existing bookings
-      const slots = generateTimeSlots();
-      const updatedSlots = slots.map(slot => {
-        const isBooked = dateViewings.some(viewing => {
-          const viewingTime = format(new Date(viewing.viewing_date), 'HH:mm');
-          return viewingTime === slot.time;
-        });
-        
-        return {
-          ...slot,
-          available: !isBooked,
-          booked: isBooked
-        };
-      });
-      
-      setAvailableSlots(updatedSlots);
-    } catch (error) {
-      console.error('Error loading existing viewings:', error);
-    }
-  };
 
   const handleScheduleViewing = async () => {
     if (!user || !selectedDate || !selectedTime) {
@@ -134,7 +162,7 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
 
     try {
       setIsSubmitting(true);
-      
+
       // Create datetime from selected date and time
       const [hours, minutes] = selectedTime.split(':').map(Number);
       const viewingDate = new Date(selectedDate);
@@ -142,7 +170,6 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
 
       const request: CreateViewingRequest = {
         property_id: propertyId,
-        agent_id: agentId,
         viewing_date: viewingDate.toISOString(),
         viewing_type: viewingType,
         notes,
@@ -150,20 +177,20 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
       };
 
       await viewingsApi.scheduleViewing(request);
-      
+
       toast.success('Viewing scheduled successfully! You will receive a confirmation email.');
-      
+
       // Reset form and close dialog
       setSelectedDate(undefined);
       setSelectedTime('');
       setNotes('');
       setIsOpen(false);
-      
+
       // Reload available slots
       if (selectedDate) {
         loadExistingViewings();
       }
-      
+
     } catch (error) {
       console.error('Error scheduling viewing:', error);
       toast.error('Failed to schedule viewing. Please try again.');
@@ -206,7 +233,7 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
           Schedule Viewing
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -216,7 +243,7 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Side - Property & Agent Info */}
+          {/* Left Side - Property Info */}
           <div className="space-y-6">
             {/* Property Info */}
             <Card>
@@ -225,8 +252,8 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4">
-                  <img 
-                    src={property.images[0] || '/placeholder.svg'} 
+                  <img
+                    src={property.images[0] || '/placeholder.svg'}
                     alt={property.title}
                     className="w-20 h-20 rounded-lg object-cover"
                   />
@@ -241,29 +268,29 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
               </CardContent>
             </Card>
 
-            {/* Agent Info */}
+            {/* User Info (replaces Agent Info) */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Your Agent</CardTitle>
+                <CardTitle className="text-lg">Your Information</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-3">
                   <Avatar className="w-12 h-12">
-                    <AvatarImage src={agent.image} />
-                    <AvatarFallback>{agent.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={userProfile.avatar_url || undefined} />
+                    <AvatarFallback>{userProfile.full_name?.charAt(0) || userProfile.email?.charAt(0) || 'U'}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <h3 className="font-semibold">{agent.name}</h3>
+                    <h3 className="font-semibold">{userProfile.full_name || 'Property Owner'}</h3>
                     <div className="flex items-center gap-4 mt-1">
-                      {agent.phone && (
+                      {userProfile.phone && (
                         <div className="flex items-center gap-1 text-sm text-gray-600">
                           <Phone className="w-3 h-3" />
-                          {agent.phone}
+                          {userProfile.phone}
                         </div>
                       )}
                       <div className="flex items-center gap-1 text-sm text-gray-600">
                         <Mail className="w-3 h-3" />
-                        {agent.email}
+                        {userProfile.email}
                       </div>
                     </div>
                   </div>
@@ -317,7 +344,7 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  disabled={(date) => 
+                  disabled={(date) =>
                     isBefore(date, startOfDay(new Date())) || // Past dates
                     date.getDay() === 0 // Sundays
                   }
@@ -333,27 +360,34 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
                   <CardTitle className="text-lg">Available Times</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-2">
-                    {availableSlots.map((slot) => (
-                      <Button
-                        key={slot.time}
-                        variant={selectedTime === slot.time ? "default" : "outline"}
-                        size="sm"
-                        disabled={!slot.available}
-                        onClick={() => setSelectedTime(slot.time)}
-                        className={`
-                          ${selectedTime === slot.time 
-                            ? 'bg-realty-800 hover:bg-realty-900' 
-                            : 'hover:bg-realty-50'
-                          }
-                          ${!slot.available ? 'opacity-50 cursor-not-allowed' : ''}
-                        `}
-                      >
-                        {slot.time}
-                        {slot.booked && <XCircle className="w-3 h-3 ml-1" />}
-                      </Button>
-                    ))}
-                  </div>
+                  {loading ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-realty-800 mx-auto"></div>
+                      <p className="text-sm text-gray-500 mt-2">Loading available times...</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      {availableSlots.map((slot) => (
+                        <Button
+                          key={slot.time}
+                          variant={selectedTime === slot.time ? "default" : "outline"}
+                          size="sm"
+                          disabled={!slot.available}
+                          onClick={() => setSelectedTime(slot.time)}
+                          className={`
+                            ${selectedTime === slot.time
+                              ? 'bg-realty-800 hover:bg-realty-900'
+                              : 'hover:bg-realty-50'
+                            }
+                            ${!slot.available ? 'opacity-50 cursor-not-allowed' : ''}
+                          `}
+                        >
+                          {slot.time}
+                          {slot.booked && <XCircle className="w-3 h-3 ml-1" />}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -447,14 +481,14 @@ const ViewingScheduler: React.FC<ViewingSchedulerProps> = ({
                   </div>
 
                   <div className="flex gap-3">
-                    <Button 
-                      onClick={() => setIsOpen(false)} 
-                      variant="outline" 
+                    <Button
+                      onClick={() => setIsOpen(false)}
+                      variant="outline"
                       className="flex-1"
                     >
                       Cancel
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleScheduleViewing}
                       disabled={isSubmitting}
                       className="flex-1 bg-realty-800 hover:bg-realty-900"

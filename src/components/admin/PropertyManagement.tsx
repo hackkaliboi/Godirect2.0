@@ -24,32 +24,10 @@ import { Search, MoreHorizontal, CheckCircle, XCircle, Eye, DollarSign, Plus, Lo
 import { fetchProperties, fetchPendingProperties } from "@/utils/supabaseData";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Property {
-    id: string;
-    title: string;
-    description?: string;
-    price: number;
-    is_featured: boolean;
-    status: "For Sale" | "For Rent" | "Sold";
-    bedrooms?: number;
-    bathrooms?: number;
-    square_feet?: number;
-    street?: string;
-    city: string;
-    state: string;
-    zip_code?: string;
-    images: string[];
-    features: string[];
-    amenities: string[];
-    type: "house" | "apartment" | "condo" | "townhouse" | "land" | "commercial";
-    year_built?: number;
-    agent_id?: string;
-    created_at: string;
-}
+import { Property } from "@/types/database";
 
 interface PropertyDisplay extends Property {
-    agent: string;
+    owner: string;
     submittedDate: string;
     location: string;
     imageCount: number;
@@ -81,7 +59,7 @@ export function PropertyManagement() {
                 property.title.toLowerCase().includes(term) ||
                 property.city.toLowerCase().includes(term) ||
                 property.state.toLowerCase().includes(term) ||
-                property.type.toLowerCase().includes(term)
+                property.property_type.toLowerCase().includes(term)
             );
             setFilteredProperties(filtered);
         }
@@ -107,7 +85,7 @@ export function PropertyManagement() {
             // Transform properties to include additional display fields
             const transformedProperties = data.map(property => ({
                 ...property,
-                agent: property.agent_id || "Unassigned",
+                owner: property.owner_id || "Unassigned",
                 submittedDate: new Date(property.created_at).toLocaleDateString(),
                 location: `${property.city}, ${property.state}`,
                 imageCount: property.images?.length || 0
@@ -131,12 +109,14 @@ export function PropertyManagement() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "For Sale":
+            case "available":
                 return "bg-success text-success-foreground";
-            case "For Rent":
+            case "pending":
                 return "bg-warning text-warning-foreground";
-            case "Sold":
+            case "sold":
                 return "bg-destructive text-destructive-foreground";
+            case "rented":
+                return "bg-blue text-blue-foreground";
             default:
                 return "bg-muted text-muted-foreground";
         }
@@ -160,7 +140,7 @@ export function PropertyManagement() {
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'NGN',
             minimumFractionDigits: 0,
         }).format(price);
     };
@@ -245,7 +225,7 @@ export function PropertyManagement() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Property</TableHead>
-                                <TableHead>Agent</TableHead>
+                                <TableHead>Owner</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Price</TableHead>
                                 <TableHead>Status</TableHead>
@@ -263,10 +243,10 @@ export function PropertyManagement() {
                                             <div className="text-sm text-muted-foreground">{property.location}</div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>{property.agent}</TableCell>
+                                    <TableCell>{property.owner}</TableCell>
                                     <TableCell>
-                                        <Badge className={getTypeColor(property.type)}>
-                                            {property.type}
+                                        <Badge className={getTypeColor(property.property_type)}>
+                                            {property.property_type}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="font-medium">

@@ -12,15 +12,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Building2, 
-  MapPin, 
-  DollarSign, 
-  Camera, 
-  Home, 
-  Bed, 
-  Bath, 
-  Square, 
+import {
+  Building2,
+  MapPin,
+  DollarSign,
+  Camera,
+  Home,
+  Bed,
+  Bath,
+  Square,
   Car,
   ArrowLeft,
   Plus,
@@ -55,7 +55,7 @@ const listingSchema = z.object({
 type ListingFormData = z.infer<typeof listingSchema>;
 
 const propertyTypes = [
-  "House", "Apartment", "Condo", "Townhouse", "Villa", "Duplex", 
+  "House", "Apartment", "Condo", "Townhouse", "Villa", "Duplex",
   "Land", "Commercial", "Office", "Warehouse", "Shop"
 ];
 
@@ -67,10 +67,10 @@ const amenitiesList = [
 ];
 
 const nigerianStates = [
-  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", 
-  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", 
-  "FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", 
-  "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", 
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
+  "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
+  "FCT", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi",
+  "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun",
   "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"
 ];
 
@@ -101,8 +101,8 @@ export default function CreateListing() {
   const propertyType = watch("propertyType");
 
   const handleAmenityToggle = (amenity: string) => {
-    setSelectedAmenities(prev => 
-      prev.includes(amenity) 
+    setSelectedAmenities(prev =>
+      prev.includes(amenity)
         ? prev.filter(a => a !== amenity)
         : [...prev, amenity]
     );
@@ -119,44 +119,46 @@ export default function CreateListing() {
 
   const onSubmit = async (data: ListingFormData) => {
     setIsSubmitting(true);
-    
+
     try {
       console.log("Form data:", data);
       console.log("Selected amenities:", selectedAmenities);
-      
+
       // Map form data to property format
       const propertyData = {
         title: data.title,
         description: data.description,
         price: data.price,
-        type: data.propertyType.toLowerCase(), // Database uses 'type' column, not 'property_type'
+        property_type: data.propertyType.toLowerCase(), // Use property_type instead of type
         status: "available", // Use 'available' status
         bedrooms: data.bedrooms,
         bathrooms: data.bathrooms,
         square_feet: data.squareFootage,
         year_built: data.yearBuilt,
-        address: `${data.street}, ${data.city}, ${data.state} ${data.zipCode}`,
+        street: data.street, // Use street instead of address
         city: data.city,
         state: data.state,
         zip_code: data.zipCode,
-        features: selectedAmenities, // Database uses 'features' column, not 'amenities'
+        country: "NG", // Add country field
+        features: selectedAmenities,
+        amenities: selectedAmenities, // Add amenities field
         images: [], // Start with empty array for now
-        featured: false, // Agent listings are not featured by default
-        agent_id: null, // Set to null for now - will be updated when auth is implemented
+        is_featured: false, // User listings are not featured by default
+        owner_id: null, // Add owner_id field
       };
 
       console.log("Property data to be sent:", propertyData);
 
       // Save to Supabase
       const createdProperty = await createProperty(propertyData);
-      
+
       if (createdProperty) {
         toast.success("Property listing created successfully! It will be reviewed before going live.");
-        navigate("/agent-dashboard/listings");
+        navigate("/dashboard/listings"); // Update navigation path
       } else {
         throw new Error("Failed to create property");
       }
-      
+
     } catch (error) {
       console.error("Detailed error creating listing:", error);
       if (error instanceof Error) {
@@ -175,10 +177,10 @@ export default function CreateListing() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
-              onClick={() => navigate("/agent-dashboard/listings")}
+              onClick={() => navigate("/dashboard/listings")} // Update navigation path
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Listings
@@ -253,7 +255,7 @@ export default function CreateListing() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <Label htmlFor="listingType">Listing Type *</Label>
-                <Select 
+                <Select
                   defaultValue="sale"
                   onValueChange={(value: "sale" | "rent") => setValue("listingType", value)}
                 >
@@ -534,7 +536,7 @@ export default function CreateListing() {
                 <Label htmlFor="contactName">Contact Name *</Label>
                 <Input
                   id="contactName"
-                  placeholder="Agent/Owner name"
+                  placeholder="Owner name"
                   {...register("contactName")}
                 />
                 {errors.contactName && (
@@ -559,7 +561,7 @@ export default function CreateListing() {
                 <Input
                   id="contactEmail"
                   type="email"
-                  placeholder="agent@example.com"
+                  placeholder="owner@example.com"
                   {...register("contactEmail")}
                 />
                 {errors.contactEmail && (
@@ -572,15 +574,15 @@ export default function CreateListing() {
 
         {/* Submit Buttons */}
         <div className="flex justify-end space-x-4">
-          <Button 
-            type="button" 
+          <Button
+            type="button"
             variant="outline"
-            onClick={() => navigate("/agent-dashboard/listings")}
+            onClick={() => navigate("/dashboard/listings")} // Update navigation path
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting}
             className="bg-primary hover:bg-primary/90"
           >

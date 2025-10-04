@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { 
-  Heart, Share, Printer, MapPin, Bed, Bath, Move, 
+import {
+  Heart, Share, Printer, MapPin, Bed, Bath, Move,
   CheckSquare, Calendar, Home, Phone, Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,28 +17,30 @@ import ChatWidget from "@/components/messaging/ChatWidget";
 import ViewingScheduler from "@/components/viewings/ViewingScheduler";
 import PropertyInquiryForm from "@/components/inquiries/PropertyInquiryForm";
 import { analyticsApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PropertyDetails = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  
+
   const { data: property, isLoading, error } = useQuery({
     queryKey: ["property", id],
     queryFn: () => id ? fetchPropertyById(id) : null,
     enabled: !!id
   });
-  
+
   // Similar properties (excluding current property)
   const { data: similarProperties = [] } = useQuery({
-    queryKey: ["similar-properties", property?.id, property?.type],
+    queryKey: ["similar-properties", property?.id, property?.property_type],
     queryFn: async () => {
       // For now, return empty array - you can implement fetchProperties later
       return [];
     },
     enabled: !!property
   });
-  
+
   // If loading
   if (isLoading) {
     return (
@@ -72,7 +73,7 @@ const PropertyDetails = () => {
         <title>{property.title} | Godirect Realty</title>
         <meta name="description" content={property.description?.substring(0, 160) || ""} />
       </Helmet>
-      
+
       <div className="bg-realty-50 dark:bg-realty-800/30 py-8">
         <div className="container-custom">
           {/* Breadcrumbs */}
@@ -89,7 +90,7 @@ const PropertyDetails = () => {
               {property.title}
             </span>
           </div>
-          
+
           {/* Property header */}
           <div className="flex flex-col md:flex-row justify-between mb-8">
             <div>
@@ -103,7 +104,7 @@ const PropertyDetails = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="mt-4 md:mt-0 flex flex-col items-end">
               <div className="text-3xl font-heading font-semibold text-realty-800 dark:text-realty-gold mb-1">
                 {formatPriceWithCommas(property.price)}
@@ -113,7 +114,7 @@ const PropertyDetails = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Action buttons */}
           <div className="flex flex-wrap gap-3 mb-8">
             <Button
@@ -124,7 +125,7 @@ const PropertyDetails = () => {
               <Heart className={`h-4 w-4 mr-2 ${isFavorite ? "fill-rose-500 text-rose-500" : ""}`} />
               {isFavorite ? "Saved" : "Save"}
             </Button>
-            
+
             <Button
               variant="outline"
               className="flex items-center"
@@ -132,7 +133,7 @@ const PropertyDetails = () => {
               <Share className="h-4 w-4 mr-2" />
               Share
             </Button>
-            
+
             <Button
               variant="outline"
               className="flex items-center"
@@ -141,10 +142,10 @@ const PropertyDetails = () => {
               Print
             </Button>
           </div>
-          
+
           {/* Property gallery */}
           <PropertyGallery images={property.images} title={property.title} />
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             {/* Main content */}
             <div className="lg:col-span-2 space-y-8">
@@ -160,7 +161,7 @@ const PropertyDetails = () => {
                       Bedrooms
                     </div>
                   </div>
-                  
+
                   <div className="text-center p-4 bg-realty-50 dark:bg-realty-700/30 rounded-lg">
                     <Bath className="h-6 w-6 mx-auto text-realty-800 dark:text-realty-300 mb-2" />
                     <div className="text-lg font-medium text-realty-900 dark:text-white">
@@ -170,7 +171,7 @@ const PropertyDetails = () => {
                       Bathrooms
                     </div>
                   </div>
-                  
+
                   <div className="text-center p-4 bg-realty-50 dark:bg-realty-700/30 rounded-lg">
                     <Move className="h-6 w-6 mx-auto text-realty-800 dark:text-realty-300 mb-2" />
                     <div className="text-lg font-medium text-realty-900 dark:text-white">
@@ -180,25 +181,25 @@ const PropertyDetails = () => {
                       Sq Ft
                     </div>
                   </div>
-                  
+
                   <div className="text-center p-4 bg-realty-50 dark:bg-realty-700/30 rounded-lg">
                     <Home className="h-6 w-6 mx-auto text-realty-800 dark:text-realty-300 mb-2" />
                     <div className="text-lg font-medium text-realty-900 dark:text-white">
-                      {property.type}
+                      {property.property_type}
                     </div>
                     <div className="text-sm text-realty-600 dark:text-realty-400">
                       Property Type
                     </div>
                   </div>
                 </div>
-                
+
                 <h2 className="text-xl font-heading font-semibold mb-4 text-realty-900 dark:text-white">
                   Description
                 </h2>
                 <p className="text-realty-600 dark:text-realty-300 whitespace-pre-line">
                   {property.description || 'No description available'}
                 </p>
-                
+
                 <div className="mt-6 pt-6 border-t border-gray-200 dark:border-realty-700">
                   <h2 className="text-xl font-heading font-semibold mb-4 text-realty-900 dark:text-white">
                     Property Details
@@ -207,7 +208,7 @@ const PropertyDetails = () => {
                     <div className="flex items-center">
                       <Calendar className="h-5 w-5 text-realty-800 dark:text-realty-300 mr-2" />
                       <span className="text-realty-600 dark:text-realty-400">
-                        Year Built: 
+                        Year Built:
                       </span>
                       <span className="ml-1 text-realty-900 dark:text-white">
                         {property.year_built || 'Unknown'}
@@ -216,16 +217,27 @@ const PropertyDetails = () => {
                     <div className="flex items-center">
                       <Home className="h-5 w-5 text-realty-800 dark:text-realty-300 mr-2" />
                       <span className="text-realty-600 dark:text-realty-400">
-                        Property Type: 
+                        Property Type:
                       </span>
                       <span className="ml-1 text-realty-900 dark:text-white">
-                        {property.type || 'Not specified'}
+                        {property.property_type || 'Not specified'}
                       </span>
                     </div>
+                    {property.lot_size && (
+                      <div className="flex items-center">
+                        <Move className="h-5 w-5 text-realty-800 dark:text-realty-300 mr-2" />
+                        <span className="text-realty-600 dark:text-realty-400">
+                          Lot Size:
+                        </span>
+                        <span className="ml-1 text-realty-900 dark:text-white">
+                          {property.lot_size} sq ft
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-              
+
               {/* Tabs: Features, Location, etc. */}
               <Tabs defaultValue="features">
                 <TabsList className="w-full grid grid-cols-3">
@@ -233,13 +245,13 @@ const PropertyDetails = () => {
                   <TabsTrigger value="location">Location</TabsTrigger>
                   <TabsTrigger value="floor-plan">Floor Plan</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="features" className="mt-6 bg-white dark:bg-realty-800 rounded-xl shadow p-6">
                   <h3 className="text-xl font-heading font-semibold mb-4 text-realty-900 dark:text-white">
                     Features & Amenities
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {property.amenities.map((amenity) => (
+                    {property.amenities && property.amenities.map((amenity) => (
                       <div key={amenity} className="flex items-center">
                         <CheckSquare className="h-5 w-5 text-realty-800 dark:text-realty-300 mr-2" />
                         <span className="text-realty-600 dark:text-realty-300">
@@ -247,9 +259,17 @@ const PropertyDetails = () => {
                         </span>
                       </div>
                     ))}
+                    {property.features && property.features.map((feature) => (
+                      <div key={feature} className="flex items-center">
+                        <CheckSquare className="h-5 w-5 text-realty-800 dark:text-realty-300 mr-2" />
+                        <span className="text-realty-600 dark:text-realty-300">
+                          {feature}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="location" className="mt-6 bg-white dark:bg-realty-800 rounded-xl shadow p-6">
                   <h3 className="text-xl font-heading font-semibold mb-4 text-realty-900 dark:text-white">
                     Location
@@ -268,7 +288,7 @@ const PropertyDetails = () => {
                     </p>
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="floor-plan" className="mt-6 bg-white dark:bg-realty-800 rounded-xl shadow p-6">
                   <h3 className="text-xl font-heading font-semibold mb-4 text-realty-900 dark:text-white">
                     Floor Plan
@@ -281,74 +301,70 @@ const PropertyDetails = () => {
                 </TabsContent>
               </Tabs>
             </div>
-            
+
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* Agent info */}
-              {property.agent_id && (
-                <div className="bg-white dark:bg-realty-800 rounded-xl shadow p-6">
-                  <div className="flex items-center mb-4">
-                    <img 
-                      src="/placeholder.svg" 
-                      alt="Agent" 
-                      className="w-16 h-16 rounded-full object-cover" 
-                    />
-                    <div className="ml-3">
-                      <h3 className="text-lg font-heading font-semibold text-realty-900 dark:text-white">
-                        Agent
-                      </h3>
-                      <p className="text-sm text-realty-500 dark:text-realty-400">
-                        Real Estate Agent
-                      </p>
-                    </div>
+              {/* Owner info and actions */}
+              <div className="bg-white dark:bg-realty-800 rounded-xl shadow p-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-16 h-16 rounded-full bg-realty-200 dark:bg-realty-700 flex items-center justify-center">
+                    <Home className="h-8 w-8 text-realty-600 dark:text-realty-400" />
                   </div>
-                  
-                  <div className="space-y-3 mb-6">
-                    <div 
-                      className="flex items-center text-sm text-realty-600 dark:text-realty-300"
-                    >
-                      <Phone className="h-4 w-4 mr-2 text-realty-500" />
-                      Contact agent for details
-                    </div>
+                  <div className="ml-3">
+                    <h3 className="text-lg font-heading font-semibold text-realty-900 dark:text-white">
+                      Property Owner
+                    </h3>
+                    <p className="text-sm text-realty-500 dark:text-realty-400">
+                      Direct Listing
+                    </p>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <Button 
-                      className="w-full bg-realty-800 hover:bg-realty-900 text-white"
-                      onClick={() => setIsChatOpen(true)}
-                    >
-                      Chat with Agent
-                    </Button>
-                    
-                    {property.agent_id && (
+                </div>
+
+                <div className="space-y-3 mb-6">
+                  <div className="text-sm text-realty-600 dark:text-realty-300">
+                    Connect directly with the property owner for inquiries and viewings.
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {user ? (
+                    <>
                       <ViewingScheduler
                         propertyId={property.id}
-                        agentId={property.agent_id}
                         property={{
                           title: property.title,
                           address: `${property.street}, ${property.city}, ${property.state}`,
                           price: property.price,
                           images: property.images
                         }}
-                        agent={{
-                          id: property.agent_id,
-                          name: 'Agent Name', // This would come from agent data
-                          email: 'agent@example.com',
-                          phone: '+234 800 000 0000'
-                        }}
                       />
-                    )}
-                  </div>
+                      <Button
+                        className="w-full bg-realty-800 hover:bg-realty-900 text-white"
+                        onClick={() => setIsChatOpen(true)}
+                      >
+                        Message Owner
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-realty-600 dark:text-realty-400 mb-3">
+                        Sign in to schedule viewings and message the property owner
+                      </p>
+                      <Button asChild>
+                        <Link to="/login">Sign In</Link>
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              {/* Purchase Property */}
+              </div>
+
+              {/* Inquiry Form */}
               <div className="bg-white dark:bg-realty-800 rounded-xl shadow p-6">
                 <h3 className="text-lg font-heading font-semibold mb-4 text-realty-900 dark:text-white">
-                  Purchase This Property
+                  Interested in this Property?
                 </h3>
                 <p className="text-sm text-realty-600 dark:text-realty-400 mb-4">
-                  Ready to make this property yours? Submit a purchase request and our team will guide you through the process.
+                  Send an inquiry directly to the property owner and get a response quickly.
                 </p>
                 <PropertyInquiryForm
                   propertyId={property.id}
@@ -356,34 +372,36 @@ const PropertyDetails = () => {
                     title: property.title,
                     price: property.price,
                     address: `${property.street}, ${property.city}, ${property.state}`,
-                    agent_id: property.agent_id
+                    agent_id: null
                   }}
                 />
               </div>
-              
+
               {/* Mortgage Calculator */}
               <div className="bg-white dark:bg-realty-800 rounded-xl shadow p-6">
                 <h3 className="text-lg font-heading font-semibold mb-4 text-realty-900 dark:text-white">
                   Mortgage Calculator
                 </h3>
-                
+
                 <div className="bg-realty-50 dark:bg-realty-700/30 p-4 rounded-lg mb-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-realty-600 dark:text-realty-300">Principal & Interest</span>
-                    <span className="font-medium text-realty-900 dark:text-white">$3,240/mo</span>
+                    <span className="font-medium text-realty-900 dark:text-white">
+                      {formatPriceWithCommas(Math.round(property.price * 0.00324))}/mo
+                    </span>
                   </div>
                   <div className="text-xs text-realty-500 dark:text-realty-400">
                     Based on 20% down payment, 30-year fixed rate mortgage at 3.25%
                   </div>
                 </div>
-                
+
                 <Button variant="outline" className="w-full">
                   Full Calculator
                 </Button>
               </div>
             </div>
           </div>
-          
+
           {/* Similar Properties */}
           <div className="mt-12">
             <h2 className="text-2xl font-heading font-semibold mb-6 text-realty-900 dark:text-white">
@@ -397,17 +415,14 @@ const PropertyDetails = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Chat Widget */}
-      {property.agent_id && (
-        <ChatWidget
-          propertyId={property.id}
-          agentId={property.agent_id}
-          isOpen={isChatOpen}
-          onToggle={() => setIsChatOpen(!isChatOpen)}
-          onClose={() => setIsChatOpen(false)}
-        />
-      )}
+      <ChatWidget
+        propertyId={property.id}
+        isOpen={isChatOpen}
+        onToggle={() => setIsChatOpen(!isChatOpen)}
+        onClose={() => setIsChatOpen(false)}
+      />
     </>
   );
 };

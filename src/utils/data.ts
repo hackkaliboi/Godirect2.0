@@ -1,4 +1,3 @@
-
 export interface Property {
   id: string;
   title: string;
@@ -19,25 +18,11 @@ export interface Property {
   amenities: string[];
   propertyType: 'House' | 'Apartment' | 'Condo' | 'Townhouse';
   yearBuilt: number;
-  agentId: string;
+  // Remove agentId since users act as their own agents
   createdAt: string;
 }
 
-export interface Agent {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  image: string;
-  title: string;
-  bio: string;
-  ratings: number;
-  reviews: number;
-  specializations: string[];
-  listings: number;
-  sales: number;
-  experience: number;
-}
+// Remove Agent interface since users act as their own agents
 
 export interface Testimonial {
   id: string;
@@ -51,8 +36,8 @@ export interface Testimonial {
 // Properties data will be fetched from Supabase
 export const properties: Property[] = [];
 
-// Agents data will be fetched from Supabase
-export const agents: Agent[] = [];
+// Remove agents data since users act as their own agents
+// export const agents: Agent[] = [];
 
 // Testimonials data will be fetched from Supabase
 export const testimonials: Testimonial[] = [];

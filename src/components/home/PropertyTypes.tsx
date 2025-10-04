@@ -20,7 +20,7 @@ const PropertyTypes = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select("type");
+        .select("property_type");
 
       if (error) {
         throw error;
@@ -40,16 +40,16 @@ const PropertyTypes = () => {
           title: "Single Family Homes",
           image: "/property-types/type-1.jpg",
           count: 0,
-          url: "/properties?type=House",
-          type: "House"
+          url: "/properties?type=house",
+          type: "house"
         },
         {
           key: 2,
           title: "Condos & Apartments",
           image: "/property-types/type-2.jpg",
           count: 0,
-          url: "/properties?type=Condo,Apartment",
-          type: "Condo"
+          url: "/properties?type=condo,apartment",
+          type: "condo"
         },
         {
           key: 3,
@@ -57,15 +57,15 @@ const PropertyTypes = () => {
           image: "/property-types/type-3.jpg",
           count: 0,
           url: "/properties?luxury=true",
-          type: "Luxury"
+          type: "luxury"
         },
         {
           key: 4,
           title: "Commercial Spaces",
           image: "/property-types/type-4.jpg",
           count: 0,
-          url: "/properties?type=Commercial",
-          type: "Commercial"
+          url: "/properties?type=commercial",
+          type: "commercial"
         }
       ];
     }
@@ -73,7 +73,7 @@ const PropertyTypes = () => {
     // Count properties by type
     const typeCounts: Record<string, number> = {};
     properties.forEach(prop => {
-      const type = prop.type;
+      const type = prop.property_type;
       typeCounts[type] = (typeCounts[type] || 0) + 1;
     });
 
@@ -83,17 +83,17 @@ const PropertyTypes = () => {
         key: 1,
         title: "Single Family Homes",
         image: "/property-types/type-1.jpg",
-        count: typeCounts["House"] || 0,
-        url: "/properties?type=House",
-        type: "House"
+        count: typeCounts["house"] || 0,
+        url: "/properties?type=house",
+        type: "house"
       },
       {
         key: 2,
         title: "Condos & Apartments",
         image: "/property-types/type-2.jpg",
-        count: (typeCounts["Condo"] || 0) + (typeCounts["Apartment"] || 0),
-        url: "/properties?type=Condo,Apartment",
-        type: "Condo"
+        count: (typeCounts["condo"] || 0) + (typeCounts["apartment"] || 0),
+        url: "/properties?type=condo,apartment",
+        type: "condo"
       },
       {
         key: 3,
@@ -101,15 +101,15 @@ const PropertyTypes = () => {
         image: "/property-types/type-3.jpg",
         count: properties.length > 5 ? Math.floor(properties.length / 5) : 0, // Estimate luxury properties
         url: "/properties?luxury=true",
-        type: "Luxury"
+        type: "luxury"
       },
       {
         key: 4,
         title: "Commercial Spaces",
         image: "/property-types/type-4.jpg",
-        count: typeCounts["Commercial"] || 0,
-        url: "/properties?type=Commercial",
-        type: "Commercial"
+        count: typeCounts["commercial"] || 0,
+        url: "/properties?type=commercial",
+        type: "commercial"
       }
     ].filter(type => type.count > 0); // Only show types with actual properties
   };

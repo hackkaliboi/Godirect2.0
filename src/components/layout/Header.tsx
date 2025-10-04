@@ -25,11 +25,10 @@ const Header = () => {
   ];
 
   // Determine which dashboard to link to based on user type
-  const getDashboardLink = () => {
+  const getDashboardUrl = () => {
     if (userType === "admin") return "/dashboard/admin";
-    if (userType === "agent") return "/dashboard/agent";
-    if (userType === "user") return "/dashboard/user";
-    return "/login";
+    // All other users (including former "agent" users) go to user dashboard
+    return "/dashboard/user";
   };
 
   return (
@@ -94,7 +93,7 @@ const Header = () => {
                   className="rounded-full border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300"
                   asChild
                 >
-                  <Link to={getDashboardLink()}>
+                  <Link to={getDashboardUrl()}>
                     <User className="h-4 w-4 mr-2 text-realty-600 dark:text-realty-300" />
                     Dashboard
                   </Link>
@@ -176,7 +175,7 @@ const Header = () => {
 
               {user && (
                 <Link
-                  to={getDashboardLink()}
+                  to={getDashboardUrl()}
                   className="px-2 py-2 text-sm font-medium rounded-md text-realty-600 dark:text-realty-400"
                   onClick={() => setIsMenuOpen(false)}
                 >

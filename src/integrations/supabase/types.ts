@@ -51,63 +51,8 @@ export type Database = {
         }
         Relationships: []
       }
-      agents: {
-        Row: {
-          bio: string | null
-          created_at: string | null
-          email: string
-          experience: number | null
-          id: string
-          image: string | null
-          listings: number | null
-          name: string
-          phone: string | null
-          ratings: number | null
-          reviews: number | null
-          sales: number | null
-          specializations: string[]
-          title: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          bio?: string | null
-          created_at?: string | null
-          email: string
-          experience?: number | null
-          id?: string
-          image?: string | null
-          listings?: number | null
-          name: string
-          phone?: string | null
-          ratings?: number | null
-          reviews?: number | null
-          sales?: number | null
-          specializations?: string[]
-          title?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          bio?: string | null
-          created_at?: string | null
-          email?: string
-          experience?: number | null
-          id?: string
-          image?: string | null
-          listings?: number | null
-          name?: string
-          phone?: string | null
-          ratings?: number | null
-          reviews?: number | null
-          sales?: number | null
-          specializations?: string[]
-          title?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       clients: {
         Row: {
-          agent_id: string | null
           bathrooms: string | null
           bedrooms: string | null
           budget: string | null
@@ -125,7 +70,6 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
-          agent_id?: string | null
           bathrooms?: string | null
           bedrooms?: string | null
           budget?: string | null
@@ -143,7 +87,6 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
-          agent_id?: string | null
           bathrooms?: string | null
           bedrooms?: string | null
           budget?: string | null
@@ -161,13 +104,7 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "clients_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "agents"
-            referencedColumns: ["id"]
-          },
+          // Remove agent_id foreign key relationship
         ]
       }
       dashboard_stats: {
@@ -469,7 +406,6 @@ export type Database = {
       }
       properties: {
         Row: {
-          agent_id: string | null
           features: string[]
           bathrooms: number | null
           bedrooms: number | null
@@ -491,7 +427,6 @@ export type Database = {
           zip_code: string | null
         }
         Insert: {
-          agent_id?: string | null
           features?: string[]
           bathrooms?: number | null
           bedrooms?: number | null
@@ -513,7 +448,6 @@ export type Database = {
           zip_code?: string | null
         }
         Update: {
-          agent_id?: string | null
           features?: string[]
           bathrooms?: number | null
           bedrooms?: number | null
@@ -754,7 +688,6 @@ export type Database = {
           id: string
           property_id: string | null
           user_id: string
-          agent_id: string
           title: string | null
           status: string
           last_message_at: string
@@ -765,7 +698,6 @@ export type Database = {
           id?: string
           property_id?: string | null
           user_id: string
-          agent_id: string
           title?: string | null
           status?: string
           last_message_at?: string
@@ -776,7 +708,6 @@ export type Database = {
           id?: string
           property_id?: string | null
           user_id?: string
-          agent_id?: string
           title?: string | null
           status?: string
           last_message_at?: string
@@ -826,7 +757,6 @@ export type Database = {
           id: string
           property_id: string
           user_id: string
-          agent_id: string
           viewing_date: string
           viewing_type: string
           status: string
@@ -836,7 +766,6 @@ export type Database = {
           meeting_link: string | null
           reminder_sent: boolean
           user_notes: string | null
-          agent_notes: string | null
           rating: number | null
           feedback: string | null
           created_at: string
@@ -846,7 +775,6 @@ export type Database = {
           id?: string
           property_id: string
           user_id: string
-          agent_id: string
           viewing_date: string
           viewing_type: string
           status?: string
@@ -856,7 +784,6 @@ export type Database = {
           meeting_link?: string | null
           reminder_sent?: boolean
           user_notes?: string | null
-          agent_notes?: string | null
           rating?: number | null
           feedback?: string | null
           created_at?: string
@@ -866,7 +793,6 @@ export type Database = {
           id?: string
           property_id?: string
           user_id?: string
-          agent_id?: string
           viewing_date?: string
           viewing_type?: string
           status?: string
@@ -876,7 +802,6 @@ export type Database = {
           meeting_link?: string | null
           reminder_sent?: boolean
           user_notes?: string | null
-          agent_notes?: string | null
           rating?: number | null
           feedback?: string | null
           created_at?: string
@@ -899,7 +824,6 @@ export type Database = {
           preferred_locations: string[] | null
           bedrooms_min: number | null
           bathrooms_min: number | null
-          assigned_agent_id: string | null
           last_contact_date: string | null
           next_followup_date: string | null
           conversion_date: string | null
@@ -922,7 +846,6 @@ export type Database = {
           preferred_locations?: string[] | null
           bedrooms_min?: number | null
           bathrooms_min?: number | null
-          assigned_agent_id?: string | null
           last_contact_date?: string | null
           next_followup_date?: string | null
           conversion_date?: string | null
@@ -945,7 +868,6 @@ export type Database = {
           preferred_locations?: string[] | null
           bedrooms_min?: number | null
           bathrooms_min?: number | null
-          assigned_agent_id?: string | null
           last_contact_date?: string | null
           next_followup_date?: string | null
           conversion_date?: string | null
@@ -960,7 +882,6 @@ export type Database = {
         Row: {
           id: string
           lead_id: string
-          agent_id: string | null
           activity_type: string
           title: string
           description: string | null
@@ -972,7 +893,6 @@ export type Database = {
         Insert: {
           id?: string
           lead_id: string
-          agent_id?: string | null
           activity_type: string
           title: string
           description?: string | null
@@ -984,7 +904,6 @@ export type Database = {
         Update: {
           id?: string
           lead_id?: string
-          agent_id?: string | null
           activity_type?: string
           title?: string
           description?: string | null
@@ -1000,7 +919,6 @@ export type Database = {
           id: string
           property_id: string
           user_id: string | null
-          agent_id: string | null
           name: string | null
           email: string | null
           phone: string | null
@@ -1018,7 +936,6 @@ export type Database = {
           id?: string
           property_id: string
           user_id?: string | null
-          agent_id?: string | null
           name?: string | null
           email?: string | null
           phone?: string | null
@@ -1036,7 +953,6 @@ export type Database = {
           id?: string
           property_id?: string
           user_id?: string | null
-          agent_id?: string | null
           name?: string | null
           email?: string | null
           phone?: string | null

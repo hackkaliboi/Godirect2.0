@@ -9,7 +9,7 @@ import { Building, Users, UserCheck, DollarSign } from "lucide-react";
 // Import admin dashboard pages
 import AdminAnalytics from "../admin/AdminAnalytics";
 import AdminUsers from "../admin/AdminUsers";
-import AdminAgents from "../admin/AdminAgents";
+// Remove AdminAgents import
 import AdminProperties from "../admin/AdminProperties";
 import AdminCreateListing from "../admin/AdminCreateListing";
 import AdminSettings from "../admin/AdminSettings";
@@ -57,7 +57,7 @@ function AdminDashboardHome() {
           loading={loading}
         />
         <StatCard
-          title="Active Agents"
+          title="Active Users"
           value={getStat('active_agents').value}
           description={getStat('active_agents').description}
           icon={UserCheck}
@@ -94,7 +94,7 @@ export function AdminDashboard() {
         <Route index element={<AdminDashboardHome />} />
         <Route path="analytics" element={<AdminAnalytics />} />
         <Route path="users" element={<AdminUsers />} />
-        <Route path="agents" element={<AdminAgents />} />
+        {/* Remove the agents route */}
         <Route path="properties" element={<AdminProperties />} />
         <Route path="properties/create" element={<AdminCreateListing />} />
         <Route path="create-listing" element={<AdminCreateListing />} />
@@ -102,7 +102,7 @@ export function AdminDashboard() {
         <Route path="reports" element={<AdminReports />} />
         <Route path="system" element={<AdminSystem />} />
         <Route path="settings" element={<AdminSettings />} />
-        
+
         {/* New Feature Routes */}
         <Route path="security" element={<SecurityCompliance />} />
         <Route path="payments" element={<PaymentManager />} />

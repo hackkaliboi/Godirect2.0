@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building, User, Users, ArrowRight } from "lucide-react";
+import { Building, User, ArrowRight, CheckCircle, TrendingUp, Shield, Zap, Home, Users, Lock } from "lucide-react";
 
 const ListProperty = () => {
     const { user } = useAuth();
@@ -38,266 +38,295 @@ const ListProperty = () => {
             </Helmet>
 
             {/* Hero Section */}
-            <section className="py-16 md:py-24 bg-gradient-to-r from-realty-900 to-realty-800 text-white">
-                <div className="container-custom">
-                    <div className="max-w-3xl mx-auto text-center">
-                        <h1 className="text-3xl md:text-5xl font-heading font-bold mb-6">
-                            List Your Property with GODIRECT
-                        </h1>
-                        <p className="text-xl text-realty-200 mb-8">
-                            Reach thousands of potential buyers and renters across Nigeria's major cities
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium text-lg px-8 py-3" asChild>
-                                <Link to="/user-signup">Get Started as Owner</Link>
-                            </Button>
-                            <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 text-white text-lg px-8 py-3" asChild>
-                                <Link to="/agent-signup">Join as Agent</Link>
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* How It Works */}
-            <section className="py-16 bg-gradient-to-b from-white to-realty-50 dark:from-realty-900 dark:to-realty-900/90">
-                <div className="container-custom">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
-                            How It <span className="text-realty-gold relative inline-block">
-                                <span className="relative z-10">Works</span>
-                                <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
-                            </span>
-                        </h2>
-                        <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto">
-                            Listing your property with us is simple and straightforward
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="text-center">
-                            <div className="w-20 h-20 rounded-full bg-realty-100 dark:bg-realty-800 flex items-center justify-center mx-auto mb-6">
-                                <span className="text-2xl font-bold text-realty-900 dark:text-white">1</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-realty-900 dark:text-white mb-3">Create Account</h3>
-                            <p className="text-realty-600 dark:text-realty-400">
-                                Sign up as an agent or property owner to get started with listing your property.
-                            </p>
+            <section className="relative py-20 md:py-28 bg-gradient-to-r from-realty-900 to-realty-800 text-white overflow-hidden">
+                <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
+                <div className="container-custom relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        {/* Left Side - Registration Card */}
+                        <div className="order-2 lg:order-1">
+                            <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-xl">
+                                <CardHeader>
+                                    <CardTitle className="text-2xl text-white">Register for Free</CardTitle>
+                                    <CardDescription className="text-realty-200">
+                                        Get started with listing your property today
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <ul className="space-y-4">
+                                        <li className="flex items-start">
+                                            <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                            <span className="text-white">Full access to our listing platform with no upfront costs</span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                            <span className="text-white">Connect directly with verified buyers and renters</span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                            <span className="text-white">Zero agent fees - keep 100% of your commission</span>
+                                        </li>
+                                    </ul>
+                                    <div className="flex flex-col gap-3">
+                                        <Button size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all" asChild>
+                                            <Link to="/user-signup">Get Started Now</Link>
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
 
-                        <div className="text-center">
-                            <div className="w-20 h-20 rounded-full bg-realty-100 dark:bg-realty-800 flex items-center justify-center mx-auto mb-6">
-                                <span className="text-2xl font-bold text-realty-900 dark:text-white">2</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-realty-900 dark:text-white mb-3">List Property</h3>
-                            <p className="text-realty-600 dark:text-realty-400">
-                                Provide detailed information about your property including photos, pricing, and features.
-                            </p>
-                        </div>
-
-                        <div className="text-center">
-                            <div className="w-20 h-20 rounded-full bg-realty-100 dark:bg-realty-800 flex items-center justify-center mx-auto mb-6">
-                                <span className="text-2xl font-bold text-realty-900 dark:text-white">3</span>
-                            </div>
-                            <h3 className="text-xl font-semibold text-realty-900 dark:text-white mb-3">Connect with Buyers</h3>
-                            <p className="text-realty-600 dark:text-realty-400">
-                                Our platform connects you with interested buyers and renters to close deals faster.
+                        {/* Right Side - Hero Content */}
+                        <div className="order-1 lg:order-2 text-center lg:text-left">
+                            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">
+                                List Your Property <span className="text-realty-gold">Directly</span>
+                            </h1>
+                            <p className="text-xl text-realty-200 mb-8 max-w-2xl">
+                                Skip the middleman. Connect directly with verified buyers and renters across Nigeria's major cities.
                             </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Options for Different Users */}
-            <section className="py-16">
+            {/* List Worry Free Section */}
+            <section className="py-20 bg-gradient-to-r from-realty-50 to-white dark:from-realty-900/40 dark:to-realty-900/20">
                 <div className="container-custom">
-                    <div className="text-center mb-12">
+                    <div className="text-center mb-16">
                         <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
-                            Listing <span className="text-realty-gold relative inline-block">
-                                <span className="relative z-10">Options</span>
-                                <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
-                            </span>
+                            List <span className="text-realty-gold">Worry Free</span>. We've got you covered
                         </h2>
-                        <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto">
-                            Choose the option that best fits your needs
+                        <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto text-lg">
+                            Experience peace of mind with our comprehensive property listing platform
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* For Property Owners */}
-                        <Card className="border-realty-200 dark:border-realty-800 shadow-lg hover:shadow-xl transition-shadow">
-                            <CardHeader>
-                                <div className="w-12 h-12 rounded-full bg-realty-100 dark:bg-realty-800 flex items-center justify-center mb-4">
-                                    <User className="h-6 w-6 text-realty-900 dark:text-white" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        {/* Your rental your rules */}
+                        <div className="text-center">
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-realty-gold/10 flex items-center justify-center">
+                                <Home className="h-10 w-10 text-realty-gold" />
+                            </div>
+                            <h3 className="text-2xl font-heading font-bold text-realty-900 dark:text-white mb-4">
+                                Your Rental, Your Rules
+                            </h3>
+                            <ul className="space-y-3 text-left max-w-xs mx-auto">
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">Set your own pricing and terms</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">Screen tenants with our verification system</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">Manage all communications in one place</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Get to know your guests */}
+                        <div className="text-center">
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-realty-gold/10 flex items-center justify-center">
+                                <Users className="h-10 w-10 text-realty-gold" />
+                            </div>
+                            <h3 className="text-2xl font-heading font-bold text-realty-900 dark:text-white mb-4">
+                                Get to Know Your Guests
+                            </h3>
+                            <ul className="space-y-3 text-left max-w-xs mx-auto">
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">Access verified tenant profiles and backgrounds</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">Review rental history and references</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">Connect directly through our secure messaging</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Stay Protected */}
+                        <div className="text-center">
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-realty-gold/10 flex items-center justify-center">
+                                <Lock className="h-10 w-10 text-realty-gold" />
+                            </div>
+                            <h3 className="text-2xl font-heading font-bold text-realty-900 dark:text-white mb-4">
+                                Stay Protected
+                            </h3>
+                            <ul className="space-y-3 text-left max-w-xs mx-auto">
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">Legal document templates for all agreements</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">Secure payment processing with escrow options</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                    <span className="text-realty-700 dark:text-realty-300">24/7 support for any issues that arise</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="text-center mt-12">
+                        <Button size="lg" className="bg-realty-900 hover:bg-realty-800 text-white font-medium text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl" asChild>
+                            <Link to="/user-signup">List with us Today</Link>
+                        </Button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Success Stories */}
+            <section className="py-20 bg-realty-900 text-white">
+                <div className="container-custom">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">
+                            Success Stories from <span className="text-realty-gold">Direct Listings</span>
+                        </h2>
+                        <p className="text-realty-200 max-w-2xl mx-auto text-lg">
+                            See how property owners achieved their real estate goals with our platform
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <Card className="bg-realty-800 border-realty-700">
+                            <CardContent className="p-6">
+                                <div className="flex items-center mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-realty-gold/20 flex items-center justify-center mr-4">
+                                        <span className="font-bold text-realty-gold">AO</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Adeola Okafor</h3>
+                                        <p className="text-realty-400 text-sm">Lagos Property Owner</p>
+                                    </div>
                                 </div>
-                                <CardTitle className="text-xl text-realty-900 dark:text-white">Property Owners</CardTitle>
-                                <CardDescription>
-                                    List your property directly as an owner
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 mb-6">
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Free basic listing</span>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Reach verified buyers</span>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Property showcase</span>
-                                    </li>
-                                </ul>
-                                <Button asChild className="w-full">
-                                    <Link to="/user-signup">Sign Up as Owner</Link>
-                                </Button>
+                                <p className="text-realty-200 mb-4">
+                                    "I listed my 3-bedroom apartment in Lekki and had 3 serious buyers within a week. Sold for 15% above asking price in just 10 days!"
+                                </p>
+                                <div className="flex items-center text-realty-gold">
+                                    {[...Array(5)].map((_, i) => (
+                                        <CheckCircle key={i} className="h-5 w-5 fill-current" />
+                                    ))}
+                                </div>
                             </CardContent>
                         </Card>
 
-                        {/* For Real Estate Agents */}
-                        <Card className="border-realty-200 dark:border-realty-800 shadow-lg hover:shadow-xl transition-shadow">
-                            <CardHeader>
-                                <div className="w-12 h-12 rounded-full bg-realty-100 dark:bg-realty-800 flex items-center justify-center mb-4">
-                                    <Users className="h-6 w-6 text-realty-900 dark:text-white" />
+                        <Card className="bg-realty-800 border-realty-700">
+                            <CardContent className="p-6">
+                                <div className="flex items-center mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-realty-gold/20 flex items-center justify-center mr-4">
+                                        <span className="font-bold text-realty-gold">TE</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Tunde Eze</h3>
+                                        <p className="text-realty-400 text-sm">Enugu Property Investor</p>
+                                    </div>
                                 </div>
-                                <CardTitle className="text-xl text-realty-900 dark:text-white">Real Estate Agents</CardTitle>
-                                <CardDescription>
-                                    List multiple properties as a licensed agent
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 mb-6">
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Professional dashboard</span>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Lead management tools</span>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Commission tracking</span>
-                                    </li>
-                                </ul>
-                                <Button asChild variant="outline" className="w-full">
-                                    <Link to="/agent-signup">Sign Up as Agent</Link>
-                                </Button>
+                                <p className="text-realty-200 mb-4">
+                                    "As a repeat user, I've sold 4 properties through GODIRECT. The platform saved me over ₦400,000 in agent fees alone!"
+                                </p>
+                                <div className="flex items-center text-realty-gold">
+                                    {[...Array(5)].map((_, i) => (
+                                        <CheckCircle key={i} className="h-5 w-5 fill-current" />
+                                    ))}
+                                </div>
                             </CardContent>
                         </Card>
 
-                        {/* For Existing Users */}
-                        <Card className="border-realty-200 dark:border-realty-800 shadow-lg hover:shadow-xl transition-shadow">
-                            <CardHeader>
-                                <div className="w-12 h-12 rounded-full bg-realty-100 dark:bg-realty-800 flex items-center justify-center mb-4">
-                                    <Building className="h-6 w-6 text-realty-900 dark:text-white" />
+                        <Card className="bg-realty-800 border-realty-700">
+                            <CardContent className="p-6">
+                                <div className="flex items-center mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-realty-gold/20 flex items-center justify-center mr-4">
+                                        <span className="font-bold text-realty-gold">FC</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Fiona Chukwu</h3>
+                                        <p className="text-realty-400 text-sm">Calabar Property Owner</p>
+                                    </div>
                                 </div>
-                                <CardTitle className="text-xl text-realty-900 dark:text-white">Existing Users</CardTitle>
-                                <CardDescription>
-                                    Already have an account? Sign in to list a property
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 mb-6">
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Quick property listing</span>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Access to dashboard</span>
-                                    </li>
-                                    <li className="flex items-center">
-                                        <ArrowRight className="h-4 w-4 text-realty-gold mr-2" />
-                                        <span className="text-sm">Performance analytics</span>
-                                    </li>
-                                </ul>
-                                <Button asChild className="w-full bg-realty-gold hover:bg-realty-gold/90 text-realty-900">
-                                    <Link to="/login">Sign In to List Property</Link>
-                                </Button>
+                                <p className="text-realty-200 mb-4">
+                                    "The virtual tour feature helped me rent my property to tenants in Abuja without them ever visiting in person. Truly innovative!"
+                                </p>
+                                <div className="flex items-center text-realty-gold">
+                                    {[...Array(5)].map((_, i) => (
+                                        <CheckCircle key={i} className="h-5 w-5 fill-current" />
+                                    ))}
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
                 </div>
             </section>
 
-            {/* Benefits Section */}
-            <section className="py-16 bg-gradient-to-r from-realty-50 to-white dark:from-realty-900/40 dark:to-realty-900/20">
+            {/* New CTA Section as per your design */}
+            <section className="py-20 bg-gradient-to-r from-realty-900 to-realty-800 text-white">
                 <div className="container-custom">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
-                            Why List with <span className="text-realty-gold relative inline-block">
-                                <span className="relative z-10">GODIRECT</span>
-                                <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
-                            </span>
+                    <div className="max-w-6xl mx-auto text-center">
+                        <h2 className="text-3xl md:text-4xl font-heading font-bold mb-12">
+                            List <span className="text-realty-gold">Worry Free</span>. We've got you covered
                         </h2>
-                        <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto">
-                            We provide the tools and exposure you need to sell or rent your property faster
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div className="text-center p-6 bg-white dark:bg-realty-800 rounded-lg shadow-sm">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-realty-100 dark:bg-realty-700 flex items-center justify-center">
-                                <Users className="h-8 w-8 text-realty-gold" />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div>
+                                <h3 className="text-xl font-heading font-bold mb-4 text-realty-gold">Your Rental, Your Rules</h3>
+                                <ul className="space-y-3">
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">Set your own pricing and terms</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">Screen tenants with our verification system</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">Manage all communications in one place</span>
+                                    </li>
+                                </ul>
                             </div>
-                            <h3 className="text-lg font-semibold text-realty-900 dark:text-white mb-2">Wide Reach</h3>
-                            <p className="text-realty-600 dark:text-realty-400 text-sm">
-                                Access to thousands of verified buyers and renters across Nigeria
-                            </p>
-                        </div>
-
-                        <div className="text-center p-6 bg-white dark:bg-realty-800 rounded-lg shadow-sm">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-realty-100 dark:bg-realty-700 flex items-center justify-center">
-                                <Building className="h-8 w-8 text-realty-gold" />
+                            <div>
+                                <h3 className="text-xl font-heading font-bold mb-4 text-realty-gold">Get to Know Your Guests</h3>
+                                <ul className="space-y-3">
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">Access verified tenant profiles and backgrounds</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">Review rental history and references</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">Connect directly through our secure messaging</span>
+                                    </li>
+                                </ul>
                             </div>
-                            <h3 className="text-lg font-semibold text-realty-900 dark:text-white mb-2">Premium Exposure</h3>
-                            <p className="text-realty-600 dark:text-realty-400 text-sm">
-                                Featured listings get priority placement in search results
-                            </p>
-                        </div>
-
-                        <div className="text-center p-6 bg-white dark:bg-realty-800 rounded-lg shadow-sm">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-realty-100 dark:bg-realty-700 flex items-center justify-center">
-                                <User className="h-8 w-8 text-realty-gold" />
+                            <div>
+                                <h3 className="text-xl font-heading font-bold mb-4 text-realty-gold">Stay Protected</h3>
+                                <ul className="space-y-3">
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">Legal document templates for all agreements</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">Secure payment processing with escrow options</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <CheckCircle className="h-5 w-5 text-realty-gold mt-0.5 mr-3 flex-shrink-0" />
+                                        <span className="text-left">24/7 support for any issues that arise</span>
+                                    </li>
+                                </ul>
                             </div>
-                            <h3 className="text-lg font-semibold text-realty-900 dark:text-white mb-2">Expert Support</h3>
-                            <p className="text-realty-600 dark:text-realty-400 text-sm">
-                                Dedicated support team to help with your listing process
-                            </p>
                         </div>
-
-                        <div className="text-center p-6 bg-white dark:bg-realty-800 rounded-lg shadow-sm">
-                            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-realty-100 dark:bg-realty-700 flex items-center justify-center">
-                                <ArrowRight className="h-8 w-8 text-realty-gold" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-realty-900 dark:text-white mb-2">Fast Results</h3>
-                            <p className="text-realty-600 dark:text-realty-400 text-sm">
-                                Properties sell 40% faster on our platform compared to traditional methods
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="py-16 bg-realty-900 text-white">
-                <div className="container-custom">
-                    <div className="max-w-3xl mx-auto text-center">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
-                            Ready to List Your Property?
-                        </h2>
-                        <p className="text-realty-200 text-lg mb-8">
-                            Join thousands of property owners and agents who have successfully listed their properties with us
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium" asChild>
-                                <Link to="/agent-signup">List as Agent</Link>
-                            </Button>
-                            <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 text-white" asChild>
-                                <Link to="/user-signup">List as Owner</Link>
+                        <div className="mt-12">
+                            <Button size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl" asChild>
+                                <Link to="/user-signup">List with us Today</Link>
                             </Button>
                         </div>
                     </div>

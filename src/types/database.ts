@@ -1,10 +1,40 @@
 // Extended types for the new database features
 
+export interface Property {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  property_type: string;
+  status: 'available' | 'pending' | 'sold' | 'rented' | 'withdrawn';
+  bedrooms?: number;
+  bathrooms?: number;
+  square_feet?: number;
+  lot_size?: number;
+  year_built?: number;
+  street: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
+  images: string[];
+  features: string[];
+  amenities: string[];
+  virtual_tour_url?: string;
+  is_featured: boolean;
+  views_count: number;
+  owner_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Conversation {
   id: string;
   property_id?: string;
   user_id: string;
-  agent_id: string;
+  // Remove agent_id since users act as their own agents
   title?: string;
   status: 'active' | 'closed' | 'archived';
   last_message_at: string;
@@ -16,7 +46,7 @@ export interface Message {
   id: string;
   conversation_id: string;
   sender_id: string;
-  sender_type: 'user' | 'agent' | 'admin';
+  sender_type: 'user' | 'admin';
   message_text: string;
   message_type: 'text' | 'image' | 'document' | 'property_link';
   file_url?: string;
@@ -28,7 +58,6 @@ export interface PropertyViewing {
   id: string;
   property_id: string;
   user_id: string;
-  agent_id: string;
   viewing_date: string;
   viewing_type: 'in_person' | 'virtual' | 'group';
   status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'rescheduled';
@@ -38,7 +67,6 @@ export interface PropertyViewing {
   meeting_link?: string;
   reminder_sent: boolean;
   user_notes?: string;
-  agent_notes?: string;
   rating?: number;
   feedback?: string;
   created_at: string;
@@ -59,7 +87,7 @@ export interface Lead {
   preferred_locations?: string[];
   bedrooms_min?: number;
   bathrooms_min?: number;
-  assigned_agent_id?: string;
+  // Remove assigned_agent_id since users act as their own agents
   last_contact_date?: string;
   next_followup_date?: string;
   conversion_date?: string;
@@ -72,7 +100,7 @@ export interface Lead {
 export interface LeadActivity {
   id: string;
   lead_id: string;
-  agent_id?: string;
+  // Remove agent_id since users act as their own agents
   activity_type: 'call' | 'email' | 'sms' | 'meeting' | 'property_shown' | 'note_added' | 'status_changed';
   title: string;
   description?: string;
@@ -116,7 +144,7 @@ export interface PropertyInquiry {
   id: string;
   property_id: string;
   user_id?: string;
-  agent_id?: string;
+  // Remove agent_id since users act as their own agents
   name?: string;
   email?: string;
   phone?: string;
@@ -151,7 +179,7 @@ export interface PropertyAnalytics {
 export interface Notification {
   id: string;
   recipient_id: string;
-  recipient_type: 'user' | 'agent' | 'admin';
+  recipient_type: 'user' | 'admin';
   type: 'property_alert' | 'viewing_reminder' | 'message_received' | 'inquiry_received' | 'viewing_scheduled' | 'viewing_cancelled' | 'property_updated' | 'payment_reminder';
   title: string;
   message: string;
@@ -192,7 +220,7 @@ export interface PaymentTransaction {
   id: string;
   user_id?: string;
   property_id?: string;
-  agent_id?: string;
+  // Remove agent_id since users act as their own agents
   transaction_type: 'property_purchase' | 'agent_commission' | 'service_fee' | 'inspection_fee' | 'legal_fee';
   amount: number;
   currency: string;
@@ -211,11 +239,11 @@ export interface PaymentTransaction {
 // Form types for creating/updating
 export interface CreateViewingRequest {
   property_id: string;
-  agent_id: string;
   viewing_date: string;
   viewing_type: 'in_person' | 'virtual' | 'group';
   notes?: string;
   attendees_count?: number;
+  // Remove agent_id since users act as their own agents
 }
 
 export interface CreateInquiryRequest {
@@ -259,11 +287,7 @@ export interface ConversationWithMessages extends Conversation {
     price: number;
     images: string[];
   };
-  agent?: {
-    id: string;
-    name: string;
-    image?: string;
-  };
+  // Remove agent since users act as their own agents
   user?: {
     id: string;
     name: string;
@@ -278,12 +302,6 @@ export interface ViewingWithDetails extends PropertyViewing {
     price: number;
     images: string[];
   };
-  agent: {
-    id: string;
-    name: string;
-    phone?: string;
-    email: string;
-  };
   user: {
     id: string;
     name: string;
@@ -294,9 +312,5 @@ export interface ViewingWithDetails extends PropertyViewing {
 
 export interface LeadWithActivities extends Lead {
   activities: LeadActivity[];
-  agent?: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  // Remove agent since users act as their own agents
 }

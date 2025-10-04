@@ -32,10 +32,12 @@ import {
   Loader2
 } from "lucide-react";
 import { toast } from "sonner";
-import { createProperty, fetchAgents, Agent } from "@/utils/supabaseData";
+// Remove fetchAgents and Agent import since we're removing agents
+import { createProperty } from "@/utils/supabaseData";
 import { supabase } from "@/integrations/supabase/client";
 
 // Enhanced validation schema for admin with additional fields
+// Remove assignedAgent from the schema since we're removing agents
 const adminListingSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(20, "Description must be at least 20 characters"),
@@ -56,8 +58,7 @@ const adminListingSchema = z.object({
   contactName: z.string().min(2, "Contact name is required"),
   contactPhone: z.string().min(10, "Valid phone number is required"),
   contactEmail: z.string().email("Valid email is required"),
-  // Admin-specific fields
-  assignedAgent: z.string().optional(),
+  // Admin-specific fields (remove assignedAgent)
   priority: z.enum(["low", "medium", "high", "urgent"]),
   status: z.enum(["draft", "pending", "approved", "published", "archived"]),
   featured: z.boolean(),
@@ -93,32 +94,7 @@ export default function AdminCreateListing() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [availableAgents, setAvailableAgents] = useState<Agent[]>([]);
-  const [loadingAgents, setLoadingAgents] = useState(true);
-
-  // Fetch agents when component mounts
-  useEffect(() => {
-    const loadAgents = async () => {
-      try {
-        const agents = await fetchAgents();
-        setAvailableAgents(agents);
-      } catch (error) {
-        console.error("Error fetching agents:", error);
-        toast.error("Failed to load agents. Using mock data.");
-        // Fallback to mock data if fetch fails
-        setAvailableAgents([
-          { id: "12345678-1234-1234-1234-123456789012", name: "John Okafor", email: "john@example.com" } as Agent,
-          { id: "23456789-2345-2345-2345-234567890123", name: "Mary Adebayo", email: "mary@example.com" } as Agent,
-          { id: "34567890-3456-3456-3456-345678901234", name: "David Okwu", email: "david@example.com" } as Agent,
-          { id: "45678901-4567-4567-4567-456789012345", name: "Sarah Usman", email: "sarah@example.com" } as Agent,
-        ]);
-      } finally {
-        setLoadingAgents(false);
-      }
-    };
-
-    loadAgents();
-  }, []);
+  // Remove availableAgents and loadingAgents since we're removing agents
 
   const {
     register,
@@ -223,20 +199,22 @@ export default function AdminCreateListing() {
         title: data.title,
         description: data.description,
         price: data.price,
-        type: propertyType, // This will be mapped to property_type in createProperty
-        status: "available", // Use 'available' status for consistency with database
+        property_type: propertyType,
+        status: "available",
         bedrooms: data.bedrooms,
         bathrooms: data.bathrooms,
         square_feet: data.squareFootage,
         year_built: data.yearBuilt,
-        street: `${data.street}, ${data.city}, ${data.state} ${data.zipCode}`, // This will be mapped to address in createProperty
+        street: data.street,
         city: data.city,
         state: data.state,
         zip_code: data.zipCode,
-        features: selectedAmenities, // This will be mapped correctly
-        images: imageUrls, // Use the uploaded image URLs
-        featured: data.featured,
-        agent_id: data.assignedAgent && !loadingAgents ? data.assignedAgent : null, // Use agent_id only when not loading
+        country: "NG",
+        features: selectedAmenities,
+        amenities: selectedAmenities,
+        images: imageUrls,
+        is_featured: data.featured,
+        owner_id: null,
       };
 
       console.log("Sending property data to createProperty:", propertyData);
@@ -358,33 +336,7 @@ export default function AdminCreateListing() {
                 </Select>
               </div>
 
-              <div>
-                <Label htmlFor="assignedAgent">Assign to Agent</Label>
-                <Select onValueChange={(value) => setValue("assignedAgent", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select agent" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {loadingAgents ? (
-                      <SelectItem value="loading" disabled>
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Loading agents...
-                        </div>
-                      </SelectItem>
-                    ) : (
-                      availableAgents.map((agent) => (
-                        <SelectItem key={agent.id} value={agent.id}>
-                          <div className="flex items-center gap-2">
-                            <UserCheck className="h-4 w-4" />
-                            {agent.name}
-                          </div>
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Remove the assignedAgent select since we're removing agents */}
 
               <div className="flex items-center space-x-2">
                 <Label htmlFor="featured" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
