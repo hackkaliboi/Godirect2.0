@@ -364,7 +364,7 @@ const AgentKYCVerification = () => {
       }
     } catch (error) {
       console.error("Error submitting KYC:", error);
-      toast.error("An error occurred while submitting your information");
+      toast.error("An error occurred while submitting your information: " + (error.message || "Unknown error"));
     } finally {
       setSubmitting(false);
     }

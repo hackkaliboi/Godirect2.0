@@ -206,7 +206,7 @@ export default function AuthForm({
             .single();
 
           // If no profile exists, create one manually
-          if (!profileData && profileError?.code === 'PGRST116') {
+          if (!profileData && profileError && 'message' in profileError && profileError.message.includes('PGRST116')) {
             console.log('Profile not found, creating manually...');
             const { error: createError } = await supabase
               .from('profiles')
@@ -240,9 +240,16 @@ export default function AuthForm({
             }
           ];
 
-          await supabase
-            .from('user_settings')
-            .upsert(defaultSettings, { onConflict: 'user_id,setting_key' });
+          // Handle user settings with individual inserts
+          for (const setting of defaultSettings) {
+            try {
+              await supabase
+                .from('user_settings')
+                .insert(setting);
+            } catch (insertError) {
+              console.warn('Could not insert setting:', setting, insertError);
+            }
+          }
 
         } catch (profileSetupError) {
           console.warn('Error setting up user profile:', profileSetupError);

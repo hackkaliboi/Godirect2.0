@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Search, MoreHorizontal, UserCheck, UserX, Mail, Phone } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/integrations/supabase/types";
 
 interface User {
   id: string;
@@ -33,10 +36,47 @@ interface User {
   avatar?: string;
 }
 
-// Empty data - will be populated from database
-const users: User[] = [];
-
 export function UserManagement() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*');
+
+        if (error) {
+          console.error('Error fetching users:', error);
+          setLoading(false);
+          return;
+        }
+
+        // Transform the data to match our User interface
+        const transformedUsers: User[] = (data || []).map((profile: Profile) => ({
+          id: profile.id,
+          name: profile.full_name || 'Unknown',
+          email: profile.email || 'No email',
+          role: profile.user_type === 'agent' ? 'agent' : 'user',
+          status: profile.status === 'active' ? 'active' : 'pending',
+          joinDate: profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : 'Unknown',
+          lastActive: profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : 'Unknown',
+          avatar: profile.avatar_url || undefined
+        }));
+
+        setUsers(transformedUsers);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -82,7 +122,12 @@ export function UserManagement() {
         </div>
       </CardHeader>
       <CardContent>
-        {users.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading users...</p>
+          </div>
+        ) : users.length === 0 ? (
           <div className="text-center py-12">
             <UserCheck className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Users Yet</h3>
