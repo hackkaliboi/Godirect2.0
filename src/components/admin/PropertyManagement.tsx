@@ -21,7 +21,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Search, MoreHorizontal, CheckCircle, XCircle, Eye, DollarSign, Plus, Loader2, RefreshCw } from "lucide-react";
-import { fetchProperties, fetchPendingProperties } from "@/utils/supabaseData";
+import { fetchProperties, fetchPendingProperties, updatePropertyStatus } from "@/utils/supabaseData";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Property } from "@/types/database";
@@ -117,6 +117,8 @@ export function PropertyManagement() {
                 return "bg-destructive text-destructive-foreground";
             case "rented":
                 return "bg-blue text-blue-foreground";
+            case "rejected":
+                return "bg-destructive text-destructive-foreground";
             default:
                 return "bg-muted text-muted-foreground";
         }
@@ -143,6 +145,30 @@ export function PropertyManagement() {
             currency: 'NGN',
             minimumFractionDigits: 0,
         }).format(price);
+    };
+
+    const handleApproveProperty = async (propertyId: string) => {
+        try {
+            await updatePropertyStatus(propertyId, "available");
+            toast.success("Property approved successfully");
+            // Refresh the property list
+            loadProperties();
+        } catch (error) {
+            console.error("Error approving property:", error);
+            toast.error("Failed to approve property: " + (error.message || "Unknown error"));
+        }
+    };
+
+    const handleRejectProperty = async (propertyId: string) => {
+        try {
+            await updatePropertyStatus(propertyId, "rejected");
+            toast.success("Property rejected successfully");
+            // Refresh the property list
+            loadProperties();
+        } catch (error) {
+            console.error("Error rejecting property:", error);
+            toast.error("Failed to reject property: " + (error.message || "Unknown error"));
+        }
     };
 
     return (
@@ -273,14 +299,32 @@ export function PropertyManagement() {
                                                     View Details
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-success">
-                                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                                    Approve
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive">
-                                                    <XCircle className="mr-2 h-4 w-4" />
-                                                    Reject
-                                                </DropdownMenuItem>
+                                                {property.status === "pending" && (
+                                                    <>
+                                                        <DropdownMenuItem
+                                                            className="text-success"
+                                                            onClick={() => handleApproveProperty(property.id)}
+                                                        >
+                                                            <CheckCircle className="mr-2 h-4 w-4" />
+                                                            Approve
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className="text-destructive"
+                                                            onClick={() => handleRejectProperty(property.id)}
+                                                        >
+                                                            <XCircle className="mr-2 h-4 w-4" />
+                                                            Reject
+                                                        </DropdownMenuItem>
+                                                    </>
+                                                )}
+                                                {property.status !== "pending" && (
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleApproveProperty(property.id)}
+                                                    >
+                                                        <CheckCircle className="mr-2 h-4 w-4" />
+                                                        Set Available
+                                                    </DropdownMenuItem>
+                                                )}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>

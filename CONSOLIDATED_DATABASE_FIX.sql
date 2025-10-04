@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email VARCHAR(255) UNIQUE NOT NULL,
     full_name VARCHAR(255),
-    user_type VARCHAR(20) DEFAULT 'user' CHECK (user_type IN ('admin', 'agent', 'user')),
+    user_type VARCHAR(20) DEFAULT 'user' CHECK (user_type IN ('admin', 'user')),
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
     phone VARCHAR(20),
     avatar_url TEXT,
@@ -35,12 +35,12 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Properties table
 CREATE TABLE IF NOT EXISTS properties (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    agent_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    owner_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     price DECIMAL(12,2) NOT NULL,
     property_type VARCHAR(50) NOT NULL CHECK (property_type IN ('house', 'apartment', 'condo', 'townhouse', 'land', 'commercial')),
-    status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'pending', 'sold', 'rented', 'withdrawn')),
+    status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'pending', 'sold', 'rented', 'withdrawn', 'rejected')),
     bedrooms INTEGER,
     bathrooms DECIMAL(3,1),
     square_feet INTEGER,
@@ -380,7 +380,7 @@ CREATE INDEX IF NOT EXISTS idx_profiles_user_type ON profiles(user_type);
 CREATE INDEX IF NOT EXISTS idx_profiles_status ON profiles(status);
 
 -- Properties indexes
-CREATE INDEX IF NOT EXISTS idx_properties_agent_id ON properties(agent_id);
+CREATE INDEX IF NOT EXISTS idx_properties_owner_id ON properties(owner_id);
 CREATE INDEX IF NOT EXISTS idx_properties_status ON properties(status);
 CREATE INDEX IF NOT EXISTS idx_properties_property_type ON properties(property_type);
 CREATE INDEX IF NOT EXISTS idx_properties_price ON properties(price);
@@ -708,13 +708,13 @@ CREATE POLICY "Service role can manage all profiles" ON profiles
 CREATE POLICY "Anyone can view published properties" ON properties
     FOR SELECT USING (true);
 
-CREATE POLICY "Agents can manage own properties" ON properties
+CREATE POLICY "Owners can manage own properties" ON properties
     FOR ALL USING (
-        auth.uid() = agent_id OR 
+        auth.uid() = owner_id OR 
         auth.role() = 'service_role'
     );
 
-CREATE POLICY "Agents can insert properties" ON properties
+CREATE POLICY "Owners can insert properties" ON properties
     FOR INSERT WITH CHECK (
         auth.uid() IS NOT NULL OR 
         auth.role() = 'service_role'
@@ -871,7 +871,7 @@ CREATE POLICY "Users can view property documents" ON property_documents
         auth.role() = 'service_role'
     );
 
-CREATE POLICY "Agents and service role can manage property documents" ON property_documents
+CREATE POLICY "Owners and service role can manage property documents" ON property_documents
     FOR ALL USING (auth.role() = 'service_role');
 
 -- Saved searches policies
@@ -951,12 +951,12 @@ CREATE POLICY "Public avatar access" ON storage.objects
   FOR SELECT USING (bucket_id = 'avatars');
 
 -- Storage policies for property images bucket
-CREATE POLICY "Agents can upload property images" ON storage.objects
+CREATE POLICY "Owners can upload property images" ON storage.objects
   FOR INSERT WITH CHECK (
     bucket_id = 'property-images' AND 
     EXISTS (
       SELECT 1 FROM profiles 
-      WHERE id = auth.uid() AND user_type IN ('admin', 'agent')
+      WHERE id = auth.uid() AND user_type IN ('admin', 'user')
     )
   );
 
@@ -1038,7 +1038,7 @@ INSERT INTO system_settings (key, value, description) VALUES
         "sidebar_collapsed": false,
         "animations_enabled": true
     }', 'Default theme settings for new users'),
-    ('default_agent_theme_settings', '{
+    ('default_user_theme_settings', '{
         "theme": "light",
         "primary_color": "#059669",
         "accent_color": "#dc2626",
@@ -1048,7 +1048,7 @@ INSERT INTO system_settings (key, value, description) VALUES
         "animations_enabled": true,
         "dashboard_layout": "grid",
         "property_card_style": "detailed"
-    }', 'Default theme settings for new agents'),
+    }', 'Default theme settings for new users'),
     ('default_admin_theme_settings', '{
         "theme": "dark",
         "primary_color": "#7c3aed",

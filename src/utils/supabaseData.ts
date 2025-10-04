@@ -238,3 +238,27 @@ export async function createProperty(propertyData: {
     throw error;
   }
 }
+
+// Update property status (for admin approval/rejection)
+export async function updatePropertyStatus(propertyId: string, status: string): Promise<Property | null> {
+  console.log(`Updating property ${propertyId} status to ${status}`);
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", propertyId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating property status:", error);
+      throw error;
+    }
+
+    console.log("Property status updated successfully:", data);
+    return data as Property;
+  } catch (error) {
+    console.error("Error in updatePropertyStatus function:", error);
+    throw error;
+  }
+}

@@ -155,24 +155,43 @@ const PropertyListingForm = () => {
         const imageUrls: string[] = [];
 
         for (const image of images) {
-            const fileExt = image.name.split('.').pop();
-            const fileName = `${Math.random()}.${fileExt}`;
-            const filePath = `property-images/${user?.id}/${fileName}`;
+            try {
+                const fileExt = image.name.split('.').pop();
+                const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+                const filePath = `property-images/${user?.id}/${fileName}`;
 
-            const { data, error } = await supabase.storage
-                .from('property-images')
-                .upload(filePath, image);
+                console.log("Uploading image:", { fileName, filePath, fileSize: image.size, fileType: image.type });
 
-            if (error) {
-                console.error('Error uploading image:', error);
+                const { data, error } = await supabase.storage
+                    .from('property-images')
+                    .upload(filePath, image, {
+                        cacheControl: '3600',
+                        upsert: false
+                    });
+
+                if (error) {
+                    console.error('Error uploading image:', error);
+                    console.error('Error details:', JSON.stringify(error, null, 2));
+
+                    toast({
+                        title: "Image Upload Error",
+                        description: `Failed to upload image: ${error.message}`,
+                        variant: "destructive"
+                    });
+                    throw error;
+                }
+
+                // Get public URL for the uploaded image
+                const { data: { publicUrl } } = supabase.storage
+                    .from('property-images')
+                    .getPublicUrl(filePath);
+
+                console.log("Image uploaded successfully:", publicUrl);
+                imageUrls.push(publicUrl);
+            } catch (error: any) {
+                console.error("Error in uploadImages:", error);
                 throw error;
             }
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('property-images')
-                .getPublicUrl(filePath);
-
-            imageUrls.push(publicUrl);
         }
 
         return imageUrls;
@@ -200,11 +219,11 @@ const PropertyListingForm = () => {
             if (images.length > 0) {
                 try {
                     imageUrls = await uploadImages();
-                } catch (error) {
+                } catch (error: any) {
                     console.error("Error uploading images:", error);
                     toast({
-                        title: "Error",
-                        description: "Failed to upload images. Please try again.",
+                        title: "Image Upload Error",
+                        description: error.message || "Failed to upload images. Please check your internet connection and try again.",
                         variant: "destructive"
                     });
                     setLoading(false);
@@ -237,12 +256,17 @@ const PropertyListingForm = () => {
                 address: `${formData.street}, ${formData.city}, ${formData.state}`
             };
 
+            console.log("Creating property with data:", propertyData);
+
             const { data, error } = await supabase
                 .from('properties')
                 .insert([propertyData])
                 .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error("Database error:", error);
+                throw error;
+            }
 
             toast({
                 title: "Success",
@@ -273,11 +297,11 @@ const PropertyListingForm = () => {
             setImages([]);
             setImagePreviews([]);
             setIsFeaturedRequest(false);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error submitting property:", error);
             toast({
                 title: "Error",
-                description: "Failed to submit property listing. Please try again.",
+                description: error.message || "Failed to submit property listing. Please try again.",
                 variant: "destructive"
             });
         } finally {
