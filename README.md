@@ -1,8 +1,8 @@
-# GoDirect - Real Estate Platform
+# GODIRECT - Real Estate Platform
 
 **Find Your Dream Home in Nigeria** 🏡
 
-GoDirect is a comprehensive real estate platform that connects buyers, sellers, and agents across Nigeria. Our platform specializes in premium properties in major Nigerian cities including Enugu, Calabar, and Lagos.
+GODIRECT is a comprehensive real estate platform that connects buyers, sellers, and agents across Nigeria. Our platform specializes in premium properties in major Nigerian cities including Enugu, Calabar, and Lagos.
 
 ## ✨ Features
 

@@ -1,8 +1,8 @@
-# Mock Data Removal - GoDirect Realty
+# Mock Data Removal - GODIRECT Realty
 
 ## Overview
 
-All mock/hardcoded data has been removed from the GoDirect Realty application. The site now relies fully on data from Supabase database.
+All mock/hardcoded data has been removed from the GODIRECT Realty application. The site now relies fully on data from Supabase database.
 
 ## Files Modified
 

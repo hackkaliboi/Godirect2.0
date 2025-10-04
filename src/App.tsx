@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import PropertyListings from "./pages/PropertyListings";
 import PropertyDetails from "./pages/PropertyDetails";
 import ListProperty from "./pages/ListProperty";
+import ListPropertyProtected from "./pages/ListPropertyProtected";
 import NotFound from "./pages/NotFound";
 import Navigation from "./components/layout/Navigation";
 import Footer from "./components/layout/Footer";
@@ -49,7 +50,7 @@ import RouteWrapper from "./components/layout/RouteWrapper";
 const App = () => {
   // Create QueryClient instance inside the component
   const queryClient = new QueryClient();
-  
+
   // Add debugging to see which routes are being matched
   const location = useLocation();
   console.log("Current location:", location.pathname);
@@ -148,6 +149,16 @@ const App = () => {
                   <Route path="/properties" element={<RouteWrapper><PropertyListings /></RouteWrapper>} />
                   <Route path="/properties/:id" element={<RouteWrapper><PropertyDetails /></RouteWrapper>} />
                   <Route path="/list-property" element={<RouteWrapper><ListProperty /></RouteWrapper>} />
+                  <Route
+                    path="/list-property-protected"
+                    element={
+                      <RouteWrapper>
+                        <RequireAuth>
+                          <ListPropertyProtected />
+                        </RequireAuth>
+                      </RouteWrapper>
+                    }
+                  />
                   <Route path="*" element={<RouteWrapper><NotFound /></RouteWrapper>} />
                 </Routes>
               </CurrencyProvider>

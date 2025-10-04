@@ -21,11 +21,11 @@ const PropertyTypes = () => {
       const { data, error } = await supabase
         .from("properties")
         .select("type");
-      
+
       if (error) {
         throw error;
       }
-      
+
       return data;
     }
   });
@@ -69,14 +69,14 @@ const PropertyTypes = () => {
         }
       ];
     }
-    
+
     // Count properties by type
     const typeCounts: Record<string, number> = {};
     properties.forEach(prop => {
       const type = prop.type;
       typeCounts[type] = (typeCounts[type] || 0) + 1;
     });
-    
+
     // Map to our UI format
     return [
       {
@@ -129,7 +129,7 @@ const PropertyTypes = () => {
             Discover your perfect property from our diverse selection of listings
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {isLoading ? (
             // Loading states
@@ -141,20 +141,20 @@ const PropertyTypes = () => {
           ) : (
             // Property type cards
             propertyTypes.map((type) => (
-              <Link 
+              <Link
                 key={type.key}
                 to={type.url}
                 className="group relative h-80 rounded-xl overflow-hidden"
               >
                 {/* Background Image */}
-                <div 
+                <div
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                   style={{ backgroundImage: `url(${type.image})` }}
                 />
-                
+
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-realty-900/80 to-realty-900/20" />
-                
+
                 {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <h3 className="text-xl font-heading font-semibold text-white mb-1">

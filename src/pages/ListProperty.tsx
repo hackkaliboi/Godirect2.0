@@ -1,15 +1,40 @@
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building, User, Users, ArrowRight } from "lucide-react";
 
 const ListProperty = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    // If user is already logged in, redirect them to the protected version
+    useEffect(() => {
+        if (user) {
+            navigate("/list-property-protected");
+        }
+    }, [user, navigate]);
+
+    // If user is logged in, don't show the public page
+    if (user) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-center">
+                    <p className="text-lg text-realty-600 dark:text-realty-300">
+                        Redirecting to your property listing dashboard...
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
             <Helmet>
-                <title>List Your Property | GoDirectly</title>
-                <meta name="description" content="List your property with GoDirectly and reach thousands of potential buyers and renters in Nigeria." />
+                <title>List Your Property | GODIRECT</title>
+                <meta name="description" content="List your property with GODIRECT and reach thousands of potential buyers and renters in Nigeria." />
             </Helmet>
 
             {/* Hero Section */}
@@ -17,14 +42,19 @@ const ListProperty = () => {
                 <div className="container-custom">
                     <div className="max-w-3xl mx-auto text-center">
                         <h1 className="text-3xl md:text-5xl font-heading font-bold mb-6">
-                            List Your Property with GoDirectly
+                            List Your Property with GODIRECT
                         </h1>
                         <p className="text-xl text-realty-200 mb-8">
                             Reach thousands of potential buyers and renters across Nigeria's major cities
                         </p>
-                        <Button size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium text-lg px-8 py-3">
-                            Get Started Now
-                        </Button>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Button size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium text-lg px-8 py-3" asChild>
+                                <Link to="/user-signup">Get Started as Owner</Link>
+                            </Button>
+                            <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 text-white text-lg px-8 py-3" asChild>
+                                <Link to="/agent-signup">Join as Agent</Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -158,15 +188,15 @@ const ListProperty = () => {
                             </CardContent>
                         </Card>
 
-                        {/* For Existing Agents */}
+                        {/* For Existing Users */}
                         <Card className="border-realty-200 dark:border-realty-800 shadow-lg hover:shadow-xl transition-shadow">
                             <CardHeader>
                                 <div className="w-12 h-12 rounded-full bg-realty-100 dark:bg-realty-800 flex items-center justify-center mb-4">
                                     <Building className="h-6 w-6 text-realty-900 dark:text-white" />
                                 </div>
-                                <CardTitle className="text-xl text-realty-900 dark:text-white">Existing Agents</CardTitle>
+                                <CardTitle className="text-xl text-realty-900 dark:text-white">Existing Users</CardTitle>
                                 <CardDescription>
-                                    Already have an account? List a new property
+                                    Already have an account? Sign in to list a property
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -185,7 +215,7 @@ const ListProperty = () => {
                                     </li>
                                 </ul>
                                 <Button asChild className="w-full bg-realty-gold hover:bg-realty-gold/90 text-realty-900">
-                                    <Link to="/login">Login to Dashboard</Link>
+                                    <Link to="/login">Sign In to List Property</Link>
                                 </Button>
                             </CardContent>
                         </Card>
@@ -199,7 +229,7 @@ const ListProperty = () => {
                     <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
                             Why List with <span className="text-realty-gold relative inline-block">
-                                <span className="relative z-10">GoDirectly</span>
+                                <span className="relative z-10">GODIRECT</span>
                                 <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
                             </span>
                         </h2>
@@ -263,10 +293,10 @@ const ListProperty = () => {
                             Join thousands of property owners and agents who have successfully listed their properties with us
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium">
+                            <Button size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium" asChild>
                                 <Link to="/agent-signup">List as Agent</Link>
                             </Button>
-                            <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 text-white">
+                            <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 text-white" asChild>
                                 <Link to="/user-signup">List as Owner</Link>
                             </Button>
                         </div>

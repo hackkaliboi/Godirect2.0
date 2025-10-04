@@ -1,6 +1,6 @@
 # Database Cleanup Scripts
 
-These scripts allow you to reset your GoDirect Realty platform to a fresh state while preserving all user accounts.
+These scripts allow you to reset your GODIRECT Realty platform to a fresh state while preserving all user accounts.
 
 ## Available Scripts
 

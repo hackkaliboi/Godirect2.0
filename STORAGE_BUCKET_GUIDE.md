@@ -1,7 +1,7 @@
 # Storage Bucket Guide
 
 ## Overview
-The GoDirect Realty platform includes a comprehensive storage system with three dedicated buckets for different types of media and documents:
+The GODIRECT Realty platform includes a comprehensive storage system with three dedicated buckets for different types of media and documents:
 
 1. **avatars** - For user profile pictures
 2. **property-images** - For property photos and galleries

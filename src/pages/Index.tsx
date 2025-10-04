@@ -54,91 +54,73 @@ const Index = () => {
     {
       id: 1,
       name: "Enugu",
-      description: "Known as the 'Coal City', Enugu offers a blend of urban amenities and natural beauty.",
       properties: "240+ Properties",
       price: "From ₦25M",
-      gradient: "from-green-600 to-green-800",
-      icon: <Building className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-1.jpg",
       link: "/properties?location=Enugu"
     },
     {
       id: 2,
       name: "Calabar",
-      description: "The 'Canaan City' is known for its cleanliness, hospitality, and vibrant cultural heritage.",
       properties: "180+ Properties",
       price: "From ₦22M",
-      gradient: "from-blue-600 to-blue-800",
-      icon: <Home className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-2.jpg",
       link: "/properties?location=Calabar"
     },
     {
       id: 3,
       name: "Lagos",
-      description: "Nigeria's economic hub offering premium waterfront properties and urban living.",
       properties: "320+ Properties",
       price: "From ₦35M",
-      gradient: "from-orange-600 to-orange-800",
-      icon: <TrendingUp className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-3.jpg",
       link: "/properties?location=Lagos"
     },
     {
       id: 4,
       name: "Abuja",
-      description: "The Federal Capital Territory with modern infrastructure and government amenities.",
       properties: "280+ Properties",
       price: "From ₦40M",
-      gradient: "from-purple-600 to-purple-800",
-      icon: <Award className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-4.jpg",
       link: "/properties?location=Abuja"
     },
     {
       id: 5,
       name: "Akwa Ibom",
-      description: "Coastal state with beautiful beaches and growing real estate opportunities.",
       properties: "120+ Properties",
       price: "From ₦18M",
-      gradient: "from-teal-600 to-teal-800",
-      icon: <MapPin className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-5.jpg",
       link: "/properties?location=Akwa%20Ibom"
     },
     {
       id: 6,
       name: "Anambra",
-      description: "Historically significant state with developing commercial districts.",
       properties: "150+ Properties",
       price: "From ₦20M",
-      gradient: "from-amber-600 to-amber-800",
-      icon: <Building className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-6.jpg",
       link: "/properties?location=Anambra"
     },
     {
       id: 7,
       name: "Kano",
-      description: "Northern commercial hub with traditional markets and modern developments.",
       properties: "190+ Properties",
       price: "From ₦15M",
-      gradient: "from-red-600 to-red-800",
-      icon: <TrendingUp className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-7.jpg",
       link: "/properties?location=Kano"
     },
     {
       id: 8,
       name: "Kaduna",
-      description: "Industrial city with educational institutions and military history.",
       properties: "130+ Properties",
       price: "From ₦17M",
-      gradient: "from-indigo-600 to-indigo-800",
-      icon: <Home className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-8.jpg",
       link: "/properties?location=Kaduna"
     },
     {
       id: 9,
       name: "Port Harcourt",
-      description: "Oil city with coastal beauty and bustling commercial activities.",
       properties: "210+ Properties",
       price: "From ₦30M",
-      gradient: "from-emerald-600 to-emerald-800",
-      icon: <Users className="h-24 w-24 text-white/30" />,
+      image: "/locations/location-9.jpg",
       link: "/properties?location=Port%20Harcourt"
     }
   ];
@@ -146,8 +128,8 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>GoDirectly | Find Your Dream Home in Nigeria</title>
-        <meta name="description" content="Find your dream home with GoDirectly. Browse thousands of premium properties for sale and rent in Enugu and Calabar, Nigeria." />
+        <title>GODIRECT | Find Your Dream Home in Nigeria</title>
+        <meta name="description" content="Find your dream home with GODIRECT. Browse thousands of premium properties for sale and rent in Enugu and Calabar, Nigeria." />
         <meta name="keywords" content="real estate, property, Nigeria, Enugu, Calabar, buy home, rent apartment, luxury properties" />
       </Helmet>
 
@@ -173,7 +155,7 @@ const Index = () => {
             {offers.map((offer) => (
               <Card key={offer.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
                 <div className="relative h-48 overflow-hidden">
-                  <div 
+                  <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                     style={{ backgroundImage: `url(${offer.image})` }}
                   />
@@ -220,19 +202,29 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {locations.map((location) => (
               <div key={location.id} className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
-                <div className={`absolute inset-0 bg-gradient-to-br ${location.gradient} z-0`}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-realty-900/90 to-realty-900/20 z-10"></div>
-                <div className={`w-full h-80 bg-gradient-to-br ${location.gradient} relative`}>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {location.icon}
-                  </div>
+                <div className="absolute inset-0 z-0">
+                  <img
+                    src={location.image}
+                    alt={location.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      // Show gradient fallback
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<div class="absolute inset-0 bg-gradient-to-br from-realty-500 to-realty-700"></div>';
+                      }
+                    }}
+                  />
                 </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-realty-900/90 to-realty-900/20 z-10"></div>
+                <div className="w-full h-80 relative"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
-                  <div className="flex items-center text-white mb-2">
+                  <div className="flex items-center text-white mb-4">
                     <MapPin className="h-5 w-5 mr-2 text-realty-gold" />
                     <h3 className="text-xl font-semibold">{location.name}</h3>
                   </div>
-                  <p className="text-white/80 mb-4 text-sm">{location.description}</p>
                   <div className="flex flex-wrap gap-3 mb-4">
                     <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">{location.properties}</span>
                     <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">{location.price}</span>
@@ -297,7 +289,7 @@ const Index = () => {
               </span>
             </h2>
             <p className="text-realty-300 max-w-2xl mx-auto">
-              Hear what our satisfied clients have to say about their experience with GoDirectly.
+              Hear what our satisfied clients have to say about their experience with GODIRECT.
             </p>
           </div>
           <Testimonials />
@@ -315,7 +307,7 @@ const Index = () => {
               Ready to Find Your Dream Home in Nigeria?
             </h2>
             <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
-              Join thousands of satisfied clients who have found their perfect property with GoDirectly. Our expert team is ready to guide you every step of the way.
+              Join thousands of satisfied clients who have found their perfect property with GODIRECT. Our expert team is ready to guide you every step of the way.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-realty-gold hover:bg-realty-gold/90 text-realty-900 font-medium">

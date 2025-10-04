@@ -1,9 +1,7 @@
 {
-
-
   "name": "godirect-scripts",
   "version": "1.0.0",
-  "description": "Utility scripts for GoDirectly platform",
+  "description": "Utility scripts for GODIRECT platform",
   "main": "check-tables.js",
   "scripts": {
     "check-tables": "node check-tables.js",

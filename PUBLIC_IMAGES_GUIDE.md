@@ -1,6 +1,6 @@
 # Public Images Guide
 
-This guide explains the image directories structure and how to use them for the GoDirectly real estate platform.
+This guide explains the image directories structure and how to use them for the GODIRECT real estate platform.
 
 ## Image Directories
 
