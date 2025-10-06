@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   Heart, Share, Printer, MapPin, Bed, Bath, Move,
@@ -11,13 +11,14 @@ import PropertyGallery from "@/components/properties/PropertyGallery";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyPurchase from "@/components/properties/PropertyPurchase";
 import { Helmet } from "react-helmet-async";
-import { fetchPropertyById, Property } from "@/utils/supabaseData";
+import { fetchPropertyById, Property, isPropertyFavorite, addUserFavorite, removeUserFavorite } from "@/utils/supabaseData";
 import { useQuery } from "@tanstack/react-query";
 import ChatWidget from "@/components/messaging/ChatWidget";
 import ViewingScheduler from "@/components/viewings/ViewingScheduler";
 import PropertyInquiryForm from "@/components/inquiries/PropertyInquiryForm";
 import { analyticsApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const PropertyDetails = () => {
   const { id } = useParams();
@@ -31,6 +32,18 @@ const PropertyDetails = () => {
     enabled: !!id
   });
 
+  // Check if property is already favorited
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (user && id) {
+        const isFav = await isPropertyFavorite(user.id, id);
+        setIsFavorite(isFav);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [user, id]);
+
   // Similar properties (excluding current property)
   const { data: similarProperties = [] } = useQuery({
     queryKey: ["similar-properties", property?.id, property?.property_type],
@@ -40,6 +53,41 @@ const PropertyDetails = () => {
     },
     enabled: !!property
   });
+
+  // Toggle favorite status
+  const toggleFavorite = async () => {
+    if (!user) {
+      toast.error("Please log in to save properties");
+      return;
+    }
+
+    if (!id) return;
+
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        const success = await removeUserFavorite(user.id, id);
+        if (success) {
+          setIsFavorite(false);
+          toast.success("Property removed from favorites");
+        } else {
+          toast.error("Failed to remove property from favorites");
+        }
+      } else {
+        // Add to favorites
+        const success = await addUserFavorite(user.id, id);
+        if (success) {
+          setIsFavorite(true);
+          toast.success("Property saved to favorites");
+        } else {
+          toast.error("Failed to save property to favorites");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast.error("Failed to update favorite status");
+    }
+  };
 
   // If loading
   if (isLoading) {
@@ -119,7 +167,7 @@ const PropertyDetails = () => {
           <div className="flex flex-wrap gap-3 mb-8">
             <Button
               variant="outline"
-              onClick={() => setIsFavorite(!isFavorite)}
+              onClick={toggleFavorite}
               className="flex items-center"
             >
               <Heart className={`h-4 w-4 mr-2 ${isFavorite ? "fill-rose-500 text-rose-500" : ""}`} />

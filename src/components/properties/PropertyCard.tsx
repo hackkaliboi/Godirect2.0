@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Bed, Bath, Move, MapPin, ArrowRight } from "lucide-react";
 import { Property } from "@/types/database";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { cn } from "@/lib/utils";
+import { isPropertyFavorite, addUserFavorite, removeUserFavorite } from "@/utils/supabaseData";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface PropertyCardProps {
   property: Property;
@@ -11,12 +14,54 @@ interface PropertyCardProps {
 
 const PropertyCard = ({ property }: PropertyCardProps) => {
   const { formatPrice } = useCurrency();
+  const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const toggleFavorite = (e: React.MouseEvent) => {
+  // Check if property is already favorited
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (user && property.id) {
+        const isFav = await isPropertyFavorite(user.id, property.id);
+        setIsFavorite(isFav);
+      }
+    };
+
+    checkFavoriteStatus();
+  }, [user, property.id]);
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+
+    if (!user) {
+      toast.error("Please log in to save properties");
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        const success = await removeUserFavorite(user.id, property.id);
+        if (success) {
+          setIsFavorite(false);
+          toast.success("Property removed from favorites");
+        } else {
+          toast.error("Failed to remove property from favorites");
+        }
+      } else {
+        // Add to favorites
+        const success = await addUserFavorite(user.id, property.id);
+        if (success) {
+          setIsFavorite(true);
+          toast.success("Property saved to favorites");
+        } else {
+          toast.error("Failed to save property to favorites");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast.error("Failed to update favorite status");
+    }
   };
 
   return (

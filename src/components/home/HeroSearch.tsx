@@ -6,9 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { propertyTypes, priceRanges } from "@/utils/data";
 import ImageSlider from "@/components/ui/slider/ImageSlider";
+import { searchHistoryApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HeroSearch = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [location, setLocation] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [priceRange, setPriceRange] = useState("");
@@ -32,6 +35,17 @@ const HeroSearch = () => {
 
     // Navigate to the properties page with search params
     navigate(`/properties?${params.toString()}`);
+
+    // Save search to history if user is logged in
+    if (user) {
+      const searchFilters = {
+        property_type: propertyType || null,
+        price_range: priceRange || null
+      };
+
+      // Save to search history (non-blocking)
+      searchHistoryApi.saveSearchToHistory(location, searchFilters);
+    }
   };
 
   const recentSearches = ["Lagos, Nigeria", "Enugu, Nigeria", "Calabar, Nigeria", "Abuja, Nigeria"];

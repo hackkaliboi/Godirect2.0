@@ -9,7 +9,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   Home,
   Building2,
@@ -79,11 +79,10 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           ...commonItems,
           { title: "My Listings", url: `/dashboard/user/listings`, icon: Building2 },
           { title: "Saved Properties", url: `/dashboard/user/saved`, icon: Heart },
-          { title: "Search History", url: `/dashboard/user/history`, icon: Search },
+          { title: "Search Management", url: `/dashboard/user/history`, icon: Search },
           { title: "Appointments", url: `/dashboard/user/appointments`, icon: Calendar },
           { title: "Messages", url: `/dashboard/user/messages`, icon: MessageSquare },
           { title: "My Applications", url: `/dashboard/user/applications`, icon: FileText },
-          { title: "Saved Searches", url: `/dashboard/user/searches`, icon: Search },
           { title: "Notifications", url: `/dashboard/user/notifications`, icon: Bell },
           { title: "Payments", url: `/dashboard/user/payments`, icon: CreditCard },
           { title: "Profile", url: `/dashboard/user/profile`, icon: Settings },
@@ -93,11 +92,10 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
         return [
           ...commonItems,
           { title: "Saved Properties", url: `/dashboard/user/saved`, icon: Heart },
-          { title: "Search History", url: `/dashboard/user/history`, icon: Search },
+          { title: "Search Management", url: `/dashboard/user/history`, icon: Search },
           { title: "Appointments", url: `/dashboard/user/appointments`, icon: Calendar },
           { title: "Messages", url: `/dashboard/user/messages`, icon: MessageSquare },
           { title: "My Applications", url: `/dashboard/user/applications`, icon: FileText },
-          { title: "Saved Searches", url: `/dashboard/user/searches`, icon: Search },
           { title: "Notifications", url: `/dashboard/user/notifications`, icon: Bell },
           { title: "Payments", url: `/dashboard/user/payments`, icon: CreditCard },
           { title: "Profile", url: `/dashboard/user/profile`, icon: Settings },
@@ -117,15 +115,15 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
     >
       <SidebarContent className="bg-card">
         <div className="p-4 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 bg-gradient-to-br from-primary to-primary-glow rounded-lg flex items-center justify-center shrink-0 shadow-sm">
-              <Building2 className="h-4 w-4 text-primary-foreground" />
+          <NavLink to="/" className="flex items-center gap-3 group">
+            <div className="h-8 w-8 bg-gradient-to-br from-realty-800 to-realty-900 dark:from-realty-gold dark:to-realty-gold/80 rounded-md flex items-center justify-center shadow-md transition-transform duration-300 group-hover:scale-105">
+              <span className="text-white dark:text-realty-900 font-bold text-sm">GD</span>
             </div>
             <div className="overflow-hidden">
-              <h2 className="font-bold text-lg text-foreground">RealEstate</h2>
+              <h2 className="font-heading font-bold text-lg text-foreground">GODIRECT</h2>
               <p className="text-xs text-muted-foreground capitalize">{userRole} Portal</p>
             </div>
-          </div>
+          </NavLink>
         </div>
 
         <SidebarGroup className="px-2 py-4">

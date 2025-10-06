@@ -13,6 +13,7 @@ GODIRECT is a comprehensive real estate platform that connects buyers, sellers, 
 - 💰 **Investment Calculator** - Calculate potential returns and mortgage estimates
 - 📱 **Interactive Map** - Visual property browsing with location-based search
 - 💌 **Save Favorites** - Keep track of properties you're interested in
+- 📊 **Dashboard Analytics** - View your property listing count and other metrics
 
 ### For Real Estate Agents
 - 📊 **Agent Dashboard** - Comprehensive management tools for listings and clients
@@ -21,6 +22,7 @@ GODIRECT is a comprehensive real estate platform that connects buyers, sellers, 
 - 💵 **Commission Tracking** - Monitor earnings and transaction history
 - 📧 **Client Communication** - Built-in messaging system
 - 📈 **Performance Analytics** - Track your success metrics
+- 🏠 **Property Listing** - List properties directly from your dashboard
 
 ### For Administrators
 - 🎛️ **Admin Dashboard** - Complete platform oversight and management

@@ -132,7 +132,7 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
           title: "Property Tools",
           icon: SearchCheck,
           subItems: [
-            { title: "Saved Searches", path: "/dashboard/user/saved-searches" },
+            { title: "Search Management", path: "/dashboard/user/history" },
             { title: "Property Alerts", path: "/dashboard/user/property-alerts" },
             { title: "Viewing History", path: "/dashboard/user/viewing-history" },
           ]
@@ -154,7 +154,7 @@ export const useNavItems = (userType: "admin" | "agent" | "user"): NavItem[] => 
         title: "Property Tools",
         icon: SearchCheck,
         subItems: [
-          { title: "Saved Searches", path: "/dashboard/user/saved-searches" },
+          { title: "Search Management", path: "/dashboard/user/history" },
           { title: "Property Alerts", path: "/dashboard/user/property-alerts" },
           { title: "Viewing History", path: "/dashboard/user/viewing-history" },
         ]

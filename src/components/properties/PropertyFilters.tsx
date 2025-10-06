@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -19,16 +18,27 @@ interface FilterState {
 
 interface PropertyFiltersProps {
   onApplyFilters: (filters: FilterState) => void;
+  initialFilters?: Partial<FilterState>;
 }
 
-const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
+const PropertyFilters = ({ onApplyFilters, initialFilters = {} }: PropertyFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<number[]>([0, 2000000]);
-  const [bedrooms, setBedrooms] = useState<number | null>(null);
-  const [bathrooms, setBathrooms] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState(initialFilters.searchTerm || "");
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(initialFilters.propertyTypes || []);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(initialFilters.amenities || []);
+  const [priceRange, setPriceRange] = useState<number[]>(initialFilters.priceRange || [0, 2000000]);
+  const [bedrooms, setBedrooms] = useState<number | null>(initialFilters.bedrooms || null);
+  const [bathrooms, setBathrooms] = useState<number | null>(initialFilters.bathrooms || null);
+
+  // Update local state when initial filters change
+  useEffect(() => {
+    setSearchTerm(initialFilters.searchTerm || "");
+    setSelectedTypes(initialFilters.propertyTypes || []);
+    setSelectedAmenities(initialFilters.amenities || []);
+    setPriceRange(initialFilters.priceRange || [0, 2000000]);
+    setBedrooms(initialFilters.bedrooms || null);
+    setBathrooms(initialFilters.bathrooms || null);
+  }, [initialFilters]);
 
   const toggleFilter = (type: string, array: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
     if (array.includes(type)) {
@@ -58,8 +68,8 @@ const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
     setBedrooms(null);
     setBathrooms(null);
   };
-  
-  const formatPrice = (value: number) => 
+
+  const formatPrice = (value: number) =>
     `$${value.toLocaleString('en-US')}`;
 
   // Fixed type conversion for bedrooms and bathrooms
@@ -114,8 +124,8 @@ const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-heading font-medium text-lg">Advanced Filters</h3>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={handleClearFilters}
               className="text-realty-600 dark:text-realty-300 hover:text-realty-900 dark:hover:text-white"
@@ -221,8 +231,8 @@ const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
               <div className="grid grid-cols-2 gap-2">
                 {amenities.slice(0, 8).map((amenity) => (
                   <div key={amenity} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={amenity} 
+                    <Checkbox
+                      id={amenity}
                       checked={selectedAmenities.includes(amenity)}
                       onCheckedChange={() => toggleFilter(amenity, selectedAmenities, setSelectedAmenities)}
                     />
@@ -258,51 +268,71 @@ const PropertyFilters = ({ onApplyFilters }: PropertyFiltersProps) => {
       </div>
 
       {/* Active filters display */}
-      {(selectedTypes.length > 0 || selectedAmenities.length > 0 || 
-        bedrooms !== null || bathrooms !== null || 
-        priceRange[0] > 0 || priceRange[1] < 2000000) && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {selectedTypes.map(type => (
-            <div key={type} className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
-              {type}
-              <X 
-                className="h-3 w-3 ml-2 cursor-pointer" 
-                onClick={() => setSelectedTypes(selectedTypes.filter(t => t !== type))}
-              />
-            </div>
-          ))}
-          
-          {bedrooms !== null && (
-            <div className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
-              {bedrooms}+ Beds
-              <X 
-                className="h-3 w-3 ml-2 cursor-pointer" 
-                onClick={() => setBedrooms(null)}
-              />
-            </div>
-          )}
-          
-          {bathrooms !== null && (
-            <div className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
-              {bathrooms}+ Baths
-              <X 
-                className="h-3 w-3 ml-2 cursor-pointer" 
-                onClick={() => setBathrooms(null)}
-              />
-            </div>
-          )}
-          
-          {(priceRange[0] > 0 || priceRange[1] < 2000000) && (
-            <div className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
-              {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
-              <X 
-                className="h-3 w-3 ml-2 cursor-pointer" 
-                onClick={() => setPriceRange([0, 2000000])}
-              />
-            </div>
-          )}
-        </div>
-      )}
+      {(selectedTypes.length > 0 || selectedAmenities.length > 0 ||
+        bedrooms !== null || bathrooms !== null ||
+        priceRange[0] > 0 || priceRange[1] < 2000000 || searchTerm) && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {searchTerm && (
+              <div className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
+                Location: {searchTerm}
+                <X
+                  className="h-3 w-3 ml-2 cursor-pointer"
+                  onClick={() => setSearchTerm("")}
+                />
+              </div>
+            )}
+
+            {selectedTypes.map(type => (
+              <div key={type} className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
+                {type}
+                <X
+                  className="h-3 w-3 ml-2 cursor-pointer"
+                  onClick={() => setSelectedTypes(selectedTypes.filter(t => t !== type))}
+                />
+              </div>
+            ))}
+
+            {bedrooms !== null && (
+              <div className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
+                {bedrooms}+ Beds
+                <X
+                  className="h-3 w-3 ml-2 cursor-pointer"
+                  onClick={() => setBedrooms(null)}
+                />
+              </div>
+            )}
+
+            {bathrooms !== null && (
+              <div className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
+                {bathrooms}+ Baths
+                <X
+                  className="h-3 w-3 ml-2 cursor-pointer"
+                  onClick={() => setBathrooms(null)}
+                />
+              </div>
+            )}
+
+            {(priceRange[0] > 0 || priceRange[1] < 2000000) && (
+              <div className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
+                {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
+                <X
+                  className="h-3 w-3 ml-2 cursor-pointer"
+                  onClick={() => setPriceRange([0, 2000000])}
+                />
+              </div>
+            )}
+
+            {selectedAmenities.map(amenity => (
+              <div key={amenity} className="bg-realty-50 dark:bg-realty-700 text-realty-800 dark:text-white px-3 py-1 rounded-full text-sm flex items-center">
+                {amenity}
+                <X
+                  className="h-3 w-3 ml-2 cursor-pointer"
+                  onClick={() => setSelectedAmenities(selectedAmenities.filter(a => a !== amenity))}
+                />
+              </div>
+            ))}
+          </div>
+        )}
     </div>
   );
 };

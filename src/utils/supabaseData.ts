@@ -308,6 +308,71 @@ export async function fetchUserSavedProperties(userId: string): Promise<any[]> {
   }
 }
 
+// Add property to user's favorites
+export async function addUserFavorite(userId: string, propertyId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("property_favorites")
+      .insert({
+        user_id: userId,
+        property_id: propertyId
+      });
+
+    if (error) {
+      console.error("Error adding favorite:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in addUserFavorite function:", error);
+    return false;
+  }
+}
+
+// Remove property from user's favorites
+export async function removeUserFavorite(userId: string, propertyId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("property_favorites")
+      .delete()
+      .eq("user_id", userId)
+      .eq("property_id", propertyId);
+
+    if (error) {
+      console.error("Error removing favorite:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in removeUserFavorite function:", error);
+    return false;
+  }
+}
+
+// Check if property is in user's favorites
+export async function isPropertyFavorite(userId: string, propertyId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from("property_favorites")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("property_id", propertyId)
+      .limit(1);
+
+    if (error) {
+      console.error("Error checking favorite status:", error);
+      return false;
+    }
+
+    return data && data.length > 0;
+  } catch (error) {
+    console.error("Error in isPropertyFavorite function:", error);
+    return false;
+  }
+}
+
 // Fetch user's property views
 export async function fetchUserPropertyViews(userId: string): Promise<any[]> {
   console.log(`Fetching property views for user ${userId}`);
@@ -422,6 +487,14 @@ export async function fetchUserDashboardStats(userId: string): Promise<any[]> {
 
     if (viewingsError) throw viewingsError;
 
+    // Fetch user's listed properties count
+    const { count: listedPropertiesCount, error: listedPropertiesError } = await supabase
+      .from("properties")
+      .select("*", { count: "exact", head: true })
+      .eq("owner_id", userId);
+
+    if (listedPropertiesError) throw listedPropertiesError;
+
     // Create stats array
     const statsData = [
       {
@@ -446,6 +519,12 @@ export async function fetchUserDashboardStats(userId: string): Promise<any[]> {
         stat_name: "user_scheduled_tours",
         stat_value: viewingsCount?.toString() || "0",
         compare_text: "Scheduled property tours",
+        updated_at: new Date().toISOString()
+      },
+      {
+        stat_name: "user_listed_properties",
+        stat_value: listedPropertiesCount?.toString() || "0",
+        compare_text: "Properties you've listed",
         updated_at: new Date().toISOString()
       }
     ];

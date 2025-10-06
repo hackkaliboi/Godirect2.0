@@ -2,11 +2,11 @@ import { Routes, Route } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
-import { Heart, Eye, MessageSquare, Calendar } from "lucide-react";
+import { Heart, Eye, MessageSquare, Calendar, Home } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  fetchUserDashboardStats, 
+import {
+  fetchUserDashboardStats,
   fetchUserRecentActivities,
   fetchUserProperties,
   fetchUserSavedProperties
@@ -24,7 +24,7 @@ import UserProfile from "../user/UserProfile";
 
 // Import new feature components
 import NotificationCenter from "@/components/notifications/NotificationCenter";
-import SavedSearches from "@/components/searches/SavedSearches";
+import UnifiedSearchHistory from "@/components/searches/UnifiedSearchHistory";
 import PaymentManager from "@/components/payments/PaymentManager";
 
 function UserDashboardHome() {
@@ -45,14 +45,14 @@ function UserDashboardHome() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Fetch all dashboard data in parallel
       const [statsData, activitiesData, savedPropertiesData] = await Promise.all([
         fetchUserDashboardStats(user!.id),
         fetchUserRecentActivities(user!.id),
         fetchUserSavedProperties(user!.id)
       ]);
-      
+
       setStats(statsData);
       setRecentActivities(activitiesData);
       setSavedProperties(savedPropertiesData);
@@ -82,13 +82,20 @@ function UserDashboardHome() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back, {user.email?.split('@')[0] || 'User'}</h1>
       </div>
-      
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard
           title="Saved Properties"
           value={getStat('user_saved_properties').value}
           description={getStat('user_saved_properties').description}
           icon={Heart}
+          loading={loading}
+        />
+        <StatCard
+          title="Listed Properties"
+          value={getStat('user_listed_properties').value}
+          description={getStat('user_listed_properties').description}
+          icon={Home}
           loading={loading}
         />
         <StatCard
@@ -130,8 +137,8 @@ function UserDashboardHome() {
                   {savedProperties.slice(0, 3).map((item: any) => (
                     <div key={item.id} className="flex items-center space-x-3">
                       {item.property?.images?.[0] ? (
-                        <img 
-                          src={item.property.images[0]} 
+                        <img
+                          src={item.property.images[0]}
                           alt={item.property.title}
                           className="w-12 h-12 object-cover rounded"
                         />
@@ -153,7 +160,7 @@ function UserDashboardHome() {
             </div>
           </div>
         </div>
-        
+
         <div className="lg:col-span-3">
           <RecentActivity activities={recentActivities} loading={loading} />
         </div>
@@ -171,13 +178,13 @@ export function UserDashboard() {
         <Route path="messages" element={<UserMessages />} />
         <Route path="appointments" element={<UserAppointments />} />
         <Route path="saved" element={<UserSaved />} />
-        <Route path="history" element={<UserHistory />} />
+        <Route path="history" element={<UnifiedSearchHistory />} />
         <Route path="applications" element={<UserApplications />} />
         <Route path="profile" element={<UserProfile />} />
-        
+
         {/* New Feature Routes */}
         <Route path="notifications" element={<NotificationCenter />} />
-        <Route path="searches" element={<SavedSearches />} />
+        <Route path="searches" element={<UnifiedSearchHistory />} />
         <Route path="payments" element={<PaymentManager />} />
       </Routes>
     </DashboardLayout>

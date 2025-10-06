@@ -42,6 +42,7 @@ import {
   Calendar,
   Eye,
   Settings,
+  Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -74,7 +75,7 @@ const SavedSearches = () => {
     min_sqft: 0,
     max_sqft: 10000,
     alerts_enabled: true,
-    alert_frequency: "daily" as "instant" | "daily" | "weekly",
+    alert_frequency: "daily" as "immediate" | "daily" | "weekly",
   });
 
   const propertyTypes = [
@@ -88,7 +89,7 @@ const SavedSearches = () => {
   ];
 
   const alertFrequencies = [
-    { value: "instant", label: "Instant", description: "Get notified immediately" },
+    { value: "immediate", label: "Instant", description: "Get notified immediately" },
     { value: "daily", label: "Daily", description: "Daily digest at 9 AM" },
     { value: "weekly", label: "Weekly", description: "Weekly summary on Mondays" },
   ];
@@ -99,7 +100,7 @@ const SavedSearches = () => {
 
   const fetchSavedSearches = async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
       const response = await savedSearchesApi.getUserSavedSearches(user.id);
@@ -139,16 +140,16 @@ const SavedSearches = () => {
     setSelectedSearch(search);
     setSearchForm({
       name: search.name,
-      location: search.location || "",
-      property_type: search.criteria.property_type || "",
-      min_price: search.criteria.min_price || 0,
-      max_price: search.criteria.max_price || 50000000,
-      min_bedrooms: search.criteria.min_bedrooms || 0,
-      max_bedrooms: search.criteria.max_bedrooms || 10,
-      min_bathrooms: search.criteria.min_bathrooms || 0,
-      max_bathrooms: search.criteria.max_bathrooms || 10,
-      min_sqft: search.criteria.min_sqft || 0,
-      max_sqft: search.criteria.max_sqft || 10000,
+      location: search.search_criteria?.location || "",
+      property_type: search.search_criteria?.property_type || "",
+      min_price: search.search_criteria?.price_min || 0,
+      max_price: search.search_criteria?.price_max || 50000000,
+      min_bedrooms: search.search_criteria?.bedrooms || 0,
+      max_bedrooms: search.search_criteria?.bedrooms || 10,
+      min_bathrooms: 0,
+      max_bathrooms: 10,
+      min_sqft: 0,
+      max_sqft: 10000,
       alerts_enabled: search.alerts_enabled,
       alert_frequency: search.alert_frequency,
     });
@@ -162,19 +163,14 @@ const SavedSearches = () => {
     }
 
     try {
-      const searchData = {
+      const searchData: any = {
         name: searchForm.name,
-        location: searchForm.location || null,
-        criteria: {
+        search_criteria: {
+          location: searchForm.location || null,
           property_type: searchForm.property_type || null,
-          min_price: searchForm.min_price > 0 ? searchForm.min_price : null,
-          max_price: searchForm.max_price < 50000000 ? searchForm.max_price : null,
-          min_bedrooms: searchForm.min_bedrooms > 0 ? searchForm.min_bedrooms : null,
-          max_bedrooms: searchForm.max_bedrooms < 10 ? searchForm.max_bedrooms : null,
-          min_bathrooms: searchForm.min_bathrooms > 0 ? searchForm.min_bathrooms : null,
-          max_bathrooms: searchForm.max_bathrooms < 10 ? searchForm.max_bathrooms : null,
-          min_sqft: searchForm.min_sqft > 0 ? searchForm.min_sqft : null,
-          max_sqft: searchForm.max_sqft < 10000 ? searchForm.max_sqft : null,
+          price_min: searchForm.min_price > 0 ? searchForm.min_price : null,
+          price_max: searchForm.max_price < 50000000 ? searchForm.max_price : null,
+          bedrooms: searchForm.min_bedrooms > 0 ? searchForm.min_bedrooms : null,
         },
         alerts_enabled: searchForm.alerts_enabled,
         alert_frequency: searchForm.alert_frequency,
@@ -198,19 +194,14 @@ const SavedSearches = () => {
     }
 
     try {
-      const updateData = {
+      const updateData: any = {
         name: searchForm.name,
-        location: searchForm.location || null,
-        criteria: {
+        search_criteria: {
+          location: searchForm.location || null,
           property_type: searchForm.property_type || null,
-          min_price: searchForm.min_price > 0 ? searchForm.min_price : null,
-          max_price: searchForm.max_price < 50000000 ? searchForm.max_price : null,
-          min_bedrooms: searchForm.min_bedrooms > 0 ? searchForm.min_bedrooms : null,
-          max_bedrooms: searchForm.max_bedrooms < 10 ? searchForm.max_bedrooms : null,
-          min_bathrooms: searchForm.min_bathrooms > 0 ? searchForm.min_bathrooms : null,
-          max_bathrooms: searchForm.max_bathrooms < 10 ? searchForm.max_bathrooms : null,
-          min_sqft: searchForm.min_sqft > 0 ? searchForm.min_sqft : null,
-          max_sqft: searchForm.max_sqft < 10000 ? searchForm.max_sqft : null,
+          price_min: searchForm.min_price > 0 ? searchForm.min_price : null,
+          price_max: searchForm.max_price < 50000000 ? searchForm.max_price : null,
+          bedrooms: searchForm.min_bedrooms > 0 ? searchForm.min_bedrooms : null,
         },
         alerts_enabled: searchForm.alerts_enabled,
         alert_frequency: searchForm.alert_frequency,
@@ -254,19 +245,34 @@ const SavedSearches = () => {
 
   const runSearch = (search: SavedSearchWithCount) => {
     const params = new URLSearchParams();
-    
-    if (search.location) params.set('location', search.location);
-    if (search.criteria.property_type) params.set('type', search.criteria.property_type);
-    if (search.criteria.min_price) params.set('minPrice', search.criteria.min_price.toString());
-    if (search.criteria.max_price) params.set('maxPrice', search.criteria.max_price.toString());
-    if (search.criteria.min_bedrooms) params.set('minBedrooms', search.criteria.min_bedrooms.toString());
-    if (search.criteria.max_bedrooms) params.set('maxBedrooms', search.criteria.max_bedrooms.toString());
-    if (search.criteria.min_bathrooms) params.set('minBathrooms', search.criteria.min_bathrooms.toString());
-    if (search.criteria.max_bathrooms) params.set('maxBathrooms', search.criteria.max_bathrooms.toString());
-    if (search.criteria.min_sqft) params.set('minSqft', search.criteria.min_sqft.toString());
-    if (search.criteria.max_sqft) params.set('maxSqft', search.criteria.max_sqft.toString());
+
+    if (search.search_criteria?.location) params.set('location', search.search_criteria.location);
+    if (search.search_criteria?.property_type) params.set('type', search.search_criteria.property_type);
+    if (search.search_criteria?.price_min) params.set('minPrice', search.search_criteria.price_min.toString());
+    if (search.search_criteria?.price_max) params.set('maxPrice', search.search_criteria.price_max.toString());
+    if (search.search_criteria?.bedrooms) params.set('minBedrooms', search.search_criteria.bedrooms.toString());
 
     navigate(`/properties?${params.toString()}`);
+  };
+
+  const formatSearchCriteria = (search: SavedSearchWithCount) => {
+    const criteria = [];
+
+    if (search.search_criteria?.property_type) {
+      criteria.push(propertyTypes.find(t => t.value === search.search_criteria.property_type)?.label);
+    }
+
+    if (search.search_criteria?.price_min || search.search_criteria?.price_max) {
+      const min = search.search_criteria.price_min ? formatCurrency(search.search_criteria.price_min) : "Any";
+      const max = search.search_criteria.price_max ? formatCurrency(search.search_criteria.price_max) : "Any";
+      criteria.push(`${min} - ${max}`);
+    }
+
+    if (search.search_criteria?.bedrooms) {
+      criteria.push(`${search.search_criteria.bedrooms}+ beds`);
+    }
+
+    return criteria.length > 0 ? criteria.join(" • ") : "Any property";
   };
 
   const formatCurrency = (amount: number) => {
@@ -276,34 +282,6 @@ const SavedSearches = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
-  };
-
-  const formatSearchCriteria = (search: SavedSearchWithCount) => {
-    const criteria = [];
-    
-    if (search.criteria.property_type) {
-      criteria.push(propertyTypes.find(t => t.value === search.criteria.property_type)?.label);
-    }
-    
-    if (search.criteria.min_price || search.criteria.max_price) {
-      const min = search.criteria.min_price ? formatCurrency(search.criteria.min_price) : "Any";
-      const max = search.criteria.max_price ? formatCurrency(search.criteria.max_price) : "Any";
-      criteria.push(`${min} - ${max}`);
-    }
-    
-    if (search.criteria.min_bedrooms || search.criteria.max_bedrooms) {
-      const min = search.criteria.min_bedrooms || "Any";
-      const max = search.criteria.max_bedrooms || "Any";
-      criteria.push(`${min}-${max} beds`);
-    }
-    
-    if (search.criteria.min_bathrooms || search.criteria.max_bathrooms) {
-      const min = search.criteria.min_bathrooms || "Any";
-      const max = search.criteria.max_bathrooms || "Any";
-      criteria.push(`${min}-${max} baths`);
-    }
-
-    return criteria.length > 0 ? criteria.join(" • ") : "Any property";
   };
 
   const getActiveSearchCount = () => {
@@ -340,7 +318,7 @@ const SavedSearches = () => {
             Save your search preferences and get notified of new matches
           </p>
         </div>
-        
+
         <Button onClick={openCreateDialog} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Create New Search
@@ -414,6 +392,25 @@ const SavedSearches = () => {
         </Card>
       </div>
 
+      {/* Information about the difference between Saved Searches and Search History */}
+      <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                What's the difference?
+              </p>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                <span className="font-medium">Saved Searches</span> are filter criteria that you can save and re-run at any time. You can also set up alerts to notify you when new properties match your criteria.
+                <br />
+                <span className="font-medium">Search History</span> (found in your dashboard) shows a record of all your past searches for reference.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Saved Searches List */}
       <div className="space-y-4">
         {searches.length === 0 ? (
@@ -444,10 +441,10 @@ const SavedSearches = () => {
                           {search.name}
                         </h3>
                         <div className="flex items-center gap-4 text-sm text-realty-600 dark:text-realty-400 mt-1">
-                          {search.location && (
+                          {search.search_criteria?.location && (
                             <div className="flex items-center gap-1">
                               <MapPin className="h-4 w-4" />
-                              {search.location}
+                              {search.search_criteria.location}
                             </div>
                           )}
                           <div className="flex items-center gap-1">
@@ -605,7 +602,7 @@ const SavedSearches = () => {
                 <div className="px-2">
                   <Slider
                     value={[searchForm.min_price, searchForm.max_price]}
-                    onValueChange={([min, max]) => 
+                    onValueChange={([min, max]) =>
                       setSearchForm(prev => ({ ...prev, min_price: min, max_price: max }))
                     }
                     max={50000000}
@@ -713,7 +710,7 @@ const SavedSearches = () => {
             {/* Alert Settings */}
             <div className="space-y-4">
               <Label>Alert Settings</Label>
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="alerts-enabled">Enable Alerts</Label>
@@ -830,7 +827,7 @@ const SavedSearches = () => {
                 <div className="px-2">
                   <Slider
                     value={[searchForm.min_price, searchForm.max_price]}
-                    onValueChange={([min, max]) => 
+                    onValueChange={([min, max]) =>
                       setSearchForm(prev => ({ ...prev, min_price: min, max_price: max }))
                     }
                     max={50000000}

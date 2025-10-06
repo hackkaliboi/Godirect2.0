@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutGrid, LayoutList, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,8 @@ import PropertyFilters from "@/components/properties/PropertyFilters";
 import { Property, fetchProperties } from "@/utils/supabaseData";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
+import { searchHistoryApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FilterState {
   searchTerm?: string;
@@ -20,6 +22,8 @@ interface FilterState {
 
 const PropertyListings = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
@@ -32,10 +36,42 @@ const PropertyListings = () => {
   });
 
   const handleApplyFilters = useCallback((filters: FilterState) => {
+    // Update URL with filter parameters
+    const params = new URLSearchParams();
+
+    if (filters.searchTerm) {
+      params.set("location", filters.searchTerm);
+    }
+
+    if (filters.propertyTypes && filters.propertyTypes.length > 0) {
+      params.set("type", filters.propertyTypes.join(","));
+    }
+
+    if (filters.priceRange) {
+      params.set("price_min", filters.priceRange[0].toString());
+      params.set("price_max", filters.priceRange[1].toString());
+    }
+
+    if (filters.bedrooms !== null) {
+      params.set("bedrooms", filters.bedrooms.toString());
+    }
+
+    if (filters.bathrooms !== null) {
+      params.set("bathrooms", filters.bathrooms.toString());
+    }
+
+    if (filters.amenities && filters.amenities.length > 0) {
+      params.set("amenities", filters.amenities.join(","));
+    }
+
+    // Update browser history
+    const newUrl = `/properties${params.toString() ? `?${params.toString()}` : ''}`;
+    navigate(newUrl, { replace: true });
+
     // Apply all filters to the properties
     let results = [...properties];
 
-    // Filter by search term
+    // Filter by search term (location)
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase();
       results = results.filter(
@@ -43,28 +79,31 @@ const PropertyListings = () => {
           property.city.toLowerCase().includes(term) ||
           property.state.toLowerCase().includes(term) ||
           property.zip_code?.toLowerCase().includes(term) ||
-          property.title.toLowerCase().includes(term)
+          property.title.toLowerCase().includes(term) ||
+          property.street?.toLowerCase().includes(term)
       );
     }
 
     // Filter by property type
     if (filters.propertyTypes && filters.propertyTypes.length > 0) {
       results = results.filter((property) =>
-        filters.propertyTypes.includes(property.property_type)
+        filters.propertyTypes.some(type =>
+          property.property_type.toLowerCase().includes(type.toLowerCase())
+        )
       );
     }
 
     // Filter by bedrooms
     if (filters.bedrooms !== null) {
       results = results.filter(
-        (property) => property.bedrooms >= filters.bedrooms
+        (property) => property.bedrooms && property.bedrooms >= filters.bedrooms
       );
     }
 
     // Filter by bathrooms
     if (filters.bathrooms !== null) {
       results = results.filter(
-        (property) => property.bathrooms >= filters.bathrooms
+        (property) => property.bathrooms && property.bathrooms >= filters.bathrooms
       );
     }
 
@@ -81,36 +120,77 @@ const PropertyListings = () => {
     if (filters.amenities && filters.amenities.length > 0) {
       results = results.filter((property) =>
         filters.amenities.some((amenity: string) =>
-          property.amenities.includes(amenity)
+          property.amenities && Array.isArray(property.amenities) && property.amenities.includes(amenity)
         )
       );
     }
 
     setFilteredProperties(results);
-  }, [properties]);
+
+    // Save search to history if user is logged in
+    if (user) {
+      const searchQuery = filters.searchTerm || "";
+      const searchFilters = {
+        property_type: filters.propertyTypes?.[0],
+        min_price: filters.priceRange?.[0],
+        max_price: filters.priceRange?.[1],
+        bedrooms: filters.bedrooms,
+        bathrooms: filters.bathrooms,
+        amenities: filters.amenities
+      };
+
+      // Save to search history (non-blocking)
+      searchHistoryApi.saveSearchToHistory(searchQuery, searchFilters, results.length);
+    }
+  }, [properties, navigate, user]);
 
   // Parse URL query params on initial load and set filtered properties
   useEffect(() => {
     if (properties.length > 0) {
-      setFilteredProperties(properties);
-
       const params = new URLSearchParams(location.search);
       const locationFilter = params.get("location");
       const typeFilter = params.get("type");
-      const priceFilter = params.get("price");
+      const priceMin = params.get("price_min");
+      const priceMax = params.get("price_max");
+      const bedroomsFilter = params.get("bedrooms");
+      const bathroomsFilter = params.get("bathrooms");
+      const amenitiesFilter = params.get("amenities");
 
       const initialFilters: Partial<FilterState> = {};
+
       if (locationFilter) initialFilters.searchTerm = locationFilter;
-      if (typeFilter) initialFilters.propertyTypes = [typeFilter];
-      if (priceFilter) {
-        // Handle price range logic based on your priceFilter format
+
+      if (typeFilter) {
+        initialFilters.propertyTypes = typeFilter.split(",").map(type => type.trim());
+      }
+
+      if (priceMin && priceMax) {
+        initialFilters.priceRange = [
+          parseInt(priceMin, 10),
+          parseInt(priceMax, 10)
+        ];
+      }
+
+      if (bedroomsFilter) {
+        initialFilters.bedrooms = parseInt(bedroomsFilter, 10);
+      }
+
+      if (bathroomsFilter) {
+        initialFilters.bathrooms = parseInt(bathroomsFilter, 10);
+      }
+
+      if (amenitiesFilter) {
+        initialFilters.amenities = amenitiesFilter.split(",").map(amenity => amenity.trim());
       }
 
       setInitialFilters(initialFilters);
+      setFilteredProperties(properties);
 
       // Apply initial filters if present
       if (Object.keys(initialFilters).length > 0) {
         handleApplyFilters(initialFilters as FilterState);
+      } else {
+        setFilteredProperties(properties);
       }
     }
   }, [properties, location.search, handleApplyFilters]);
@@ -162,6 +242,7 @@ const PropertyListings = () => {
 
           <PropertyFilters
             onApplyFilters={handleApplyFilters}
+            initialFilters={initialFilters}
           />
 
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6">

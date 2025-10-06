@@ -401,11 +401,29 @@ export const savedSearchesApi = {
     return data;
   },
 
+  // Create a saved search
+  async createSavedSearch(search: Omit<SavedSearch, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'results_count' | 'last_run'>): Promise<SavedSearch> {
+    return await this.saveSearch(search as any);
+  },
+
   // Delete saved search
   async deleteSavedSearch(searchId: string): Promise<void> {
     const { error } = await supabase
       .from('saved_searches')
       .delete()
+      .eq('id', searchId);
+
+    if (error) throw error;
+  },
+
+  // Update saved search
+  async updateSavedSearch(searchId: string, updates: Partial<Omit<SavedSearch, 'id' | 'user_id' | 'created_at'>>): Promise<void> {
+    const { error } = await supabase
+      .from('saved_searches')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', searchId);
 
     if (error) throw error;
@@ -421,6 +439,54 @@ export const savedSearchesApi = {
         updated_at: new Date().toISOString()
       })
       .eq('id', searchId);
+
+    if (error) throw error;
+  }
+};
+
+// =====================
+// SEARCH HISTORY
+// =====================
+
+export const searchHistoryApi = {
+  // Save a search to history
+  async saveSearchToHistory(searchQuery: string, filters?: any, resultsCount?: number): Promise<void> {
+    const { data: user } = await supabase.auth.getUser();
+
+    if (!user.user?.id) return;
+
+    const { error } = await supabase
+      .from('search_history')
+      .insert({
+        user_id: user.user.id,
+        search_query: searchQuery,
+        search_filters: filters || null,
+        results_count: resultsCount || 0,
+        searched_at: new Date().toISOString()
+      });
+
+    if (error) console.error('Error saving search to history:', error);
+  },
+
+  // Get user's search history
+  async getUserSearchHistory(userId: string, limit: number = 20): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('search_history')
+      .select('*')
+      .eq('user_id', userId)
+      .order('searched_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Clear user's search history
+  async clearSearchHistory(userId: string): Promise<void> {
+    const { error } = await supabase
+      .from('search_history')
+      .delete()
+      .eq('user_id', userId);
 
     if (error) throw error;
   }
