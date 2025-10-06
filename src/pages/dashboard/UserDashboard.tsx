@@ -3,6 +3,15 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { Heart, Eye, MessageSquare, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { 
+  fetchUserDashboardStats, 
+  fetchUserRecentActivities,
+  fetchUserProperties,
+  fetchUserSavedProperties
+} from "@/utils/supabaseData";
+import { toast } from "sonner";
 
 // Import user dashboard pages
 import UserProperties from "../user/UserProperties";
@@ -18,32 +27,60 @@ import NotificationCenter from "@/components/notifications/NotificationCenter";
 import SavedSearches from "@/components/searches/SavedSearches";
 import PaymentManager from "@/components/payments/PaymentManager";
 
-import { useDashboardStats } from "@/hooks/useDashboardStats";
-
 function UserDashboardHome() {
-  const { stats, loading, error } = useDashboardStats();
-  // Recent activities will be fetched from Supabase
-  const recentActivities: {
-    id: string;
-    type: "property" | "user" | "transaction" | "message";
-    title: string;
-    description: string;
-    timestamp: Date;
-    status?: "pending" | "completed" | "cancelled";
-  }[] = [];
+  const { user } = useAuth();
+  const [stats, setStats] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [savedProperties, setSavedProperties] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Fetch all dashboard data in parallel
+      const [statsData, activitiesData, savedPropertiesData] = await Promise.all([
+        fetchUserDashboardStats(user!.id),
+        fetchUserRecentActivities(user!.id),
+        fetchUserSavedProperties(user!.id)
+      ]);
+      
+      setStats(statsData);
+      setRecentActivities(activitiesData);
+      setSavedProperties(savedPropertiesData);
+    } catch (err) {
+      console.error("Error loading dashboard data:", err);
+      setError(err.message || "Failed to load dashboard data");
+      toast.error("Failed to load dashboard data: " + (err.message || "Unknown error"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStat = (name: string) => {
     const stat = stats?.find(s => s.stat_name === name);
     return {
       value: stat?.stat_value || '0',
-      description: stat?.compare_text || 'No change from last month'
+      description: stat?.compare_text || 'No data available'
     };
   };
+
+  if (!user) {
+    return <div>Please log in to view your dashboard</div>;
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">User Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back, {user.email?.split('@')[0] || 'User'}</h1>
       </div>
       
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -82,15 +119,43 @@ function UserDashboardHome() {
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 sm:p-6">
             <h3 className="text-lg font-semibold mb-4">Saved Properties</h3>
             <div className="space-y-4">
-              <div className="text-sm text-muted-foreground">
-                Your saved properties will appear here
-              </div>
+              {loading ? (
+                <div className="text-sm text-muted-foreground">Loading saved properties...</div>
+              ) : savedProperties.length === 0 ? (
+                <div className="text-sm text-muted-foreground">
+                  You haven't saved any properties yet. Start browsing to find your perfect home!
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {savedProperties.slice(0, 3).map((item: any) => (
+                    <div key={item.id} className="flex items-center space-x-3">
+                      {item.property?.images?.[0] ? (
+                        <img 
+                          src={item.property.images[0]} 
+                          alt={item.property.title}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                          <Heart className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{item.property?.title || 'Untitled Property'}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Saved on {new Date(item.added_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
         
         <div className="lg:col-span-3">
-          <RecentActivity activities={recentActivities} />
+          <RecentActivity activities={recentActivities} loading={loading} />
         </div>
       </div>
     </div>

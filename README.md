@@ -65,6 +65,11 @@ For existing projects:
 - Copy the contents into your Supabase SQL Editor
 - Run the SQL to set up your database with all fixes and improvements
 
+**Recent Fix**: If you encounter the error "column property_views.viewing_date does not exist":
+- Run `FIX_TABLE_NAMES.sql` in your Supabase SQL Editor
+- This creates the missing `property_viewings` table with the correct schema
+- See `README_VIEWING_TABLE_FIX.md` for detailed information
+
 5. **Storage Setup**
 The database setup includes storage bucket configuration:
 - **avatars**: For user profile pictures

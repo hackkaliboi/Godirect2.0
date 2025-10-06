@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { Loader2 } from "lucide-react";
 
 interface Activity {
   id: string;
@@ -14,9 +15,10 @@ interface Activity {
 interface RecentActivityProps {
   activities: Activity[];
   title?: string;
+  loading?: boolean;
 }
 
-export function RecentActivity({ activities, title = "Recent Activity" }: RecentActivityProps) {
+export function RecentActivity({ activities, title = "Recent Activity", loading = false }: RecentActivityProps) {
   const getStatusColor = (status?: string) => {
     switch (status) {
       case "completed":
@@ -36,7 +38,11 @@ export function RecentActivity({ activities, title = "Recent Activity" }: Recent
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {activities.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : activities.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No recent activity</p>
             <p className="text-xs">Activity will appear here once you start using the platform</p>

@@ -14,6 +14,14 @@ import ScrollToTop from "@/components/ui/scroll-to-top";
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+// Add carousel components
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const Index = () => {
   // Smooth scroll effect for the page
@@ -151,35 +159,63 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {offers.map((offer) => (
-              <Card key={offer.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
-                <div className="relative h-48 overflow-hidden">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                    style={{ backgroundImage: `url(${offer.image})` }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-realty-900/80 to-realty-900/20" />
-                  <div className="absolute top-4 right-4 p-2 bg-realty-gold rounded-full">
-                    {offer.icon}
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-heading font-semibold text-realty-900 dark:text-white mb-2">
-                    {offer.title}
-                  </h3>
-                  <p className="text-realty-600 dark:text-realty-300 mb-4">
-                    {offer.description}
-                  </p>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to={offer.link} className="flex items-center justify-center">
-                      View Offer
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+          {/* Converted to Carousel */}
+          <div className="relative px-4 sm:px-8 md:px-12 lg:px-16">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+                breakpoints: {
+                  640: {
+                    slidesToScroll: 1,
+                  },
+                  768: {
+                    slidesToScroll: 2,
+                  },
+                  1024: {
+                    slidesToScroll: 3,
+                  },
+                },
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {offers.map((offer) => (
+                  <CarouselItem key={offer.id} className="basis-full sm:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 h-full">
+                        <div className="relative h-48 overflow-hidden">
+                          <div
+                            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                            style={{ backgroundImage: `url(${offer.image})` }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-realty-900/80 to-realty-900/20" />
+                          <div className="absolute top-4 right-4 p-2 bg-realty-gold rounded-full">
+                            {offer.icon}
+                          </div>
+                        </div>
+                        <CardContent className="p-6">
+                          <h3 className="text-xl font-heading font-semibold text-realty-900 dark:text-white mb-2">
+                            {offer.title}
+                          </h3>
+                          <p className="text-realty-600 dark:text-realty-300 mb-4">
+                            {offer.description}
+                          </p>
+                          <Button asChild variant="outline" className="w-full">
+                            <Link to={offer.link} className="flex items-center justify-center">
+                              View Offer
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 md:-translate-x-12" />
+              <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 md:translate-x-12" />
+            </Carousel>
           </div>
         </div>
       </section>

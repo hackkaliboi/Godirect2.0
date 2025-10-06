@@ -262,3 +262,283 @@ export async function updatePropertyStatus(propertyId: string, status: string): 
     throw error;
   }
 }
+
+// Fetch user's properties (properties they own)
+export async function fetchUserProperties(userId: string): Promise<Property[]> {
+  console.log(`Fetching properties for user ${userId}`);
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("owner_id", userId);
+
+    if (error) {
+      console.error("Error fetching user properties:", error);
+      throw error;
+    }
+
+    return (data || []) as Property[];
+  } catch (error) {
+    console.error("Error in fetchUserProperties function:", error);
+    throw error;
+  }
+}
+
+// Fetch user's saved properties
+export async function fetchUserSavedProperties(userId: string): Promise<any[]> {
+  console.log(`Fetching saved properties for user ${userId}`);
+  try {
+    const { data, error } = await supabase
+      .from("property_favorites") // Using the actual database table name
+      .select(`
+        *,
+        property:properties(*)
+      `)
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error fetching user saved properties:", error);
+      throw error;
+    }
+
+    return (data || []);
+  } catch (error) {
+    console.error("Error in fetchUserSavedProperties function:", error);
+    throw error;
+  }
+}
+
+// Fetch user's property views
+export async function fetchUserPropertyViews(userId: string): Promise<any[]> {
+  console.log(`Fetching property views for user ${userId}`);
+  try {
+    const { data, error } = await supabase
+      .from("property_views")
+      .select(`
+        *,
+        property:properties(title, price, images)
+      `)
+      .eq("user_id", userId)
+      .order("viewed_at", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("Error fetching user property views:", error);
+      throw error;
+    }
+
+    return (data || []);
+  } catch (error) {
+    console.error("Error in fetchUserPropertyViews function:", error);
+    throw error;
+  }
+}
+
+// Fetch user's inquiries
+export async function fetchUserInquiries(userId: string): Promise<any[]> {
+  console.log(`Fetching inquiries for user ${userId}`);
+  try {
+    const { data, error } = await supabase
+      .from("property_inquiries")
+      .select(`
+        *,
+        property:properties(title, price, images)
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("Error fetching user inquiries:", error);
+      throw error;
+    }
+
+    return (data || []);
+  } catch (error) {
+    console.error("Error in fetchUserInquiries function:", error);
+    throw error;
+  }
+}
+
+// Fetch user's viewings (scheduled appointments)
+export async function fetchUserViewings(userId: string): Promise<any[]> {
+  console.log(`Fetching viewings for user ${userId}`);
+  try {
+    const { data, error } = await supabase
+      .from("property_viewings")
+      .select(`
+        *,
+        property:properties(title, price, images, street, city, state)
+      `)
+      .eq("user_id", userId)
+      .order("viewing_date", { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error("Error fetching user viewings:", error);
+      throw error;
+    }
+
+    return (data || []);
+  } catch (error) {
+    console.error("Error in fetchUserViewings function:", error);
+    throw error;
+  }
+}
+
+// Fetch user dashboard stats
+export async function fetchUserDashboardStats(userId: string): Promise<any[]> {
+  console.log(`Fetching dashboard stats for user ${userId}`);
+  try {
+    // Fetch saved properties count
+    const { count: savedPropertiesCount, error: savedPropertiesError } = await supabase
+      .from("property_favorites") // Using the actual database table name
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    if (savedPropertiesError) throw savedPropertiesError;
+
+    // Fetch property views count
+    const { count: propertyViewsCount, error: propertyViewsError } = await supabase
+      .from("property_views")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    if (propertyViewsError) throw propertyViewsError;
+
+    // Fetch inquiries count
+    const { count: inquiriesCount, error: inquiriesError } = await supabase
+      .from("property_inquiries")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    if (inquiriesError) throw inquiriesError;
+
+    // Fetch viewings count (scheduled appointments)
+    const { count: viewingsCount, error: viewingsError } = await supabase
+      .from("property_viewings")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    if (viewingsError) throw viewingsError;
+
+    // Create stats array
+    const statsData = [
+      {
+        stat_name: "user_saved_properties",
+        stat_value: savedPropertiesCount?.toString() || "0",
+        compare_text: "Properties you've saved",
+        updated_at: new Date().toISOString()
+      },
+      {
+        stat_name: "user_property_views",
+        stat_value: propertyViewsCount?.toString() || "0",
+        compare_text: "Properties you've viewed",
+        updated_at: new Date().toISOString()
+      },
+      {
+        stat_name: "user_inquiries_sent",
+        stat_value: inquiriesCount?.toString() || "0",
+        compare_text: "Inquiries you've sent",
+        updated_at: new Date().toISOString()
+      },
+      {
+        stat_name: "user_scheduled_tours",
+        stat_value: viewingsCount?.toString() || "0",
+        compare_text: "Scheduled property tours",
+        updated_at: new Date().toISOString()
+      }
+    ];
+
+    return statsData;
+  } catch (error) {
+    console.error("Error in fetchUserDashboardStats function:", error);
+    throw error;
+  }
+}
+
+// Fetch user recent activities
+export async function fetchUserRecentActivities(userId: string): Promise<any[]> {
+  console.log(`Fetching recent activities for user ${userId}`);
+  try {
+    // Fetch recent property views
+    const { data: propertyViews, error: viewsError } = await supabase
+      .from("property_views")
+      .select(`
+        id,
+        property_id,
+        viewed_at,
+        property:properties(title)
+      `)
+      .eq("user_id", userId)
+      .order("viewed_at", { ascending: false })
+      .limit(5);
+
+    if (viewsError) throw viewsError;
+
+    // Fetch recent inquiries
+    const { data: inquiries, error: inquiriesError } = await supabase
+      .from("property_inquiries")
+      .select(`
+        id,
+        property_id,
+        created_at,
+        property:properties(title)
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (inquiriesError) throw inquiriesError;
+
+    // Fetch recent viewings (scheduled appointments)
+    const { data: viewings, error: viewingsError } = await supabase
+      .from("property_viewings")
+      .select(`
+        id,
+        property_id,
+        viewing_date,
+        status,
+        property:properties(title)
+      `)
+      .eq("user_id", userId)
+      .order("viewing_date", { ascending: false })
+      .limit(5);
+
+    if (viewingsError) throw viewingsError;
+
+    // Combine and sort all activities
+    const allActivities = [
+      ...propertyViews.map(view => ({
+        id: view.id,
+        type: "property" as const,
+        title: "Viewed Property",
+        description: view.property?.title || "Unknown property",
+        timestamp: new Date(view.viewed_at),
+        status: "completed" as const
+      })),
+      ...inquiries.map(inquiry => ({
+        id: inquiry.id,
+        type: "message" as const,
+        title: "Sent Inquiry",
+        description: inquiry.property?.title || "Unknown property",
+        timestamp: new Date(inquiry.created_at),
+        status: "completed" as const
+      })),
+      ...viewings.map(viewing => ({
+        id: viewing.id,
+        type: "transaction" as const,
+        title: "Scheduled Viewing",
+        description: viewing.property?.title || "Unknown property",
+        timestamp: new Date(viewing.viewing_date),
+        status: viewing.status
+      }))
+    ].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, 10); // Take only the 10 most recent
+
+    return allActivities;
+  } catch (error) {
+    console.error("Error in fetchUserRecentActivities function:", error);
+    throw error;
+  }
+}

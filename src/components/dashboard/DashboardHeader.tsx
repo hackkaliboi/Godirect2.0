@@ -1,12 +1,13 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Search, LogOut } from "lucide-react";
+import { Bell, Search, LogOut, Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "@/types/auth";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 interface DashboardHeaderProps {
   userRole: "admin" | "agent" | "user";
@@ -16,7 +17,7 @@ export function DashboardHeader({ userRole }: DashboardHeaderProps) {
   const { signOut } = useContext(AuthContext);
   const { user } = useAuth();
   const [profileData, setProfileData] = useState<{ avatar_url?: string; full_name?: string }>({});
-  
+
   useEffect(() => {
     const fetchProfileData = async () => {
       if (user?.id) {
@@ -25,11 +26,11 @@ export function DashboardHeader({ userRole }: DashboardHeaderProps) {
           .select('avatar_url, full_name')
           .eq('id', user.id)
           .single();
-        
+
         if (error) {
           console.error('Error fetching profile data:', error);
         }
-        
+
         if (data) {
           console.log('Profile data fetched:', data);
           setProfileData(data);
@@ -87,6 +88,12 @@ export function DashboardHeader({ userRole }: DashboardHeaderProps) {
         </Button>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <Button asChild variant="outline" className="hidden sm:flex">
+            <Link to="/">
+              <Home className="h-4 w-4 mr-2" />
+              Back to Site
+            </Link>
+          </Button>
           <div className="text-right hidden lg:block">
             <p className="text-sm font-medium">Welcome Back</p>
             <p className="text-xs text-muted-foreground">{getRoleDisplay()}</p>
@@ -95,9 +102,9 @@ export function DashboardHeader({ userRole }: DashboardHeaderProps) {
             <AvatarImage src={profileData.avatar_url} onError={() => console.log('Avatar image failed to load:', profileData.avatar_url)} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10"
             onClick={() => {
               if (signOut) signOut();
