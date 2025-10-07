@@ -137,7 +137,8 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                 .select(`
                     *,
                     property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street),
-                    messages(*)
+                    messages(*),
+                    user:profiles(id, full_name, avatar_url, email)
                 `)
                 .eq('id', convId)
                 .single();
@@ -160,7 +161,7 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
             const { data: messageData, error: messageError } = await supabase
                 .from('messages')
                 .select(`
-                    conversation:conversations(*, property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street), messages(*))
+                    conversation:conversations(*, property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street), messages(*), user:profiles(id, full_name, avatar_url, email))
                 `)
                 .eq('conversation_id', convId)
                 .limit(1);
@@ -420,17 +421,35 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                                                             </div>
                                                         </>
                                                     ) : (
-                                                        <p className="text-sm text-muted-foreground truncate mt-1">
-                                                            {(() => {
-                                                                const messages = conversation.messages || [];
-                                                                if (messages.length > 0) {
-                                                                    const lastMessage = messages[messages.length - 1];
-                                                                    const text = lastMessage?.message_text?.substring(0, 50) || 'No messages yet';
-                                                                    return text + (lastMessage?.message_text?.length > 50 ? '...' : '');
-                                                                }
-                                                                return 'No messages yet';
-                                                            })()}
-                                                        </p>
+                                                        <div className="mt-1">
+                                                            <p className="text-sm text-muted-foreground truncate">
+                                                                {(() => {
+                                                                    const messages = conversation.messages || [];
+                                                                    if (messages.length > 0) {
+                                                                        const lastMessage = messages[messages.length - 1];
+                                                                        const text = lastMessage?.message_text?.substring(0, 50) || 'No messages yet';
+                                                                        return text + (lastMessage?.message_text?.length > 50 ? '...' : '');
+                                                                    }
+                                                                    return 'No messages yet';
+                                                                })()}
+                                                            </p>
+                                                            {conversation.user && (
+                                                                <div className="flex items-center mt-2">
+                                                                    <Avatar className="w-5 h-5 mr-2">
+                                                                        {conversation.user.avatar_url ? (
+                                                                            <AvatarImage src={conversation.user.avatar_url} />
+                                                                        ) : (
+                                                                            <AvatarFallback className="text-xs">
+                                                                                {conversation.user.full_name?.charAt(0) || 'U'}
+                                                                            </AvatarFallback>
+                                                                        )}
+                                                                    </Avatar>
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        {conversation.user.full_name || conversation.user.email}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                                 <Button
@@ -538,23 +557,41 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                                                         msg.sender_type === 'user' ? "justify-end" : "justify-start"
                                                     )}
                                                 >
-                                                    <div
-                                                        className={cn(
-                                                            "max-w-[80%] rounded-lg px-4 py-2",
-                                                            msg.sender_type === 'user'
-                                                                ? "bg-primary text-primary-foreground"
-                                                                : "bg-muted"
+                                                    <div className="flex flex-col max-w-[80%]">
+                                                        {msg.sender_type !== 'user' && selectedConversation?.user && (
+                                                            <div className="flex items-center mb-1 ml-2">
+                                                                <Avatar className="w-6 h-6 mr-2">
+                                                                    {selectedConversation.user.avatar_url ? (
+                                                                        <AvatarImage src={selectedConversation.user.avatar_url} />
+                                                                    ) : (
+                                                                        <AvatarFallback className="text-xs bg-muted">
+                                                                            {selectedConversation.user.full_name?.charAt(0) || 'U'}
+                                                                        </AvatarFallback>
+                                                                    )}
+                                                                </Avatar>
+                                                                <span className="text-xs font-medium text-muted-foreground">
+                                                                    {selectedConversation.user.full_name || selectedConversation.user.email}
+                                                                </span>
+                                                            </div>
                                                         )}
-                                                    >
-                                                        <p className="text-sm">{msg.message_text}</p>
-                                                        <p
+                                                        <div
                                                             className={cn(
-                                                                "text-xs mt-1",
-                                                                msg.sender_type === 'user' ? "text-primary-foreground/70" : "text-muted-foreground"
+                                                                "rounded-lg px-4 py-2",
+                                                                msg.sender_type === 'user'
+                                                                    ? "bg-primary text-primary-foreground self-end"
+                                                                    : "bg-muted self-start"
                                                             )}
                                                         >
-                                                            {format(new Date(msg.created_at), 'HH:mm')}
-                                                        </p>
+                                                            <p className="text-sm">{msg.message_text}</p>
+                                                            <p
+                                                                className={cn(
+                                                                    "text-xs mt-1",
+                                                                    msg.sender_type === 'user' ? "text-primary-foreground/70" : "text-muted-foreground"
+                                                                )}
+                                                            >
+                                                                {format(new Date(msg.created_at), 'HH:mm')}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))

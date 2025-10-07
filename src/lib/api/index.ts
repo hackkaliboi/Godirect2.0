@@ -99,7 +99,8 @@ export const conversationsApi = {
         .select(`
           *,
           property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street),
-          messages(*)
+          messages(*),
+          user:profiles(id, full_name, avatar_url, email)
         `)
         .or(`user_id.eq.${userId},title.ilike.%${userId}%`);
 
@@ -126,7 +127,7 @@ export const conversationsApi = {
       const { data: messageConversations, error: messageError } = await (supabase as any)
         .from('messages')
         .select(`
-          conversation:conversations(*, property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street), messages(*))
+          conversation:conversations(*, property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street), messages(*), user:profiles(id, full_name, avatar_url, email))
         `)
         .eq('sender_id', userId);
 
