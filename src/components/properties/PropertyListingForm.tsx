@@ -253,7 +253,7 @@ const PropertyListingForm = () => {
                 amenities: formData.amenities,
                 features: formData.features,
                 images: imageUrls,
-                owner_id: user?.id,
+                agent_id: user?.id,  // Set agent_id instead of owner_id
                 status: "pending", // Start with pending approval
                 is_featured: isFeaturedRequest, // Request featured status
                 address: `${formData.street}, ${formData.city}, ${formData.state}`

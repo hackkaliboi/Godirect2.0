@@ -10,10 +10,11 @@ import {
   UserX,
   Mail,
   Download,
-  Filter
+  Filter,
+  BarChart3,
+  MapPin
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Profile } from "@/integrations/supabase/types";
 
 interface UserStat {
   title: string;
@@ -69,7 +70,7 @@ export default function AdminUsers() {
 
         const { data: newUsersData, error: monthError } = await supabase
           .from('profiles')
-          .select('*');
+          .select('created_at');
 
         if (monthError) {
           console.error('Error fetching users:', monthError);
@@ -78,8 +79,8 @@ export default function AdminUsers() {
 
         // Filter users created this month
         const newThisMonth = newUsersData?.filter(user => {
-          if (!user.updated_at) return false;
-          const userDate = new Date(user.updated_at);
+          if (!user.created_at) return false;
+          const userDate = new Date(user.created_at);
           return userDate >= oneMonthAgo;
         }).length || 0;
 
@@ -94,11 +95,36 @@ export default function AdminUsers() {
           return;
         }
 
+        // Count pending verifications (users with KYC documents pending)
+        const { count: pendingVerifications, error: kycError } = await supabase
+          .from('kyc_documents')
+          .select('*', { count: 'exact', head: true })
+          .eq('verification_status', 'pending');
+
+        if (kycError) {
+          console.error('Error fetching pending verifications:', kycError);
+          return;
+        }
+
+        // Count active users (users with recent activity)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const { count: activeUsers, error: activeError } = await (supabase as any)
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gte('updated_at', thirtyDaysAgo.toISOString());
+
+        if (activeError) {
+          console.error('Error fetching active users:', activeError);
+          return;
+        }
+
         // Update stats with real data
         setUserStats([
           { ...userStats[0], value: totalUsers?.toString() || "0" },
-          { ...userStats[1], value: totalUsers?.toString() || "0" }, // For now, using total users as active users
-          { ...userStats[2], value: agentCount?.toString() || "0" }, // Showing agents as pending verifications for now
+          { ...userStats[1], value: activeUsers?.toString() || "0" },
+          { ...userStats[2], value: pendingVerifications?.toString() || "0" },
           { ...userStats[3], value: newThisMonth.toString() }
         ]);
       } catch (error) {
@@ -124,11 +150,11 @@ export default function AdminUsers() {
         <div className="flex gap-2">
           <Button variant="outline">
             <Filter className="mr-2 h-4 w-4" />
-            Filter Users
+            Advanced Filters
           </Button>
           <Button variant="outline">
             <Mail className="mr-2 h-4 w-4" />
-            Send Invite
+            Bulk Email
           </Button>
           <Button>
             <Download className="mr-2 h-4 w-4" />
@@ -159,30 +185,40 @@ export default function AdminUsers() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>User Registration Trends</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              User Registration Trends
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <UserPlus className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p className="font-medium">No registration data yet</p>
-              <p className="text-sm">
-                Registration trends will appear when users start signing up
-              </p>
+            <div className="h-80 flex items-center justify-center">
+              <div className="text-center">
+                <BarChart3 className="mx-auto h-12 w-12 mb-4 text-muted-foreground" />
+                <p className="font-medium text-muted-foreground">Registration trends chart</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Visualize user growth over time
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Agent Applications</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Geographic Distribution
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <UserCheck className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p className="font-medium">No pending applications</p>
-              <p className="text-sm">
-                Agent applications will appear here for approval
-              </p>
+            <div className="h-80 flex items-center justify-center">
+              <div className="text-center">
+                <MapPin className="mx-auto h-12 w-12 mb-4 text-muted-foreground" />
+                <p className="font-medium text-muted-foreground">User location map</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  See where your users are located
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -22,6 +22,9 @@ import AdminTransactions from "../admin/AdminTransactions";
 import AdminReports from "../admin/AdminReports";
 import AdminSystem from "../admin/AdminSystem";
 
+// Import KYC Management component
+import { AgentKYCManagement } from "@/components/admin/AgentKYCManagement";
+
 // Import new feature components
 import SecurityCompliance from "@/components/security/SecurityCompliance";
 import PaymentManager from "@/components/payments/PaymentManager";
@@ -248,6 +251,9 @@ export function AdminDashboard() {
         <Route path="reports" element={<AdminReports />} />
         <Route path="system" element={<AdminSystem />} />
         <Route path="settings" element={<AdminSettings />} />
+
+        {/* KYC Management Route */}
+        <Route path="kyc" element={<AgentKYCManagement />} />
 
         {/* New Feature Routes */}
         <Route path="security" element={<SecurityCompliance />} />

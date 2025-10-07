@@ -66,6 +66,7 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           ...commonItems,
           { title: "Analytics", url: `/dashboard/admin/analytics`, icon: BarChart3 },
           { title: "Users", url: `/dashboard/admin/users`, icon: Users },
+          { title: "KYC Management", url: `/dashboard/admin/kyc`, icon: UserCheck },
           { title: "Transactions", url: `/dashboard/admin/transactions`, icon: DollarSign },
           { title: "Reports", url: `/dashboard/admin/reports`, icon: FileText },
           { title: "System", url: `/dashboard/admin/system`, icon: Database },

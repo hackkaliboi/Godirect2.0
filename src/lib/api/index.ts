@@ -23,36 +23,7 @@ import {
 // =====================
 
 export const conversationsApi = {
-  // Get conversations for a user
-  async getConversations(userId: string): Promise<ConversationWithMessages[]> {
-    try {
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          property:properties(id, title, price, images),
-          messages(*)
-        `)
-        .eq('user_id', userId)
-        .order('last_message_at', { ascending: false });
-
-      if (error) {
-        // If the table doesn't exist, return empty array
-        if (error.message.includes('not found') || error.message.includes('does not exist')) {
-          console.warn('Conversations table not found, returning empty array');
-          return [];
-        }
-        throw error;
-      }
-      return data as ConversationWithMessages[];
-    } catch (error) {
-      // If there's any other error (like table doesn't exist), return empty array
-      console.warn('Error fetching conversations, returning empty array:', error);
-      return [];
-    }
-  },
-
-  // Create a new conversation
+  // Create a new conversation for a property
   async createConversation(propertyId: string, userId: string): Promise<Conversation> {
     const { data, error } = await supabase
       .from('conversations')
@@ -68,16 +39,157 @@ export const conversationsApi = {
     return data;
   },
 
+  // Create a new direct conversation between users
+  async createDirectConversation(userId: string, title: string = 'Direct Message'): Promise<Conversation> {
+    const { data: currentUser } = await supabase.auth.getUser();
+    console.log("Creating direct conversation:", { userId, title, currentUser });
+
+    // For admin to user conversations, the admin should be the conversation owner
+    // This ensures both admin and user can access the conversation
+    const conversationOwnerId = currentUser.user?.id;
+
+    const { data, error } = await supabase
+      .from('conversations')
+      .insert({
+        user_id: conversationOwnerId, // Admin is the conversation owner
+        title: title
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error creating conversation:", error);
+      console.error("Error details:", {
+        message: error.message,
+        ...(error as any).code && { code: (error as any).code },
+        ...(error as any).details && { details: (error as any).details },
+        ...(error as any).hint && { hint: (error as any).hint }
+      });
+      throw error;
+    }
+
+    console.log("Created conversation:", data);
+
+    // Update the conversation's last_message_at to ensure it appears correctly
+    const { error: updateError } = await supabase
+      .from('conversations')
+      .update({ last_message_at: new Date().toISOString() })
+      .eq('id', data.id);
+
+    if (updateError) {
+      console.error("Error updating conversation last_message_at:", updateError);
+    }
+
+    return data;
+  },
+
+  // Get conversations for a user
+  async getConversations(userId: string): Promise<ConversationWithMessages[]> {
+    try {
+      console.log("Fetching conversations for user:", userId);
+
+      // Get all conversations where user is involved in some way
+      // This includes:
+      // 1. Conversations owned by the user
+      // 2. Conversations with titles containing the user ID (direct messages from admin)
+      // 3. Conversations where user has sent messages
+
+      const { data, error } = await (supabase as any)
+        .from('conversations')
+        .select(`
+          *,
+          property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street),
+          messages(*)
+        `)
+        .or(`user_id.eq.${userId},title.ilike.%${userId}%`);
+
+      console.log("Fetched conversations for user", userId, ":", data);
+      console.log("Fetch error:", error);
+
+      if (error) {
+        console.error("Error fetching conversations:", error);
+        console.error("Error details:", {
+          message: error.message,
+          ...(error as any).code && { code: (error as any).code },
+          ...(error as any).details && { details: (error as any).details },
+          ...(error as any).hint && { hint: (error as any).hint }
+        });
+        // If the table doesn't exist, return empty array
+        if (error.message.includes('not found') || error.message.includes('does not exist')) {
+          console.warn('Conversations table not found, returning empty array');
+          return [];
+        }
+        throw error;
+      }
+
+      // Also get conversations where user has sent messages
+      const { data: messageConversations, error: messageError } = await (supabase as any)
+        .from('messages')
+        .select(`
+          conversation:conversations(*, property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street), messages(*))
+        `)
+        .eq('sender_id', userId);
+
+      if (messageError) {
+        console.error("Error fetching message conversations:", messageError);
+      }
+
+      // Combine and deduplicate conversations
+      const allConversations = [...(data || [])];
+
+      // Add message conversations that aren't already in the list
+      if (messageConversations) {
+        messageConversations.forEach(msg => {
+          if (msg.conversation && !allConversations.find(c => c.id === msg.conversation.id)) {
+            allConversations.push(msg.conversation);
+          }
+        });
+      }
+
+      // Sort by last_message_at
+      allConversations.sort((a, b) =>
+        new Date(b.last_message_at || b.created_at).getTime() -
+        new Date(a.last_message_at || a.created_at).getTime()
+      );
+
+      console.log("Fetched all conversations for user", userId, ":", allConversations);
+      return allConversations as ConversationWithMessages[];
+    } catch (error) {
+      // If there's any other error (like table doesn't exist), return empty array
+      console.warn('Error fetching conversations, returning empty array:', error);
+      return [];
+    }
+  },
+
   // Send a message
   async sendMessage(request: SendMessageRequest): Promise<Message> {
     const { data: user } = await supabase.auth.getUser();
+    console.log("Sending message with request:", request);
+    console.log("Current user:", user);
+
+    // Determine sender type based on user role
+    let senderType = 'user';
+    if (user?.user?.id) {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('id', user.user.id)
+        .single();
+
+      console.log("User profile:", profile, "Error:", profileError);
+      if (profile?.user_type === 'admin') {
+        senderType = 'admin';
+      }
+    }
+
+    console.log("Determined sender type:", senderType);
 
     const { data, error } = await supabase
       .from('messages')
       .insert({
         conversation_id: request.conversation_id,
         sender_id: user.user?.id,
-        sender_type: 'user', // Determine this based on user type
+        sender_type: senderType,
         message_text: request.message_text,
         message_type: request.message_type || 'text',
         file_url: request.file_url
@@ -85,13 +197,28 @@ export const conversationsApi = {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error sending message:", error);
+      console.error("Error details:", {
+        message: error.message,
+        ...(error as any).code && { code: (error as any).code },
+        ...(error as any).details && { details: (error as any).details },
+        ...(error as any).hint && { hint: (error as any).hint }
+      });
+      throw error;
+    }
+
+    console.log("Message sent successfully:", data);
 
     // Update conversation last_message_at
-    await supabase
+    const { error: updateError } = await supabase
       .from('conversations')
       .update({ last_message_at: new Date().toISOString() })
       .eq('id', request.conversation_id);
+
+    if (updateError) {
+      console.error("Error updating conversation last_message_at:", updateError);
+    }
 
     return data;
   },
@@ -105,6 +232,38 @@ export const conversationsApi = {
       .is('read_at', null);
 
     if (error) throw error;
+  },
+
+  // Delete a conversation and all its messages
+  async deleteConversation(conversationId: string): Promise<void> {
+    try {
+      // First delete all messages in the conversation
+      const { error: messagesError } = await supabase
+        .from('messages')
+        .delete()
+        .eq('conversation_id', conversationId);
+
+      if (messagesError) {
+        console.error("Error deleting messages:", messagesError);
+        throw messagesError;
+      }
+
+      // Then delete the conversation itself
+      const { error: conversationError } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', conversationId);
+
+      if (conversationError) {
+        console.error("Error deleting conversation:", conversationError);
+        throw conversationError;
+      }
+
+      console.log("Successfully deleted conversation:", conversationId);
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      throw error;
+    }
   }
 };
 
@@ -330,13 +489,13 @@ export const notificationsApi = {
   // Get user notifications
   async getUserNotifications(userId: string): Promise<Notification[]> {
     console.log('notificationsApi.getUserNotifications called with userId:', userId);
-    
+
     // Validate userId
     if (!userId) {
       console.warn('No userId provided to getUserNotifications');
       return [];
     }
-    
+
     try {
       console.log('Attempting to fetch notifications from Supabase...');
       const { data, error, count } = await supabase
@@ -347,7 +506,7 @@ export const notificationsApi = {
         .limit(50);
 
       console.log('Supabase response:', { data, error, count });
-      
+
       if (error) {
         console.error("Error fetching notifications from Supabase:", error);
         // If it's a table not found error, return empty array instead of throwing
@@ -358,7 +517,7 @@ export const notificationsApi = {
         // For other errors, still return empty array to prevent app crashes
         return [];
       }
-      
+
       console.log(`Successfully fetched ${data?.length || 0} notifications`);
       return data || [];
     } catch (error) {
@@ -371,12 +530,12 @@ export const notificationsApi = {
   // Mark notification as read
   async markAsRead(notificationId: string): Promise<void> {
     console.log('notificationsApi.markAsRead called with notificationId:', notificationId);
-    
+
     if (!notificationId) {
       console.warn('No notificationId provided to markAsRead');
       return;
     }
-    
+
     try {
       const { error } = await supabase
         .from('notifications')
@@ -390,7 +549,7 @@ export const notificationsApi = {
         console.error("Error marking notification as read:", error);
         return;
       }
-      
+
       console.log('Successfully marked notification as read');
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -400,12 +559,12 @@ export const notificationsApi = {
   // Mark notification as unread
   async markAsUnread(notificationId: string): Promise<void> {
     console.log('notificationsApi.markAsUnread called with notificationId:', notificationId);
-    
+
     if (!notificationId) {
       console.warn('No notificationId provided to markAsUnread');
       return;
     }
-    
+
     try {
       const { error } = await supabase
         .from('notifications')
@@ -419,7 +578,7 @@ export const notificationsApi = {
         console.error("Error marking notification as unread:", error);
         return;
       }
-      
+
       console.log('Successfully marked notification as unread');
     } catch (error) {
       console.error("Error marking notification as unread:", error);
@@ -429,12 +588,12 @@ export const notificationsApi = {
   // Delete notification
   async deleteNotification(notificationId: string): Promise<void> {
     console.log('notificationsApi.deleteNotification called with notificationId:', notificationId);
-    
+
     if (!notificationId) {
       console.warn('No notificationId provided to deleteNotification');
       return;
     }
-    
+
     try {
       const { error } = await supabase
         .from('notifications')
@@ -445,7 +604,7 @@ export const notificationsApi = {
         console.error("Error deleting notification:", error);
         return;
       }
-      
+
       console.log('Successfully deleted notification');
     } catch (error) {
       console.error("Error deleting notification:", error);
@@ -455,12 +614,12 @@ export const notificationsApi = {
   // Mark all notifications as read
   async markAllAsRead(userId: string): Promise<void> {
     console.log('notificationsApi.markAllAsRead called with userId:', userId);
-    
+
     if (!userId) {
       console.warn('No userId provided to markAllAsRead');
       return;
     }
-    
+
     try {
       const { error } = await supabase
         .from('notifications')
@@ -475,7 +634,7 @@ export const notificationsApi = {
         console.error("Error marking all notifications as read:", error);
         return;
       }
-      
+
       console.log('Successfully marked all notifications as read');
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
@@ -485,7 +644,7 @@ export const notificationsApi = {
   // Create notification (internal use)
   async createNotification(notification: Omit<Notification, 'id' | 'created_at' | 'is_read' | 'read_at' | 'email_sent' | 'sms_sent'>): Promise<Notification> {
     console.log('notificationsApi.createNotification called with:', notification);
-    
+
     try {
       const { data, error } = await supabase
         .from('notifications')
@@ -535,7 +694,7 @@ export const notificationsApi = {
           created_at: new Date().toISOString()
         } as Notification;
       }
-      
+
       console.log('Successfully created notification:', data);
       return data;
     } catch (error) {
@@ -786,6 +945,128 @@ export const analyticsApi = {
 
     if (error) throw error;
     return data;
+  }
+};
+
+// =====================
+// ADMIN SECURITY API
+// =====================
+
+export const adminSecurityApi = {
+  // Get pending KYC verifications
+  async getPendingKYCVerifications(): Promise<any[]> {
+    try {
+      // Fetch pending KYC documents with user information
+      const { data, error } = await supabase
+        .from('kyc_documents')
+        .select(`
+          id,
+          user_id,
+          document_type,
+          verification_status,
+          created_at,
+          profiles:profiles!inner(
+            full_name,
+            email,
+            phone,
+            avatar_url
+          )
+        `)
+        .eq('verification_status', 'pending')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Group documents by user and format for display
+      const groupedAgents: any[] = [];
+      const userMap: Record<string, any> = {};
+
+      data?.forEach((doc: any) => {
+        const userId = doc.user_id;
+        if (!userMap[userId]) {
+          userMap[userId] = {
+            kyc_id: doc.id,
+            agent_id: userId,
+            agent_name: doc.profiles?.full_name || 'Unknown User',
+            agent_email: doc.profiles?.email || 'No email',
+            agent_phone: doc.profiles?.phone || undefined,
+            agent_avatar: doc.profiles?.avatar_url || undefined,
+            submitted_at: doc.created_at,
+            verification_status: doc.verification_status,
+            documents_count: 1,
+            document_types: [doc.document_type],
+            risk_flags: []
+          };
+          groupedAgents.push(userMap[userId]);
+        } else {
+          userMap[userId].documents_count += 1;
+          userMap[userId].document_types.push(doc.document_type);
+        }
+      });
+
+      return groupedAgents;
+    } catch (error) {
+      console.error('Error fetching pending KYC verifications:', error);
+      return [];
+    }
+  },
+
+  // Verify agent KYC
+  async verifyAgentKYC(kycId: string, decision: 'approve' | 'reject', rejectionReason?: string): Promise<void> {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+
+      if (decision === 'approve') {
+        // Update the document status to verified
+        const { error } = await supabase
+          .from('kyc_documents')
+          .update({
+            verification_status: 'verified',
+            verified_by: user.user?.id,
+            verified_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', kycId);
+
+        if (error) throw error;
+
+        // Also update the user's profile to mark them as verified agent
+        const { data: kycDoc, error: kycError } = await supabase
+          .from('kyc_documents')
+          .select('user_id')
+          .eq('id', kycId)
+          .single();
+
+        if (kycError) throw kycError;
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            user_type: 'agent',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', kycDoc.user_id);
+
+        if (profileError) throw profileError;
+      } else {
+        // Update the document status to rejected
+        const { error } = await supabase
+          .from('kyc_documents')
+          .update({
+            verification_status: 'rejected',
+            verified_by: user.user?.id,
+            verified_at: new Date().toISOString(),
+            rejection_reason: rejectionReason,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', kycId);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error verifying agent KYC:', error);
+      throw error;
+    }
   }
 };
 

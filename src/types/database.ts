@@ -287,6 +287,12 @@ export interface ConversationWithMessages extends Conversation {
     title: string;
     price: number;
     images: string[];
+    city: string;
+    state: string;
+    bedrooms?: number;
+    bathrooms?: number;
+    property_type: string;
+    street: string;
   };
   // Remove agent since users act as their own agents
   user?: {

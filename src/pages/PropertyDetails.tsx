@@ -468,6 +468,7 @@ const PropertyDetails = () => {
       {/* Chat Widget */}
       <ChatWidget
         propertyId={property.id}
+        ownerId={property.owner_id}
         isOpen={isChatOpen}
         onToggle={() => setIsChatOpen(!isChatOpen)}
         onClose={() => setIsChatOpen(false)}
