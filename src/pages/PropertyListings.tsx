@@ -35,7 +35,7 @@ const PropertyListings = () => {
     queryFn: fetchProperties,
   });
 
-  const handleApplyFilters = useCallback((filters: FilterState) => {
+  const handleApplyFilters = (filters: FilterState) => {
     // Update URL with filter parameters
     const params = new URLSearchParams();
 
@@ -142,7 +142,7 @@ const PropertyListings = () => {
       // Save to search history (non-blocking)
       searchHistoryApi.saveSearchToHistory(searchQuery, searchFilters, results.length);
     }
-  }, [properties, navigate, user]);
+  };
 
   // Parse URL query params on initial load and set filtered properties
   useEffect(() => {
@@ -188,7 +188,10 @@ const PropertyListings = () => {
 
       // Apply initial filters if present
       if (Object.keys(initialFilters).length > 0) {
-        handleApplyFilters(initialFilters as FilterState);
+        // Use setTimeout to ensure state updates are processed
+        setTimeout(() => {
+          handleApplyFilters(initialFilters as FilterState);
+        }, 0);
       } else {
         setFilteredProperties(properties);
       }

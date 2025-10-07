@@ -171,6 +171,54 @@ export function PropertyManagement() {
         }
     };
 
+    const handleDeleteProperty = async (propertyId: string, propertyTitle: string) => {
+        try {
+            // Show confirmation dialog
+            if (!confirm(`Are you sure you want to delete the property "${propertyTitle}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            // Delete the property
+            const { error } = await supabase
+                .from('properties')
+                .delete()
+                .eq('id', propertyId);
+
+            if (error) throw error;
+
+            toast.success("Property deleted successfully");
+            // Refresh the property list
+            loadProperties();
+        } catch (error) {
+            console.error("Error deleting property:", error);
+            toast.error("Failed to delete property: " + (error.message || "Unknown error"));
+        }
+    };
+
+    const handleMarkAsSold = async (propertyId: string) => {
+        try {
+            await updatePropertyStatus(propertyId, "sold");
+            toast.success("Property marked as sold");
+            // Refresh the property list
+            loadProperties();
+        } catch (error) {
+            console.error("Error marking property as sold:", error);
+            toast.error("Failed to mark property as sold: " + (error.message || "Unknown error"));
+        }
+    };
+
+    const handleMarkAsRented = async (propertyId: string) => {
+        try {
+            await updatePropertyStatus(propertyId, "rented");
+            toast.success("Property marked as rented");
+            // Refresh the property list
+            loadProperties();
+        } catch (error) {
+            console.error("Error marking property as rented:", error);
+            toast.error("Failed to mark property as rented: " + (error.message || "Unknown error"));
+        }
+    };
+
     return (
         <Card>
             <CardHeader className="space-y-4">
@@ -298,6 +346,10 @@ export function PropertyManagement() {
                                                     <Eye className="mr-2 h-4 w-4" />
                                                     View Details
                                                 </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => navigate(`/dashboard/admin/properties/edit/${property.id}`)}>
+                                                    <DollarSign className="mr-2 h-4 w-4" />
+                                                    Edit Property
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 {property.status === "pending" && (
                                                     <>
@@ -317,14 +369,36 @@ export function PropertyManagement() {
                                                         </DropdownMenuItem>
                                                     </>
                                                 )}
-                                                {property.status !== "pending" && (
-                                                    <DropdownMenuItem
-                                                        onClick={() => handleApproveProperty(property.id)}
-                                                    >
-                                                        <CheckCircle className="mr-2 h-4 w-4" />
-                                                        Set Available
-                                                    </DropdownMenuItem>
+                                                {property.status !== "pending" && property.status !== "sold" && property.status !== "rented" && (
+                                                    <>
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleApproveProperty(property.id)}
+                                                        >
+                                                            <CheckCircle className="mr-2 h-4 w-4" />
+                                                            Set Available
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleMarkAsSold(property.id)}
+                                                        >
+                                                            <DollarSign className="mr-2 h-4 w-4" />
+                                                            Mark as Sold
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => handleMarkAsRented(property.id)}
+                                                        >
+                                                            <DollarSign className="mr-2 h-4 w-4" />
+                                                            Mark as Rented
+                                                        </DropdownMenuItem>
+                                                    </>
                                                 )}
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    className="text-destructive"
+                                                    onClick={() => handleDeleteProperty(property.id, property.title)}
+                                                >
+                                                    <XCircle className="mr-2 h-4 w-4" />
+                                                    Delete Property
+                                                </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>

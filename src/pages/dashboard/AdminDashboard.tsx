@@ -17,6 +17,7 @@ import AdminUsers from "../admin/AdminUsers";
 
 import AdminProperties from "../admin/AdminProperties";
 import AdminCreateListing from "../admin/AdminCreateListing";
+import AdminEditListing from "../admin/AdminEditListing";
 import AdminSettings from "../admin/AdminSettings";
 import AdminTransactions from "../admin/AdminTransactions";
 import AdminReports from "../admin/AdminReports";
@@ -247,6 +248,7 @@ export function AdminDashboard() {
         {/* Remove the agents route */}
         <Route path="properties" element={<AdminProperties />} />
         <Route path="properties/create" element={<AdminCreateListing />} />
+        <Route path="properties/edit/:id" element={<AdminEditListing />} />
         <Route path="create-listing" element={<AdminCreateListing />} />
         <Route path="transactions" element={<AdminTransactions />} />
         <Route path="reports" element={<AdminReports />} />

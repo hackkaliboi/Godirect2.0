@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, MapPin, Building, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { propertyTypes, priceRanges } from "@/utils/data";
 import ImageSlider from "@/components/ui/slider/ImageSlider";
 import { searchHistoryApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const HeroSearch = () => {
   const navigate = useNavigate();
@@ -15,6 +15,73 @@ const HeroSearch = () => {
   const [location, setLocation] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [priceRange, setPriceRange] = useState("");
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+  const [priceRanges, setPriceRanges] = useState<{ label: string }[]>([]);
+
+  // Fetch property types and price ranges on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch property types
+        const { data: typesData, error: typesError } = await supabase
+          .from("properties")
+          .select("property_type");
+        
+        if (typesError) {
+          console.error("Error fetching property types:", typesError);
+        } else {
+          // Extract unique property types
+          const uniqueTypes = [...new Set(typesData.map(item => item.property_type))];
+          setPropertyTypes(uniqueTypes.filter(type => type !== null && type !== undefined) as string[]);
+        }
+
+        // Fetch price ranges
+        const { data: priceData, error: priceError } = await supabase
+          .from("properties")
+          .select("price");
+
+        if (priceError) {
+          console.error("Error fetching price ranges:", priceError);
+        } else {
+          if (priceData && priceData.length > 0) {
+            // Calculate min and max prices
+            const prices = priceData.map(item => item.price);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+
+            // Create price ranges based on the data
+            const ranges = [];
+            
+            // For Nigerian properties, we'll create ranges in millions of Naira
+            const rangeSize = 50000000; // 50 million Naira increments
+            let currentMin = Math.floor(minPrice / rangeSize) * rangeSize;
+            
+            while (currentMin <= maxPrice) {
+              const currentMax = currentMin + rangeSize - 1;
+              const count = prices.filter(price => price >= currentMin && price <= currentMax).length;
+              
+              if (count > 0) {
+                // Format the label
+                const minLabel = currentMin >= 1000000 ? `${(currentMin / 1000000).toFixed(0)}M` : currentMin.toLocaleString();
+                const maxLabel = currentMax >= 1000000 ? `${(currentMax / 1000000).toFixed(0)}M` : currentMax.toLocaleString();
+                ranges.push({
+                  label: `₦${minLabel} - ₦${maxLabel}`
+                });
+              }
+              
+              currentMin += rangeSize;
+            }
+
+            setPriceRanges(ranges);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Define slider images
   const sliderImages = [
@@ -31,7 +98,33 @@ const HeroSearch = () => {
 
     if (location) params.append("location", location);
     if (propertyType) params.append("type", propertyType);
-    if (priceRange) params.append("price", priceRange);
+    
+    // Parse price range if selected
+    if (priceRange) {
+      // Extract min and max values from the price range label
+      // Expected format: "₦5M - ₦10M" or "₦1000000 - ₦5000000"
+      const priceMatch = priceRange.match(/₦([\d.]+[Mm]?)[\s]*-[\s]*₦([\d.]+[Mm]?)/i);
+      if (priceMatch) {
+        let minPrice = priceMatch[1];
+        let maxPrice = priceMatch[2];
+        
+        // Convert M suffix to actual numbers
+        if (minPrice.toLowerCase().endsWith('m')) {
+          minPrice = (parseFloat(minPrice) * 1000000).toString();
+        } else {
+          minPrice = minPrice.replace(/[^\d]/g, ''); // Remove any non-digit characters except decimal
+        }
+        
+        if (maxPrice.toLowerCase().endsWith('m')) {
+          maxPrice = (parseFloat(maxPrice) * 1000000).toString();
+        } else {
+          maxPrice = maxPrice.replace(/[^\d]/g, ''); // Remove any non-digit characters except decimal
+        }
+        
+        params.append("price_min", minPrice);
+        params.append("price_max", maxPrice);
+      }
+    }
 
     // Navigate to the properties page with search params
     navigate(`/properties?${params.toString()}`);
@@ -135,8 +228,8 @@ const HeroSearch = () => {
                     <SelectValue placeholder="Price range" />
                   </SelectTrigger>
                   <SelectContent>
-                    {priceRanges.map((range) => (
-                      <SelectItem key={range.label} value={range.label}>
+                    {priceRanges.map((range, index) => (
+                      <SelectItem key={index} value={range.label}>
                         {range.label}
                       </SelectItem>
                     ))}

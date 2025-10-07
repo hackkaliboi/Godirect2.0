@@ -1,3 +1,5 @@
+import { fetchPropertyTypes, fetchPriceRanges } from "@/utils/supabaseData";
+
 export interface Property {
   id: string;
   title: string;

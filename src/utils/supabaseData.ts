@@ -263,6 +263,30 @@ export async function updatePropertyStatus(propertyId: string, status: string): 
   }
 }
 
+// Update property (for admin editing)
+export async function updateProperty(propertyId: string, propertyData: Partial<Property>): Promise<Property | null> {
+  console.log(`Updating property ${propertyId} with data:`, propertyData);
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .update({ ...propertyData, updated_at: new Date().toISOString() })
+      .eq("id", propertyId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating property:", error);
+      throw error;
+    }
+
+    console.log("Property updated successfully:", data);
+    return data as Property;
+  } catch (error) {
+    console.error("Error in updateProperty function:", error);
+    throw error;
+  }
+}
+
 // Fetch user's properties (properties they own)
 export async function fetchUserProperties(userId: string): Promise<Property[]> {
   console.log(`Fetching properties for user ${userId}`);
@@ -619,5 +643,81 @@ export async function fetchUserRecentActivities(userId: string): Promise<any[]> 
   } catch (error) {
     console.error("Error in fetchUserRecentActivities function:", error);
     throw error;
+  }
+}
+
+// Fetch unique property types from the database
+export async function fetchPropertyTypes(): Promise<string[]> {
+  console.log("Fetching property types...");
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("property_type");
+
+    if (error) {
+      console.error("Error fetching property types:", error);
+      return [];
+    }
+
+    // Extract unique property types
+    const propertyTypes = [...new Set(data.map(item => item.property_type))];
+    return propertyTypes.filter(type => type !== null && type !== undefined) as string[];
+  } catch (error) {
+    console.error("Error fetching property types:", error);
+    return [];
+  }
+}
+
+// Fetch price ranges from the database
+export async function fetchPriceRanges(): Promise<{ min: number; max: number; label: string }[]> {
+  console.log("Fetching price ranges...");
+  try {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("price");
+
+    if (error) {
+      console.error("Error fetching price ranges:", error);
+      return [];
+    }
+
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // Calculate min and max prices
+    const prices = data.map(item => item.price);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    // Create price ranges based on the data
+    const ranges = [];
+    
+    // For Nigerian properties, we'll create ranges in millions of Naira
+    const rangeSize = 50000000; // 50 million Naira increments
+    let currentMin = Math.floor(minPrice / rangeSize) * rangeSize;
+    
+    while (currentMin <= maxPrice) {
+      const currentMax = currentMin + rangeSize - 1;
+      const count = prices.filter(price => price >= currentMin && price <= currentMax).length;
+      
+      if (count > 0) {
+        // Format the label
+        const minLabel = currentMin >= 1000000 ? `${(currentMin / 1000000).toFixed(0)}M` : currentMin.toLocaleString();
+        const maxLabel = currentMax >= 1000000 ? `${(currentMax / 1000000).toFixed(0)}M` : currentMax.toLocaleString();
+        ranges.push({
+          min: currentMin,
+          max: currentMax,
+          label: `₦${minLabel} - ₦${maxLabel}`
+        });
+      }
+      
+      currentMin += rangeSize;
+    }
+
+    return ranges;
+  } catch (error) {
+    console.error("Error fetching price ranges:", error);
+    return [];
   }
 }

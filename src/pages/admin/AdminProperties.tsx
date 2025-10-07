@@ -1,10 +1,9 @@
 import { PropertyManagement } from "@/components/admin/PropertyManagement";
-import { TestComponent } from "@/components/admin/TestComponent";
+// Removed TestComponent import as it's no longer needed
 
 export default function AdminProperties() {
   console.log("AdminProperties page rendering");
-  
-  // Add a simple test to see if the page is rendering
+
   return (
     <div className="space-y-6">
       <div>
@@ -14,8 +13,7 @@ export default function AdminProperties() {
         </p>
       </div>
       <div>
-        <p>Debug: This text should always be visible</p>
-        <TestComponent />
+        {/* Removed debug text as it's no longer needed */}
         <PropertyManagement />
       </div>
     </div>
