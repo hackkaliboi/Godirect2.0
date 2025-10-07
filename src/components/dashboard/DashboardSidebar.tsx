@@ -69,11 +69,11 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           { title: "KYC Management", url: `/dashboard/admin/kyc`, icon: UserCheck },
           { title: "Transactions", url: `/dashboard/admin/transactions`, icon: DollarSign },
           { title: "Reports", url: `/dashboard/admin/reports`, icon: FileText },
-          { title: "System", url: `/dashboard/admin/system`, icon: Database },
           { title: "Security", url: `/dashboard/admin/security`, icon: Shield },
           { title: "Payments", url: `/dashboard/admin/payments`, icon: CreditCard },
           { title: "Notifications", url: `/dashboard/admin/notifications`, icon: Bell },
           { title: "Settings", url: `/dashboard/admin/settings`, icon: Settings },
+          { title: "Profile", url: `/dashboard/admin/profile`, icon: UserPlus }, // Added Profile link
         ];
 
       case "agent":

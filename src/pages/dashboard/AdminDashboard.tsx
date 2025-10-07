@@ -20,7 +20,7 @@ import AdminCreateListing from "../admin/AdminCreateListing";
 import AdminSettings from "../admin/AdminSettings";
 import AdminTransactions from "../admin/AdminTransactions";
 import AdminReports from "../admin/AdminReports";
-import AdminSystem from "../admin/AdminSystem";
+// Removed AdminSystem import as it's not needed
 
 // Import KYC Management component
 import { AgentKYCManagement } from "@/components/admin/AgentKYCManagement";
@@ -29,6 +29,7 @@ import { AgentKYCManagement } from "@/components/admin/AgentKYCManagement";
 import SecurityCompliance from "@/components/security/SecurityCompliance";
 import PaymentManager from "@/components/payments/PaymentManager";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
+import AdminProfile from "../admin/AdminProfile";
 
 interface Activity {
   id: string;
@@ -249,7 +250,7 @@ export function AdminDashboard() {
         <Route path="create-listing" element={<AdminCreateListing />} />
         <Route path="transactions" element={<AdminTransactions />} />
         <Route path="reports" element={<AdminReports />} />
-        <Route path="system" element={<AdminSystem />} />
+        {/* Removed system route as it's not needed */}
         <Route path="settings" element={<AdminSettings />} />
 
         {/* KYC Management Route */}
@@ -259,6 +260,7 @@ export function AdminDashboard() {
         <Route path="security" element={<SecurityCompliance />} />
         <Route path="payments" element={<PaymentManager />} />
         <Route path="notifications" element={<NotificationCenter />} />
+        <Route path="profile" element={<AdminProfile />} />
       </Routes>
     </DashboardLayout>
   );

@@ -11,12 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CurrencySelector, PriceDisplay } from "@/components/ui/currency-selector";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import CurrencyManagementComponent from "@/components/admin/CurrencyManagementComponent";
-import { 
-  Settings, 
-  Globe, 
-  Mail, 
-  Shield, 
-  Database, 
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import {
+  Settings,
+  Globe,
+  Mail,
+  Shield,
+  Database,
   Bell,
   Palette,
   Key,
@@ -27,25 +29,76 @@ import {
   Check,
   DollarSign,
   TrendingUp,
-  RefreshCw
+  RefreshCw,
+  Server,
+  HardDrive,
+  Zap,
+  AlertTriangle
 } from "lucide-react";
 
-export default function AdminSettings() {
-  const [theme, setTheme] = useState("system");
-  const [primaryColor, setPrimaryColor] = useState("blue");
-  const [fontSize, setFontSize] = useState("medium");
-  const [compactMode, setCompactMode] = useState(false);
-  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+interface SystemSettings {
+  platform_name: string;
+  platform_url: string;
+  platform_description: string;
+  user_registration_enabled: boolean;
+  agent_applications_enabled: boolean;
+  property_auto_approval: boolean;
+  smtp_host: string;
+  smtp_port: string;
+  smtp_username: string;
+  smtp_password: string;
+  email_welcome_enabled: boolean;
+  email_property_notifications: boolean;
+  security_2fa_required: boolean;
+  email_verification_required: boolean;
+  login_rate_limiting: boolean;
+  api_key: string;
+  notifications_new_users: boolean;
+  notifications_property_submissions: boolean;
+  notifications_system_alerts: boolean;
+  theme: string;
+  primary_color: string;
+  font_size: string;
+  compact_mode: boolean;
+  animations_enabled: boolean;
+  logo_url: string;
+  favicon_url: string;
+  brand_name: string;
+}
 
-  // Color options for primary theme
-  const colorOptions = [
-    { value: "blue", label: "Blue", color: "hsl(221, 83%, 53%)" },
-    { value: "green", label: "Green", color: "hsl(142, 76%, 36%)" },
-    { value: "purple", label: "Purple", color: "hsl(262, 83%, 58%)" },
-    { value: "orange", label: "Orange", color: "hsl(25, 95%, 53%)" },
-    { value: "red", label: "Red", color: "hsl(0, 84%, 60%)" },
-    { value: "pink", label: "Pink", color: "hsl(336, 75%, 60%)" },
-  ];
+export default function AdminSettings() {
+  const { currentCurrency } = useCurrency();
+  const [settings, setSettings] = useState<SystemSettings>({
+    platform_name: "RealEstate Platform",
+    platform_url: "https://yourdomain.com",
+    platform_description: "Your comprehensive real estate solution",
+    user_registration_enabled: true,
+    agent_applications_enabled: true,
+    property_auto_approval: false,
+    smtp_host: "",
+    smtp_port: "587",
+    smtp_username: "",
+    smtp_password: "",
+    email_welcome_enabled: true,
+    email_property_notifications: true,
+    security_2fa_required: false,
+    email_verification_required: true,
+    login_rate_limiting: true,
+    api_key: "",
+    notifications_new_users: true,
+    notifications_property_submissions: true,
+    notifications_system_alerts: true,
+    theme: "system",
+    primary_color: "blue",
+    font_size: "medium",
+    compact_mode: false,
+    animations_enabled: true,
+    logo_url: "",
+    favicon_url: "",
+    brand_name: "RealEstate Platform"
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const applyTheme = (selectedTheme: string) => {
     const root = document.documentElement;
@@ -68,13 +121,13 @@ export default function AdminSettings() {
     const root = document.documentElement;
     const colorMap = {
       blue: "214 88% 27%",
-      green: "142 76% 36%", 
+      green: "142 76% 36%",
       purple: "262 83% 58%",
       orange: "25 95% 53%",
       red: "0 84% 60%",
       pink: "336 75% 60%"
     };
-    
+
     const selectedColor = colorMap[color as keyof typeof colorMap];
     if (selectedColor) {
       root.style.setProperty("--primary", selectedColor);
@@ -82,13 +135,109 @@ export default function AdminSettings() {
     }
   };
 
+  // Load settings from database
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    loadSettings();
+  }, []);
 
-  useEffect(() => {
-    applyPrimaryColor(primaryColor);
-  }, [primaryColor]);
+  const loadSettings = async () => {
+    try {
+      setLoading(true);
+
+      // Load all settings from the database
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('key, value');
+
+      if (error) throw error;
+
+      // Convert the data to a settings object
+      const loadedSettings: any = { ...settings };
+      if (data) {
+        data.forEach(item => {
+          // Convert JSONB values to appropriate types
+          const key = item.key as keyof SystemSettings;
+          if (key in settings) {
+            // Handle JSONB values - they might be stored as strings or objects
+            let parsedValue = item.value;
+
+            // If it's a string that looks like JSON, parse it
+            if (typeof item.value === 'string') {
+              try {
+                parsedValue = JSON.parse(item.value);
+              } catch (e) {
+                // If parsing fails, use the value as is
+                parsedValue = item.value;
+              }
+            }
+
+            if (typeof settings[key] === 'boolean') {
+              loadedSettings[key] = parsedValue === 'true' || parsedValue === true;
+            } else if (typeof settings[key] === 'number') {
+              loadedSettings[key] = Number(parsedValue);
+            } else {
+              loadedSettings[key] = parsedValue;
+            }
+          }
+        });
+      }
+
+      setSettings(loadedSettings as SystemSettings);
+
+      // Removed theme application since appearance settings are now in the profile page
+      // applyTheme(loadedSettings.theme);
+      // applyPrimaryColor(loadedSettings.primary_color);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      toast.error('Failed to load settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveSettings = async () => {
+    try {
+      setSaving(true);
+
+      // Save each setting individually
+      const promises = Object.entries(settings).map(([key, value]) => {
+        return supabase
+          .from('system_settings')
+          .insert({
+            key,
+            value: typeof value === 'boolean' ? value.toString() : value,
+            description: `System setting for ${key}`,
+            updated_at: new Date().toISOString()
+          })
+          .select();
+      });
+
+      await Promise.all(promises);
+
+      // Removed theme application since appearance settings are now in the profile page
+      // applyTheme(settings.theme);
+      // applyPrimaryColor(settings.primary_color);
+
+      toast.success('Settings saved successfully');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSettingChange = (key: keyof SystemSettings, value: any) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -103,22 +252,30 @@ export default function AdminSettings() {
               Configure platform settings and preferences
             </p>
           </div>
-          <Button size="sm" className="self-start sm:self-center">
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
+          <Button onClick={saveSettings} disabled={saving} size="sm" className="self-start sm:self-center">
+            {saving ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </>
+            )}
           </Button>
         </div>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 h-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto">
             <TabsTrigger value="general" className="text-xs sm:text-sm px-2 sm:px-4">General</TabsTrigger>
             <TabsTrigger value="currency" className="text-xs sm:text-sm px-2 sm:px-4">Currency</TabsTrigger>
             <TabsTrigger value="email" className="text-xs sm:text-sm px-2 sm:px-4">Email</TabsTrigger>
             <TabsTrigger value="security" className="text-xs sm:text-sm px-2 sm:px-4">Security</TabsTrigger>
             <TabsTrigger value="notifications" className="text-xs sm:text-sm px-2 sm:px-4">Notifications</TabsTrigger>
-            <TabsTrigger value="appearance" className="text-xs sm:text-sm px-2 sm:px-4">Appearance</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="general" className="space-y-6">
             <Card>
               <CardHeader>
@@ -131,17 +288,29 @@ export default function AdminSettings() {
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="platform-name">Platform Name</Label>
-                    <Input id="platform-name" defaultValue="RealEstate Platform" />
+                    <Input
+                      id="platform-name"
+                      value={settings.platform_name}
+                      onChange={(e) => handleSettingChange('platform_name', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="platform-url">Platform URL</Label>
-                    <Input id="platform-url" defaultValue="https://yourdomain.com" />
+                    <Input
+                      id="platform-url"
+                      value={settings.platform_url}
+                      onChange={(e) => handleSettingChange('platform_url', e.target.value)}
+                    />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="platform-description">Platform Description</Label>
-                  <Input id="platform-description" defaultValue="Your comprehensive real estate solution" />
+                  <Input
+                    id="platform-description"
+                    value={settings.platform_description}
+                    onChange={(e) => handleSettingChange('platform_description', e.target.value)}
+                  />
                 </div>
 
                 <Separator />
@@ -154,32 +323,41 @@ export default function AdminSettings() {
                         <Label>User Registration</Label>
                         <p className="text-sm text-muted-foreground">Allow new users to register</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={settings.user_registration_enabled}
+                        onCheckedChange={(checked) => handleSettingChange('user_registration_enabled', checked)}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>Agent Applications</Label>
                         <p className="text-sm text-muted-foreground">Accept agent applications</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={settings.agent_applications_enabled}
+                        onCheckedChange={(checked) => handleSettingChange('agent_applications_enabled', checked)}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>Property Auto-Approval</Label>
                         <p className="text-sm text-muted-foreground">Automatically approve property listings</p>
                       </div>
-                      <Switch />
+                      <Switch
+                        checked={settings.property_auto_approval}
+                        onCheckedChange={(checked) => handleSettingChange('property_auto_approval', checked)}
+                      />
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="currency" className="space-y-6">
             <CurrencyManagementComponent />
           </TabsContent>
-          
+
           <TabsContent value="email">
             <Card>
               <CardHeader>
@@ -192,22 +370,43 @@ export default function AdminSettings() {
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="smtp-host">SMTP Host</Label>
-                    <Input id="smtp-host" placeholder="smtp.yourdomain.com" />
+                    <Input
+                      id="smtp-host"
+                      placeholder="smtp.yourdomain.com"
+                      value={settings.smtp_host}
+                      onChange={(e) => handleSettingChange('smtp_host', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="smtp-port">SMTP Port</Label>
-                    <Input id="smtp-port" placeholder="587" />
+                    <Input
+                      id="smtp-port"
+                      placeholder="587"
+                      value={settings.smtp_port}
+                      onChange={(e) => handleSettingChange('smtp_port', e.target.value)}
+                    />
                   </div>
                 </div>
-                
+
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="smtp-username">Username</Label>
-                    <Input id="smtp-username" placeholder="noreply@yourdomain.com" />
+                    <Input
+                      id="smtp-username"
+                      placeholder="noreply@yourdomain.com"
+                      value={settings.smtp_username}
+                      onChange={(e) => handleSettingChange('smtp_username', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="smtp-password">Password</Label>
-                    <Input id="smtp-password" type="password" placeholder="••••••••" />
+                    <Input
+                      id="smtp-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={settings.smtp_password}
+                      onChange={(e) => handleSettingChange('smtp_password', e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -221,21 +420,27 @@ export default function AdminSettings() {
                         <Label>Welcome Email</Label>
                         <p className="text-sm text-muted-foreground">Send welcome email to new users</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={settings.email_welcome_enabled}
+                        onCheckedChange={(checked) => handleSettingChange('email_welcome_enabled', checked)}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>Property Notifications</Label>
                         <p className="text-sm text-muted-foreground">Email updates about saved properties</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={settings.email_property_notifications}
+                        onCheckedChange={(checked) => handleSettingChange('email_property_notifications', checked)}
+                      />
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="security">
             <Card>
               <CardHeader>
@@ -251,21 +456,30 @@ export default function AdminSettings() {
                       <Label>Two-Factor Authentication</Label>
                       <p className="text-sm text-muted-foreground">Require 2FA for admin accounts</p>
                     </div>
-                    <Switch />
+                    <Switch
+                      checked={settings.security_2fa_required}
+                      onCheckedChange={(checked) => handleSettingChange('security_2fa_required', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <Label>Email Verification</Label>
                       <p className="text-sm text-muted-foreground">Require email verification for new accounts</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.email_verification_required}
+                      onCheckedChange={(checked) => handleSettingChange('email_verification_required', checked)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <Label>Login Rate Limiting</Label>
                       <p className="text-sm text-muted-foreground">Limit failed login attempts</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.login_rate_limiting}
+                      onCheckedChange={(checked) => handleSettingChange('login_rate_limiting', checked)}
+                    />
                   </div>
                 </div>
 
@@ -276,7 +490,12 @@ export default function AdminSettings() {
                   <div className="space-y-2">
                     <Label htmlFor="api-key">API Key</Label>
                     <div className="flex gap-2">
-                      <Input id="api-key" defaultValue="••••••••••••••••••••" readOnly />
+                      <Input
+                        id="api-key"
+                        value={settings.api_key}
+                        onChange={(e) => handleSettingChange('api_key', e.target.value)}
+                        readOnly
+                      />
                       <Button variant="outline">
                         <Key className="h-4 w-4" />
                       </Button>
@@ -289,8 +508,8 @@ export default function AdminSettings() {
               </CardContent>
             </Card>
           </TabsContent>
-          
-          <TabsContent value="notifications">
+
+          <TabsContent value="notifications" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -307,166 +526,38 @@ export default function AdminSettings() {
                         <Label>New User Registrations</Label>
                         <p className="text-sm text-muted-foreground">Notify when new users register</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={settings.notifications_new_users}
+                        onCheckedChange={(checked) => handleSettingChange('notifications_new_users', checked)}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>Property Submissions</Label>
                         <p className="text-sm text-muted-foreground">Notify about new property listings</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={settings.notifications_property_submissions}
+                        onCheckedChange={(checked) => handleSettingChange('notifications_property_submissions', checked)}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <Label>System Alerts</Label>
                         <p className="text-sm text-muted-foreground">Critical system notifications</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={settings.notifications_system_alerts}
+                        onCheckedChange={(checked) => handleSettingChange('notifications_system_alerts', checked)}
+                      />
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="appearance" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="h-5 w-5" />
-                  Theme Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Color Theme</Label>
-                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                       <Button
-                         variant={theme === "light" ? "default" : "outline"}
-                         className="flex flex-col items-center gap-2 h-auto p-3 sm:p-4 bg-card border-border"
-                         onClick={() => setTheme("light")}
-                       >
-                         <Sun className="h-4 w-4 sm:h-5 sm:w-5" />
-                         <span className="text-xs sm:text-sm">Light</span>
-                         {theme === "light" && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
-                       </Button>
-                       <Button
-                         variant={theme === "dark" ? "default" : "outline"}
-                         className="flex flex-col items-center gap-2 h-auto p-3 sm:p-4 bg-card border-border"
-                         onClick={() => setTheme("dark")}
-                       >
-                         <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
-                         <span className="text-xs sm:text-sm">Dark</span>
-                         {theme === "dark" && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
-                       </Button>
-                       <Button
-                         variant={theme === "system" ? "default" : "outline"}
-                         className="flex flex-col items-center gap-2 h-auto p-3 sm:p-4 bg-card border-border"
-                         onClick={() => setTheme("system")}
-                       >
-                         <Monitor className="h-4 w-4 sm:h-5 sm:w-5" />
-                         <span className="text-xs sm:text-sm">System</span>
-                         {theme === "system" && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
-                       </Button>
-                     </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <Label>Primary Color</Label>
-                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                       {colorOptions.map((color) => (
-                         <Button
-                           key={color.value}
-                           variant={primaryColor === color.value ? "default" : "outline"}
-                           className="flex items-center gap-2 h-auto p-2 sm:p-3 bg-card border-border"
-                           onClick={() => setPrimaryColor(color.value)}
-                         >
-                           <div 
-                             className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-border flex-shrink-0"
-                             style={{ backgroundColor: color.color }}
-                           />
-                           <span className="text-xs sm:text-sm flex-1 text-left">{color.label}</span>
-                           {primaryColor === color.value && <Check className="h-3 w-3 sm:h-4 sm:w-4 ml-auto flex-shrink-0" />}
-                         </Button>
-                       ))}
-                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Display Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="font-size">Font Size</Label>
-                    <Select value={fontSize} onValueChange={setFontSize}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="small">Small</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="large">Large</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Compact Mode</Label>
-                      <p className="text-sm text-muted-foreground">Reduce spacing and padding</p>
-                    </div>
-                    <Switch checked={compactMode} onCheckedChange={setCompactMode} />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label>Animations</Label>
-                      <p className="text-sm text-muted-foreground">Enable smooth transitions and effects</p>
-                    </div>
-                    <Switch checked={animationsEnabled} onCheckedChange={setAnimationsEnabled} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Branding
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="logo-url">Logo URL</Label>
-                    <Input id="logo-url" placeholder="https://yourdomain.com/logo.png" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="favicon-url">Favicon URL</Label>
-                    <Input id="favicon-url" placeholder="https://yourdomain.com/favicon.ico" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="brand-name">Brand Name</Label>
-                    <Input id="brand-name" defaultValue="RealEstate Platform" />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-        </div>
       </div>
+    </div>
   );
 }
