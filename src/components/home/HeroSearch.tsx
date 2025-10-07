@@ -26,7 +26,7 @@ const HeroSearch = () => {
         const { data: typesData, error: typesError } = await supabase
           .from("properties")
           .select("property_type");
-        
+
         if (typesError) {
           console.error("Error fetching property types:", typesError);
         } else {
@@ -51,15 +51,15 @@ const HeroSearch = () => {
 
             // Create price ranges based on the data
             const ranges = [];
-            
+
             // For Nigerian properties, we'll create ranges in millions of Naira
             const rangeSize = 50000000; // 50 million Naira increments
             let currentMin = Math.floor(minPrice / rangeSize) * rangeSize;
-            
+
             while (currentMin <= maxPrice) {
               const currentMax = currentMin + rangeSize - 1;
               const count = prices.filter(price => price >= currentMin && price <= currentMax).length;
-              
+
               if (count > 0) {
                 // Format the label
                 const minLabel = currentMin >= 1000000 ? `${(currentMin / 1000000).toFixed(0)}M` : currentMin.toLocaleString();
@@ -68,7 +68,7 @@ const HeroSearch = () => {
                   label: `₦${minLabel} - ₦${maxLabel}`
                 });
               }
-              
+
               currentMin += rangeSize;
             }
 
@@ -98,7 +98,7 @@ const HeroSearch = () => {
 
     if (location) params.append("location", location);
     if (propertyType) params.append("type", propertyType);
-    
+
     // Parse price range if selected
     if (priceRange) {
       // Extract min and max values from the price range label
@@ -107,20 +107,20 @@ const HeroSearch = () => {
       if (priceMatch) {
         let minPrice = priceMatch[1];
         let maxPrice = priceMatch[2];
-        
+
         // Convert M suffix to actual numbers
         if (minPrice.toLowerCase().endsWith('m')) {
           minPrice = (parseFloat(minPrice) * 1000000).toString();
         } else {
           minPrice = minPrice.replace(/[^\d]/g, ''); // Remove any non-digit characters except decimal
         }
-        
+
         if (maxPrice.toLowerCase().endsWith('m')) {
           maxPrice = (parseFloat(maxPrice) * 1000000).toString();
         } else {
           maxPrice = maxPrice.replace(/[^\d]/g, ''); // Remove any non-digit characters except decimal
         }
-        
+
         params.append("price_min", minPrice);
         params.append("price_max", maxPrice);
       }

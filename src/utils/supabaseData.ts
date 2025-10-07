@@ -692,15 +692,15 @@ export async function fetchPriceRanges(): Promise<{ min: number; max: number; la
 
     // Create price ranges based on the data
     const ranges = [];
-    
+
     // For Nigerian properties, we'll create ranges in millions of Naira
     const rangeSize = 50000000; // 50 million Naira increments
     let currentMin = Math.floor(minPrice / rangeSize) * rangeSize;
-    
+
     while (currentMin <= maxPrice) {
       const currentMax = currentMin + rangeSize - 1;
       const count = prices.filter(price => price >= currentMin && price <= currentMax).length;
-      
+
       if (count > 0) {
         // Format the label
         const minLabel = currentMin >= 1000000 ? `${(currentMin / 1000000).toFixed(0)}M` : currentMin.toLocaleString();
@@ -711,7 +711,7 @@ export async function fetchPriceRanges(): Promise<{ min: number; max: number; la
           label: `₦${minLabel} - ₦${maxLabel}`
         });
       }
-      
+
       currentMin += rangeSize;
     }
 
