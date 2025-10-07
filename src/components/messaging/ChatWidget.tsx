@@ -5,26 +5,32 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  MessageCircle, 
-  Send, 
-  Paperclip, 
-  Phone, 
-  Video, 
+import {
+  MessageCircle,
+  Send,
+  Paperclip,
+  Phone,
+  Video,
   MoreHorizontal,
   X,
   Minimize2,
-  Maximize2
+  Maximize2,
+  User,
+  Home,
+  MapPin,
+  Tag,
+  Bed,
+  Bath
 } from 'lucide-react';
 import { conversationsApi } from '@/lib/api';
 import { ConversationWithMessages, Message } from '@/types/database';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ChatWidgetProps {
   propertyId?: string;
-  agentId?: string;
+  ownerId?: string; // Changed from agentId to ownerId
   isOpen: boolean;
   onToggle: () => void;
   onClose: () => void;
@@ -41,30 +47,32 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMessage, sh
     <div className={`flex gap-2 mb-4 ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
       {showAvatar && !isOwnMessage && (
         <Avatar className="w-8 h-8">
-          <AvatarFallback>A</AvatarFallback>
+          <AvatarFallback>
+            <User className="h-4 w-4" />
+          </AvatarFallback>
         </Avatar>
       )}
-      
+
       <div className={`max-w-[70%] ${isOwnMessage ? 'text-right' : 'text-left'}`}>
         <div
           className={`
             inline-block px-4 py-2 rounded-2xl
-            ${isOwnMessage 
-              ? 'bg-realty-800 text-white rounded-br-md' 
+            ${isOwnMessage
+              ? 'bg-realty-800 text-white rounded-br-md'
               : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-md'
             }
           `}
         >
           <p className="text-sm">{message.message_text}</p>
           {message.message_type === 'image' && message.file_url && (
-            <img 
-              src={message.file_url} 
-              alt="Shared image" 
+            <img
+              src={message.file_url}
+              alt="Shared image"
               className="mt-2 max-w-full h-auto rounded-lg"
             />
           )}
         </div>
-        
+
         <div className={`text-xs text-gray-500 mt-1 ${isOwnMessage ? 'text-right' : 'text-left'}`}>
           {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
           {isOwnMessage && message.read_at && (
@@ -76,12 +84,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMessage, sh
   );
 };
 
-const ChatWidget: React.FC<ChatWidgetProps> = ({ 
-  propertyId, 
-  agentId, 
-  isOpen, 
-  onToggle, 
-  onClose 
+const ChatWidget: React.FC<ChatWidgetProps> = ({
+  propertyId,
+  ownerId, // Changed from agentId to ownerId
+  isOpen,
+  onToggle,
+  onClose
 }) => {
   const { user } = useAuth();
   const [conversation, setConversation] = useState<ConversationWithMessages | null>(null);
@@ -101,37 +109,43 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    if (isOpen && user && propertyId && agentId) {
+    if (isOpen && user && propertyId && ownerId) { // Changed from agentId to ownerId
       initializeConversation();
     }
-  }, [isOpen, user, propertyId, agentId]);
+  }, [isOpen, user, propertyId, ownerId]); // Changed from agentId to ownerId
 
   const initializeConversation = async () => {
-    if (!user || !propertyId || !agentId) return;
+    if (!user || !propertyId || !ownerId) return; // Changed from agentId to ownerId
 
     try {
       setIsLoading(true);
-      
-      // First, try to find existing conversation
+
+      // First, try to find existing conversation with this property
       const conversations = await conversationsApi.getConversations(user.id);
       const existingConversation = conversations.find(
-        conv => conv.property_id === propertyId && conv.agent_id === agentId
+        conv => conv.property_id === propertyId
       );
 
       if (existingConversation) {
         setConversation(existingConversation);
         setMessages(existingConversation.messages || []);
-        
+
         // Mark messages as read
         await conversationsApi.markMessagesAsRead(existingConversation.id);
       } else {
-        // Create new conversation
+        // Create new conversation with property
         const newConversation = await conversationsApi.createConversation(
-          propertyId, 
-          user.id, 
-          agentId
+          propertyId,
+          ownerId // Use ownerId instead of agentId
         );
-        setConversation(newConversation);
+
+        // Convert to ConversationWithMessages type
+        const conversationWithMessages: ConversationWithMessages = {
+          ...newConversation,
+          messages: []
+        };
+
+        setConversation(conversationWithMessages);
         setMessages([]);
       }
     } catch (error) {
@@ -153,10 +167,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
 
       setMessages(prev => [...prev, message]);
       setNewMessage('');
-      
-      // Create notification for agent
-      // This would typically be handled by a backend trigger
-      
+
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
@@ -196,18 +207,17 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
     <div className="fixed bottom-4 right-4 z-50">
       <Card className={`w-96 shadow-2xl transition-all duration-300 ${isMinimized ? 'h-16' : 'h-[600px]'}`}>
         {/* Chat Header */}
-        <CardHeader className="p-4 bg-realty-800 text-white rounded-t-lg">
+        <CardHeader className="p-4 bg-gradient-to-r from-realty-800 to-realty-900 text-white rounded-t-lg shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={conversation?.agent?.image} />
-                <AvatarFallback>
-                  {conversation?.agent?.name?.charAt(0) || 'A'}
+              <Avatar className="w-10 h-10 border-2 border-realty-gold/30">
+                <AvatarFallback className="bg-realty-700">
+                  <User className="h-5 w-5" />
                 </AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-sm font-medium">
-                  {conversation?.agent?.name || 'Agent'}
+                <CardTitle className="text-sm font-semibold">
+                  Property Owner
                 </CardTitle>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
@@ -215,7 +225,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
@@ -235,15 +245,60 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
               </Button>
             </div>
           </div>
-          
+
           {conversation?.property && (
-            <div className="mt-2 p-2 bg-realty-700 rounded-lg">
-              <p className="text-xs text-gray-300 mb-1">Discussing:</p>
-              <p className="text-sm font-medium truncate">
-                {conversation.property.title}
-              </p>
-              <p className="text-xs text-realty-gold">
-                ₦{conversation.property.price.toLocaleString()}
+            <div className="mt-3 p-4 bg-gradient-to-r from-realty-700 to-realty-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Avatar className="w-14 h-14 flex-shrink-0 border-2 border-realty-gold/30">
+                  <AvatarImage src={conversation.property.images?.[0]} />
+                  <AvatarFallback className="bg-realty-600">
+                    <Home className="h-6 w-6 text-white" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-heading font-bold text-lg text-white truncate">
+                    {conversation.property.title}
+                  </h4>
+                  <div className="flex items-center text-realty-200 mt-1">
+                    <MapPin className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                    <span className="text-sm truncate">
+                      {conversation.property.street}, {conversation.property.city}, {conversation.property.state}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <div className="flex items-center bg-realty-gold/20 text-realty-gold px-3 py-1.5 rounded-full text-sm font-medium">
+                      <Tag className="h-3.5 w-3.5 mr-1.5" />
+                      ₦{conversation.property.price?.toLocaleString() || 'N/A'}
+                    </div>
+                    {conversation.property.bedrooms && (
+                      <div className="flex items-center bg-blue-500/20 text-blue-300 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <Bed className="h-3.5 w-3.5 mr-1.5" />
+                        {conversation.property.bedrooms} {conversation.property.bedrooms === 1 ? 'Bed' : 'Beds'}
+                      </div>
+                    )}
+                    {conversation.property.bathrooms && (
+                      <div className="flex items-center bg-purple-500/20 text-purple-300 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <Bath className="h-3.5 w-3.5 mr-1.5" />
+                        {conversation.property.bathrooms} {conversation.property.bathrooms === 1 ? 'Bath' : 'Baths'}
+                      </div>
+                    )}
+                    {conversation.property.property_type && (
+                      <div className="flex items-center bg-orange-500/20 text-orange-300 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <Home className="h-3.5 w-3.5 mr-1.5" />
+                        {conversation.property.property_type}
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3 text-sm text-realty-200 flex items-center">
+                    <span className="font-medium">Property ID:</span>
+                    <span className="ml-2 font-mono bg-realty-900/50 px-2.5 py-1 rounded text-xs">
+                      {conversation.property.id}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-realty-200 mt-3 pt-3 border-t border-realty-600">
+                This conversation is about the property shown above. Please reference this property in your communications.
               </p>
             </div>
           )}
@@ -270,7 +325,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
                     {messages.map((message, index) => {
                       const isOwnMessage = message.sender_id === user?.id;
                       const showAvatar = index === 0 || messages[index - 1].sender_id !== message.sender_id;
-                      
+
                       return (
                         <MessageBubble
                           key={message.id}
@@ -280,9 +335,9 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
                         />
                       );
                     })}
+                    <div ref={messagesEndRef} />
                   </div>
                 )}
-                <div ref={messagesEndRef} />
               </ScrollArea>
 
               {/* Message Input */}
@@ -296,7 +351,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
                   >
                     <Paperclip className="w-4 h-4" />
                   </Button>
-                  
+
                   <div className="flex-1">
                     <Input
                       value={newMessage}
@@ -306,7 +361,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
                       className="border-gray-300 focus:border-realty-800"
                     />
                   </div>
-                  
+
                   <Button
                     onClick={sendMessage}
                     disabled={!newMessage.trim()}
@@ -316,7 +371,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>
-                
+
                 <input
                   ref={fileInputRef}
                   type="file"

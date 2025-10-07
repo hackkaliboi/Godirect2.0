@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 import {
     MessageSquare,
     Send,
@@ -20,6 +21,12 @@ import {
     Search,
     X,
     Info,
+    Trash2,
+    Home,
+    MapPin,
+    Tag,
+    Bed,
+    Bath
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -30,7 +37,9 @@ interface UnifiedMessagingProps {
 }
 
 export default function UnifiedMessaging({ conversationId }: UnifiedMessagingProps) {
+    console.log("UnifiedMessaging mounted with conversationId:", conversationId);
     const { user } = useAuth();
+    console.log("Current user from AuthContext:", user);
     const [conversations, setConversations] = useState<ConversationWithMessages[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<ConversationWithMessages | null>(null);
     const [loading, setLoading] = useState(true);
@@ -42,20 +51,42 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
 
     useEffect(() => {
         if (user) {
+            console.log("Loading conversations for user:", user);
             loadConversations();
         }
     }, [user]);
 
     useEffect(() => {
+        console.log("conversationId changed to:", conversationId);
+        console.log("conversations length:", conversations.length);
+        // Select conversation when conversations are loaded or when conversationId changes
         if (conversationId && conversations.length > 0) {
             const conversation = conversations.find(c => c.id === conversationId);
+            console.log("Trying to select conversation", conversationId, "found:", conversation);
             if (conversation) {
+                console.log("Selecting conversation:", conversation);
+                console.log("Conversation messages:", conversation.messages);
                 setSelectedConversation(conversation);
+            } else {
+                console.log("Conversation not found in loaded data");
+                // If conversation not found, try to load it directly
+                loadSingleConversation(conversationId);
             }
+        } else if (conversationId && conversations.length === 0) {
+            // If we have a conversationId but no conversations loaded, load this specific conversation
+            console.log("Loading specific conversation", conversationId);
+            loadSingleConversation(conversationId);
+        } else {
+            console.log("Either no conversationId or no conversations loaded");
         }
     }, [conversationId, conversations]);
 
     useEffect(() => {
+        console.log("Selected conversation changed:", selectedConversation);
+    }, [selectedConversation]);
+
+    useEffect(() => {
+        console.log("Scrolling to bottom");
         scrollToBottom();
     }, [selectedConversation?.messages]);
 
@@ -64,21 +95,100 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
             setLoading(true);
             setError(null);
             const data = await conversationsApi.getConversations(user!.id);
+            console.log("Loaded conversations:", data);
             setConversations(data);
 
-            // If there's a conversationId in the URL, select it
+            // If there's a conversationId provided, select it
             if (conversationId && data.length > 0) {
                 const conversation = data.find(c => c.id === conversationId);
+                console.log("Trying to auto-select conversation", conversationId, "found:", conversation);
                 if (conversation) {
+                    console.log("Auto-selecting conversation:", conversation);
+                    console.log("Conversation messages:", conversation.messages);
                     setSelectedConversation(conversation);
+                } else {
+                    console.log("Conversation not found in loaded data");
                 }
+            } else {
+                console.log("No conversationId provided or no data loaded");
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error loading conversations:", err);
+            console.error("Error details:", {
+                message: err.message,
+                code: err.code,
+                details: err.details,
+                hint: err.hint
+            });
             setError(err.message || "Failed to load messages");
             toast.error("Failed to load messages: " + (err.message || "Unknown error"));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadSingleConversation = async (convId: string) => {
+        try {
+            console.log("Loading single conversation:", convId);
+
+            // Try to get conversation directly first
+            const { data: directData, error: directError } = await supabase
+                .from('conversations')
+                .select(`
+                    *,
+                    property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street),
+                    messages(*)
+                `)
+                .eq('id', convId)
+                .single();
+
+            if (!directError && directData) {
+                console.log("Loaded single conversation directly:", directData);
+                setSelectedConversation(directData as ConversationWithMessages);
+
+                // Add this conversation to the conversations list if it's not already there
+                setConversations(prev => {
+                    if (!prev.find(c => c.id === directData.id)) {
+                        return [...prev, directData as ConversationWithMessages];
+                    }
+                    return prev;
+                });
+                return;
+            }
+
+            // If direct fetch failed, try to get it through messages
+            const { data: messageData, error: messageError } = await supabase
+                .from('messages')
+                .select(`
+                    conversation:conversations(*, property:properties(id, title, price, images, city, state, bedrooms, bathrooms, property_type, street), messages(*))
+                `)
+                .eq('conversation_id', convId)
+                .limit(1);
+
+            if (!messageError && messageData && messageData.length > 0 && messageData[0].conversation) {
+                console.log("Loaded single conversation through messages:", messageData[0].conversation);
+                setSelectedConversation(messageData[0].conversation as ConversationWithMessages);
+
+                // Add this conversation to the conversations list if it's not already there
+                setConversations(prev => {
+                    if (!prev.find(c => c.id === messageData[0].conversation.id)) {
+                        return [...prev, messageData[0].conversation as ConversationWithMessages];
+                    }
+                    return prev;
+                });
+                return;
+            }
+
+            throw directError || messageError || new Error("Conversation not found");
+        } catch (err: any) {
+            console.error("Error loading single conversation:", err);
+            console.error("Error details:", {
+                message: err.message,
+                code: err.code,
+                details: err.details,
+                hint: err.hint
+            });
+            toast.error("Failed to load conversation: " + (err.message || "Unknown error"));
         }
     };
 
@@ -90,19 +200,32 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
         if (!message.trim() || !selectedConversation || sending) return;
 
         try {
-            setSending(true);
-            await conversationsApi.sendMessage({
+            console.log("Sending message:", {
                 conversation_id: selectedConversation.id,
                 message_text: message.trim()
             });
 
-            // Refresh the conversation
-            await loadConversations();
+            setSending(true);
+            const result = await conversationsApi.sendMessage({
+                conversation_id: selectedConversation.id,
+                message_text: message.trim()
+            });
+
+            console.log("Message sent successfully:", result);
+
+            // Refresh just this conversation instead of all conversations
+            await loadSingleConversation(selectedConversation.id);
 
             // Clear the message input
             setMessage("");
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error sending message:", err);
+            console.error("Error details:", {
+                message: err.message,
+                code: err.code,
+                details: err.details,
+                hint: err.hint
+            });
             toast.error("Failed to send message: " + (err.message || "Unknown error"));
         } finally {
             setSending(false);
@@ -116,13 +239,63 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
         }
     };
 
+    // Refresh conversation list periodically to get new messages
+    useEffect(() => {
+        if (selectedConversation) {
+            const interval = setInterval(() => {
+                loadSingleConversation(selectedConversation.id);
+            }, 10000); // Refresh every 10 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [selectedConversation]);
+
+    // Also refresh conversations list periodically
+    useEffect(() => {
+        if (user) {
+            const interval = setInterval(() => {
+                loadConversations();
+            }, 30000); // Refresh every 30 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [user, loadConversations]);
+
     const filteredConversations = conversations.filter(conversation => {
         if (!searchTerm) return true;
         const propertyTitle = conversation.property?.title?.toLowerCase() || "";
-        const lastMessage = conversation.messages?.[0]?.message_text?.toLowerCase() || "";
+        // Get the most recent message for search
+        const messages = conversation.messages || [];
+        const lastMessage = messages.length > 0
+            ? messages[messages.length - 1]?.message_text?.toLowerCase() || ""
+            : "";
         return propertyTitle.includes(searchTerm.toLowerCase()) ||
             lastMessage.includes(searchTerm.toLowerCase());
     });
+
+    // Function to delete a conversation
+    const deleteConversation = async (conversationId: string) => {
+        if (!window.confirm("Are you sure you want to delete this conversation? This cannot be undone.")) {
+            return;
+        }
+
+        try {
+            await conversationsApi.deleteConversation(conversationId);
+
+            // Remove the conversation from the list
+            setConversations(prev => prev.filter(c => c.id !== conversationId));
+
+            // If the deleted conversation was selected, clear the selection
+            if (selectedConversation?.id === conversationId) {
+                setSelectedConversation(null);
+            }
+
+            toast.success("Conversation deleted successfully");
+        } catch (error) {
+            console.error("Error deleting conversation:", error);
+            toast.error("Failed to delete conversation");
+        }
+    };
 
     if (!user) {
         return <div>Please log in to view your messages</div>;
@@ -146,24 +319,6 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                         New Message
                     </Button>
                 </div>
-
-                {/* Information about messaging system */}
-                <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-                    <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                            <div>
-                                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                    How Messaging Works
-                                </p>
-                                <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                                    Start conversations by inquiring about properties. Property owners will respond to your messages here.
-                                    You can send text messages, schedule calls, or arrange property viewings.
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
 
                 <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-250px)]">
                     {/* Conversations List */}
@@ -214,22 +369,22 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                                         <div
                                             key={conversation.id}
                                             className={cn(
-                                                "p-4 hover:bg-muted/50 cursor-pointer transition-colors",
-                                                selectedConversation?.id === conversation.id ? "bg-muted" : ""
+                                                "p-4 hover:bg-muted/50 cursor-pointer transition-all duration-200 border-b last:border-b-0 group",
+                                                selectedConversation?.id === conversation.id ? "bg-muted border-l-4 border-l-primary" : ""
                                             )}
                                             onClick={() => setSelectedConversation(conversation)}
                                         >
                                             <div className="flex items-center space-x-3">
-                                                <Avatar>
+                                                <Avatar className="w-12 h-12 border border-muted">
                                                     <AvatarImage src={conversation.property?.images?.[0]} />
-                                                    <AvatarFallback>
-                                                        <User className="h-4 w-4" />
+                                                    <AvatarFallback className="bg-muted">
+                                                        <User className="h-5 w-5" />
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-baseline justify-between">
                                                         <h3 className="font-medium truncate">
-                                                            {conversation.property?.title || 'Property Inquiry'}
+                                                            {conversation.property?.title || conversation.title || 'Direct Message'}
                                                         </h3>
                                                         {conversation.last_message_at && (
                                                             <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
@@ -237,11 +392,58 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className="text-sm text-muted-foreground truncate">
-                                                        {conversation.messages?.[0]?.message_text?.substring(0, 50) || 'No messages yet'}
-                                                        {conversation.messages?.[0]?.message_text?.length > 50 ? '...' : ''}
-                                                    </p>
+                                                    {conversation.property ? (
+                                                        <>
+                                                            <div className="flex items-center text-xs text-muted-foreground mt-1">
+                                                                <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                                                                <span className="truncate">
+                                                                    {conversation.property.street}, {conversation.property.city}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                                                    <Tag className="h-2.5 w-2.5 mr-1" />
+                                                                    ₦{conversation.property.price?.toLocaleString() || 'N/A'}
+                                                                </span>
+                                                                {conversation.property.bedrooms && (
+                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                        <Bed className="h-2.5 w-2.5 mr-1" />
+                                                                        {conversation.property.bedrooms}B
+                                                                    </span>
+                                                                )}
+                                                                {conversation.property.bathrooms && (
+                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                                        <Bath className="h-2.5 w-2.5 mr-1" />
+                                                                        {conversation.property.bathrooms}Ba
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <p className="text-sm text-muted-foreground truncate mt-1">
+                                                            {(() => {
+                                                                const messages = conversation.messages || [];
+                                                                if (messages.length > 0) {
+                                                                    const lastMessage = messages[messages.length - 1];
+                                                                    const text = lastMessage?.message_text?.substring(0, 50) || 'No messages yet';
+                                                                    return text + (lastMessage?.message_text?.length > 50 ? '...' : '');
+                                                                }
+                                                                return 'No messages yet';
+                                                            })()}
+                                                        </p>
+                                                    )}
                                                 </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        deleteConversation(conversation.id);
+                                                    }}
+                                                >
+                                                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                                                </Button>
                                             </div>
                                         </div>
                                     ))}
@@ -254,27 +456,72 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                     <div className="lg:w-2/3 flex flex-col border rounded-lg">
                         {selectedConversation ? (
                             <>
-                                <div className="p-4 border-b flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                        <Avatar>
+                                <div className="p-4 border-b flex items-start justify-between bg-gradient-to-r from-muted/50 to-muted/30 shadow-sm">
+                                    <div className="flex items-start space-x-3 flex-1 min-w-0">
+                                        <Avatar className="mt-1 w-14 h-14 border-2 border-primary/20">
                                             <AvatarImage src={selectedConversation.property?.images?.[0]} />
-                                            <AvatarFallback>
-                                                <User className="h-5 w-5" />
+                                            <AvatarFallback className="bg-primary/10">
+                                                <Home className="h-6 w-6 text-primary" />
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div>
-                                            <h3 className="font-medium">{selectedConversation.property?.title || 'Property Inquiry'}</h3>
-                                            <p className="text-sm text-muted-foreground">Property Owner</p>
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="font-heading font-bold text-xl truncate">
+                                                {selectedConversation.property?.title || selectedConversation.title || 'Direct Message'}
+                                            </h3>
+                                            {selectedConversation.property ? (
+                                                <>
+                                                    <div className="flex items-center text-muted-foreground mt-1">
+                                                        <MapPin className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                                                        <span className="truncate text-sm">
+                                                            {selectedConversation.property.street}, {selectedConversation.property.city}, {selectedConversation.property.state}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2 mt-3">
+                                                        <div className="flex items-center bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm font-medium">
+                                                            <Tag className="h-4 w-4 mr-1.5" />
+                                                            ₦{selectedConversation.property.price?.toLocaleString() || 'Price not available'}
+                                                        </div>
+                                                        {selectedConversation.property.bedrooms && (
+                                                            <div className="flex items-center bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                                                                <Bed className="h-4 w-4 mr-1.5" />
+                                                                {selectedConversation.property.bedrooms} {selectedConversation.property.bedrooms === 1 ? 'Bed' : 'Beds'}
+                                                            </div>
+                                                        )}
+                                                        {selectedConversation.property.bathrooms && (
+                                                            <div className="flex items-center bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                                                                <Bath className="h-4 w-4 mr-1.5" />
+                                                                {selectedConversation.property.bathrooms} {selectedConversation.property.bathrooms === 1 ? 'Bath' : 'Baths'}
+                                                            </div>
+                                                        )}
+                                                        {selectedConversation.property.property_type && (
+                                                            <div className="flex items-center bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                                                                <Home className="h-4 w-4 mr-1.5" />
+                                                                {selectedConversation.property.property_type}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="mt-3 text-sm text-muted-foreground flex items-center">
+                                                        <span className="font-medium">Property ID:</span>
+                                                        <span className="ml-2 font-mono bg-muted px-2 py-1 rounded text-xs">
+                                                            {selectedConversation.property.id}
+                                                        </span>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <p className="text-muted-foreground mt-1">
+                                                    Direct Conversation
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className="flex space-x-2">
-                                        <Button variant="ghost" size="sm">
+                                    <div className="flex space-x-1 ml-2">
+                                        <Button variant="outline" size="sm" className="h-9 w-9 p-0">
                                             <Phone className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="sm">
+                                        <Button variant="outline" size="sm" className="h-9 w-9 p-0">
                                             <Video className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="ghost" size="sm">
+                                        <Button variant="outline" size="sm" className="h-9 w-9 p-0">
                                             <MoreVertical className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -282,34 +529,40 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
 
                                 <ScrollArea className="flex-1 p-4">
                                     <div className="space-y-4">
-                                        {selectedConversation.messages?.map((msg) => (
-                                            <div
-                                                key={msg.id}
-                                                className={cn(
-                                                    "flex",
-                                                    msg.sender_type === 'user' ? "justify-end" : "justify-start"
-                                                )}
-                                            >
+                                        {selectedConversation.messages?.length > 0 ? (
+                                            selectedConversation.messages.map((msg) => (
                                                 <div
+                                                    key={msg.id}
                                                     className={cn(
-                                                        "max-w-[80%] rounded-lg px-4 py-2",
-                                                        msg.sender_type === 'user'
-                                                            ? "bg-primary text-primary-foreground"
-                                                            : "bg-muted"
+                                                        "flex",
+                                                        msg.sender_type === 'user' ? "justify-end" : "justify-start"
                                                     )}
                                                 >
-                                                    <p className="text-sm">{msg.message_text}</p>
-                                                    <p
+                                                    <div
                                                         className={cn(
-                                                            "text-xs mt-1",
-                                                            msg.sender_type === 'user' ? "text-primary-foreground/70" : "text-muted-foreground"
+                                                            "max-w-[80%] rounded-lg px-4 py-2",
+                                                            msg.sender_type === 'user'
+                                                                ? "bg-primary text-primary-foreground"
+                                                                : "bg-muted"
                                                         )}
                                                     >
-                                                        {format(new Date(msg.created_at), 'HH:mm')}
-                                                    </p>
+                                                        <p className="text-sm">{msg.message_text}</p>
+                                                        <p
+                                                            className={cn(
+                                                                "text-xs mt-1",
+                                                                msg.sender_type === 'user' ? "text-primary-foreground/70" : "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            {format(new Date(msg.created_at), 'HH:mm')}
+                                                        </p>
+                                                    </div>
                                                 </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center text-muted-foreground py-4">
+                                                No messages yet. Start the conversation!
                                             </div>
-                                        ))}
+                                        )}
                                         <div ref={messagesEndRef} />
                                     </div>
                                 </ScrollArea>
@@ -320,7 +573,10 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                                             <Input
                                                 placeholder="Type your message..."
                                                 value={message}
-                                                onChange={(e) => setMessage(e.target.value)}
+                                                onChange={(e) => {
+                                                    console.log("Message input changed:", e.target.value);
+                                                    setMessage(e.target.value);
+                                                }}
                                                 onKeyPress={handleKeyPress}
                                                 className="pr-20"
                                             />
@@ -334,7 +590,10 @@ export default function UnifiedMessaging({ conversationId }: UnifiedMessagingPro
                                             </div>
                                         </div>
                                         <Button
-                                            onClick={handleSendMessage}
+                                            onClick={() => {
+                                                console.log("Send button clicked");
+                                                handleSendMessage();
+                                            }}
                                             disabled={!message.trim() || sending}
                                             className="h-10"
                                         >
