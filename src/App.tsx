@@ -34,7 +34,6 @@ import UserSignup from "./pages/auth/UserSignup";
 import AdminLogin from "./pages/auth/AdminLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import DiagnosticTest from "./components/DiagnosticTest";
 
 // Context Providers
 import { AuthProvider, RequireAuth } from "./contexts/AuthContext";

@@ -45,19 +45,23 @@ import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
+// Extend the Notification interface to include priority if it's used
 interface NotificationWithDetails extends Notification {
   property_title?: string;
   sender_name?: string;
+  priority?: string; // Add priority property
 }
 
 const NotificationCenter = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [notifications, setNotifications] = useState<NotificationWithDetails[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<NotificationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [selectedNotification, setSelectedNotification] = useState<NotificationWithDetails | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
+  console.log('NotificationCenter rendered with:', { user, authLoading, loading });
 
   const notificationTypes = [
     { 
@@ -105,23 +109,40 @@ const NotificationCenter = () => {
   ];
 
   useEffect(() => {
-    fetchNotifications();
-  }, [user]);
+    // Only fetch notifications when user is loaded and available
+    if (!authLoading && user) {
+      fetchNotifications();
+    } else if (!authLoading && !user) {
+      // If auth is done loading but there's no user, stop loading
+      setLoading(false);
+    }
+  }, [user, authLoading]);
 
   useEffect(() => {
     filterNotifications();
   }, [notifications, filter]);
 
   const fetchNotifications = async () => {
-    if (!user) return;
+    console.log('fetchNotifications called');
+    // Double-check that user exists
+    if (!user) {
+      console.log('No user found, setting loading to false');
+      setLoading(false);
+      return;
+    }
+    
+    console.log('Fetching notifications for user:', user.id);
     
     try {
       setLoading(true);
       const response = await notificationsApi.getUserNotifications(user.id);
+      console.log('Received notifications response:', response);
       setNotifications(response);
     } catch (error) {
       console.error("Error fetching notifications:", error);
       toast.error("Failed to fetch notifications");
+      // Even on error, we should stop loading to show the error state
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -245,11 +266,31 @@ const NotificationCenter = () => {
 
   const stats = getNotificationStats();
 
-  if (loading) {
+  // Show loading state while auth is loading or while fetching notifications
+  if (authLoading || loading) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-lg">Loading notifications...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if user is not logged in
+  if (!user) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <Bell className="h-12 w-12 text-realty-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-realty-900 dark:text-white mb-2">
+              Please log in to view notifications
+            </h3>
+            <p className="text-realty-600 dark:text-realty-400">
+              You need to be logged in to see your notifications.
+            </p>
+          </div>
         </div>
       </div>
     );

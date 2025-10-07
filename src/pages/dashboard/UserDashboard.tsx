@@ -18,14 +18,13 @@ import UserProperties from "../user/UserProperties";
 import UserMessages from "../user/UserMessages";
 import UserAppointments from "../user/UserAppointments";
 import UserSaved from "../user/UserSaved";
-import UserHistory from "../user/UserHistory";
-import UserApplications from "../user/UserApplications";
 import UserProfile from "../user/UserProfile";
 
 // Import new feature components
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import UnifiedSearchHistory from "@/components/searches/UnifiedSearchHistory";
 import PaymentManager from "@/components/payments/PaymentManager";
+import UnifiedMessaging from "@/components/messages/UnifiedMessaging";
 
 function UserDashboardHome() {
   const { user } = useAuth();
@@ -175,17 +174,14 @@ export function UserDashboard() {
       <Routes>
         <Route index element={<UserDashboardHome />} />
         <Route path="properties" element={<UserProperties />} />
-        <Route path="messages" element={<UserMessages />} />
+        <Route path="messages" element={<UnifiedMessaging />} />
         <Route path="appointments" element={<UserAppointments />} />
         <Route path="saved" element={<UserSaved />} />
-        <Route path="history" element={<UnifiedSearchHistory />} />
-        <Route path="applications" element={<UserApplications />} />
-        <Route path="profile" element={<UserProfile />} />
-
-        {/* New Feature Routes */}
-        <Route path="notifications" element={<NotificationCenter />} />
+        {/* Removed history route since it's included in the searches page */}
         <Route path="searches" element={<UnifiedSearchHistory />} />
+        <Route path="notifications" element={<NotificationCenter />} />
         <Route path="payments" element={<PaymentManager />} />
+        <Route path="profile" element={<UserProfile />} />
       </Routes>
     </DashboardLayout>
   );

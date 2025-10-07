@@ -32,6 +32,7 @@ import {
   CreditCard,
   CalendarCheck,
   UserPlus,
+  Clock,
 } from "lucide-react";
 
 interface DashboardSidebarProps {
@@ -79,10 +80,9 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
           ...commonItems,
           { title: "My Listings", url: `/dashboard/user/listings`, icon: Building2 },
           { title: "Saved Properties", url: `/dashboard/user/saved`, icon: Heart },
-          { title: "Search Management", url: `/dashboard/user/history`, icon: Search },
+          { title: "Search Management", url: `/dashboard/user/searches`, icon: Search },
           { title: "Appointments", url: `/dashboard/user/appointments`, icon: Calendar },
           { title: "Messages", url: `/dashboard/user/messages`, icon: MessageSquare },
-          { title: "My Applications", url: `/dashboard/user/applications`, icon: FileText },
           { title: "Notifications", url: `/dashboard/user/notifications`, icon: Bell },
           { title: "Payments", url: `/dashboard/user/payments`, icon: CreditCard },
           { title: "Profile", url: `/dashboard/user/profile`, icon: Settings },
@@ -92,10 +92,9 @@ export function DashboardSidebar({ userRole }: DashboardSidebarProps) {
         return [
           ...commonItems,
           { title: "Saved Properties", url: `/dashboard/user/saved`, icon: Heart },
-          { title: "Search Management", url: `/dashboard/user/history`, icon: Search },
+          { title: "Searches", url: `/dashboard/user/searches`, icon: Search },
           { title: "Appointments", url: `/dashboard/user/appointments`, icon: Calendar },
           { title: "Messages", url: `/dashboard/user/messages`, icon: MessageSquare },
-          { title: "My Applications", url: `/dashboard/user/applications`, icon: FileText },
           { title: "Notifications", url: `/dashboard/user/notifications`, icon: Bell },
           { title: "Payments", url: `/dashboard/user/payments`, icon: CreditCard },
           { title: "Profile", url: `/dashboard/user/profile`, icon: Settings },

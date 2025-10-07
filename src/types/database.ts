@@ -304,7 +304,7 @@ export interface ViewingWithDetails extends PropertyViewing {
   };
   user: {
     id: string;
-    name: string;
+    full_name: string;
     phone?: string;
     email: string;
   };

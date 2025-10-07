@@ -380,6 +380,31 @@ CREATE TABLE IF NOT EXISTS property_comparisons (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Conversations table
+CREATE TABLE IF NOT EXISTS conversations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    property_id UUID REFERENCES properties(id) ON DELETE SET NULL,
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    title VARCHAR(255),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'closed', 'archived')),
+    last_message_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Messages table
+CREATE TABLE IF NOT EXISTS messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    sender_type VARCHAR(10) NOT NULL CHECK (sender_type IN ('user', 'admin')),
+    message_text TEXT NOT NULL,
+    message_type VARCHAR(20) DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'document', 'property_link')),
+    file_url TEXT,
+    read_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
@@ -486,6 +511,17 @@ CREATE INDEX IF NOT EXISTS idx_saved_searches_is_alert_enabled ON saved_searches
 
 -- Property comparisons indexes
 CREATE INDEX IF NOT EXISTS idx_property_comparisons_user_id ON property_comparisons(user_id);
+
+-- Indexes for conversations and messages
+CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_property_id ON conversations(property_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_status ON conversations(status);
+CREATE INDEX IF NOT EXISTS idx_conversations_last_message_at ON conversations(last_message_at);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_type ON messages(sender_type);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_read_at ON messages(read_at);
 
 -- =====================================================
 -- IMPROVED TRIGGER FUNCTIONS
@@ -638,6 +674,104 @@ CREATE TRIGGER update_supported_currencies_updated_at
     BEFORE UPDATE ON supported_currencies
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_property_documents_updated_at ON property_documents;
+CREATE TRIGGER update_property_documents_updated_at
+    BEFORE UPDATE ON property_documents
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_conversations_updated_at ON conversations;
+CREATE TRIGGER update_conversations_updated_at
+    BEFORE UPDATE ON conversations
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_messages_updated_at ON messages;
+CREATE TRIGGER update_messages_updated_at
+    BEFORE UPDATE ON messages
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Create avatars bucket for profile pictures
+CREATE BUCKET IF NOT EXISTS avatars;
+
+-- Create property_images bucket for property images
+CREATE BUCKET IF NOT EXISTS property_images;
+
+-- Create documents bucket for various documents
+CREATE BUCKET IF NOT EXISTS documents;
+
+-- Create storage policies for avatars bucket
+CREATE POLICY "User can upload avatar" ON storage.objects
+    FOR INSERT
+    WITH CHECK (
+        bucket_id = 'avatars' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+CREATE POLICY "User can update avatar" ON storage.objects
+    FOR UPDATE
+    USING (
+        bucket_id = 'avatars' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+CREATE POLICY "User can select avatar" ON storage.objects
+    FOR SELECT
+    USING (
+        bucket_id = 'avatars' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+-- Create storage policies for property_images bucket
+CREATE POLICY "User can upload property image" ON storage.objects
+    FOR INSERT
+    WITH CHECK (
+        bucket_id = 'property_images' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+CREATE POLICY "User can update property image" ON storage.objects
+    FOR UPDATE
+    USING (
+        bucket_id = 'property_images' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+CREATE POLICY "User can select property image" ON storage.objects
+    FOR SELECT
+    USING (
+        bucket_id = 'property_images' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+-- Create storage policies for documents bucket
+CREATE POLICY "User can upload document" ON storage.objects
+    FOR INSERT
+    WITH CHECK (
+        bucket_id = 'documents' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+CREATE POLICY "User can update document" ON storage.objects
+    FOR UPDATE
+    USING (
+        bucket_id = 'documents' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+CREATE POLICY "User can select document" ON storage.objects
+    FOR SELECT
+    USING (
+        bucket_id = 'documents' AND
+        auth.uid() = split_part(storage.objects.name, '/', 1)
+    );
+
+-- Create storage policies for service role
+CREATE POLICY "Service role can manage all buckets" ON storage.objects
+    FOR ALL
+    USING (auth.role() = 'service_role');
+
 -- =====================================================
 -- FIXED ROW LEVEL SECURITY (RLS) POLICIES WITHOUT RECURSION
 -- =====================================================
@@ -666,6 +800,8 @@ ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE property_documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_searches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE property_comparisons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing problematic policies
 DROP POLICY IF EXISTS "Users can view all profiles" ON profiles;
@@ -889,214 +1025,43 @@ CREATE POLICY "Users can manage own saved searches" ON saved_searches
     FOR ALL USING (auth.uid() = user_id);
 
 -- Property comparisons policies
-CREATE POLICY "Users can manage own comparisons" ON property_comparisons
-    FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own comparisons" ON property_comparisons;
 
--- =====================================================
--- STORAGE BUCKETS
--- =====================================================
+-- RLS policies for conversations and messages
+CREATE POLICY "Users can view own conversations" ON conversations
+    FOR SELECT
+    USING (user_id = auth.uid());
 
--- Create avatars bucket for profile pictures
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'avatars', 
-  'avatars', 
-  true, 
-  5242880, -- 5MB limit
-  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-)
-ON CONFLICT (id) DO UPDATE SET
-  public = EXCLUDED.public,
-  file_size_limit = EXCLUDED.file_size_limit,
-  allowed_mime_types = EXCLUDED.allowed_mime_types;
+CREATE POLICY "Users can create conversations" ON conversations
+    FOR INSERT
+    WITH CHECK (user_id = auth.uid());
 
--- Create properties bucket for property images
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'property-images', 
-  'property-images', 
-  true, 
-  10485760, -- 10MB limit
-  ARRAY['image/jpeg', 'image/png', 'image/webp']
-)
-ON CONFLICT (id) DO UPDATE SET
-  public = EXCLUDED.public,
-  file_size_limit = EXCLUDED.file_size_limit,
-  allowed_mime_types = EXCLUDED.allowed_mime_types;
+CREATE POLICY "Users can update own conversations" ON conversations
+    FOR UPDATE
+    USING (user_id = auth.uid());
 
--- Create documents bucket for KYC and property documents
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'documents', 
-  'documents', 
-  false, -- Private bucket
-  20971520, -- 20MB limit
-  ARRAY['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-)
-ON CONFLICT (id) DO UPDATE SET
-  public = EXCLUDED.public,
-  file_size_limit = EXCLUDED.file_size_limit,
-  allowed_mime_types = EXCLUDED.allowed_mime_types;
+CREATE POLICY "Users can delete own conversations" ON conversations
+    FOR DELETE
+    USING (user_id = auth.uid());
 
--- Storage policies for avatars bucket
-CREATE POLICY "Users can upload their own avatars" ON storage.objects
-  FOR INSERT WITH CHECK (
-    bucket_id = 'avatars' AND 
-    auth.uid()::text = (storage.foldername(name))[1]
-  );
+CREATE POLICY "Users can view messages in own conversations" ON messages
+    FOR SELECT
+    USING (conversation_id IN (
+        SELECT id FROM conversations WHERE user_id = auth.uid()
+    ));
 
-CREATE POLICY "Users can update their own avatars" ON storage.objects
-  FOR UPDATE USING (
-    bucket_id = 'avatars' AND 
-    auth.uid()::text = (storage.foldername(name))[1]
-  );
+CREATE POLICY "Users can create messages in own conversations" ON messages
+    FOR INSERT
+    WITH CHECK (conversation_id IN (
+        SELECT id FROM conversations WHERE user_id = auth.uid()
+    ));
 
-CREATE POLICY "Users can delete their own avatars" ON storage.objects
-  FOR DELETE USING (
-    bucket_id = 'avatars' AND 
-    auth.uid()::text = (storage.foldername(name))[1]
-  );
+CREATE POLICY "Service role can manage all conversations" ON conversations
+    FOR ALL
+    USING (auth.jwt() ->> 'role' = 'service_role');
 
-CREATE POLICY "Public avatar access" ON storage.objects
-  FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "Service role can manage all messages" ON messages
+    FOR ALL
+    USING (auth.jwt() ->> 'role' = 'service_role');
 
--- Storage policies for property images bucket
-CREATE POLICY "Owners can upload property images" ON storage.objects
-  FOR INSERT WITH CHECK (
-    bucket_id = 'property-images' AND 
-    EXISTS (
-      SELECT 1 FROM profiles 
-      WHERE id = auth.uid() AND user_type IN ('admin', 'user')
-    )
-  );
-
-CREATE POLICY "Public property image access" ON storage.objects
-  FOR SELECT USING (bucket_id = 'property-images');
-
--- Storage policies for documents bucket
-CREATE POLICY "Users can upload their own documents" ON storage.objects
-  FOR INSERT WITH CHECK (
-    bucket_id = 'documents' AND 
-    auth.uid()::text = (storage.foldername(name))[1]
-  );
-
-CREATE POLICY "Users can view their own documents" ON storage.objects
-  FOR SELECT USING (
-    bucket_id = 'documents' AND (
-      auth.uid()::text = (storage.foldername(name))[1] OR
-      auth.role() = 'service_role'
-    )
-  );
-
--- =====================================================
--- ESSENTIAL CONFIGURATION DATA
--- =====================================================
-
--- Insert supported currencies
-INSERT INTO supported_currencies (code, name, symbol, exchange_rate, is_default, is_active) VALUES
-    ('USD', 'US Dollar', '$', 1.0, true, true),
-    ('EUR', 'Euro', '€', 0.85, false, true),
-    ('GBP', 'British Pound', '£', 0.73, false, true),
-    ('CAD', 'Canadian Dollar', 'C$', 1.25, false, true),
-    ('AUD', 'Australian Dollar', 'A$', 1.35, false, true)
-ON CONFLICT (code) DO UPDATE SET
-    name = EXCLUDED.name,
-    symbol = EXCLUDED.symbol,
-    is_active = EXCLUDED.is_active,
-    updated_at = NOW();
-
--- Insert system settings
-INSERT INTO system_settings (key, value, description) VALUES
-    ('site_name', '"GODIRECT Realty"', 'Name of the website'),
-    ('site_description', '"Your trusted partner in real estate"', 'Website description'),
-    ('contact_email', '"info@godirectrealty.com"', 'Main contact email'),
-    ('contact_phone', '"+1 (555) 123-4567"', 'Main contact phone'),
-    ('office_address', '"123 Real Estate Ave, City, State 12345"', 'Office address'),
-    ('public_max_properties_per_page', '12', 'Number of properties to show per page'),
-    ('public_featured_properties_count', '6', 'Number of featured properties to show on homepage'),
-    ('public_testimonials_count', '3', 'Number of testimonials to show on homepage'),
-    ('public_blog_posts_per_page', '9', 'Number of blog posts per page'),
-    ('public_enable_property_inquiry', 'true', 'Enable property inquiry form'),
-    ('public_enable_newsletter', 'true', 'Enable newsletter subscription'),
-    ('public_enable_testimonials', 'true', 'Enable testimonials feature'),
-    ('currency_default', '"USD"', 'Default currency code'),
-    ('timezone', '"America/New_York"', 'Default timezone'),
-    ('date_format', '"MM/DD/YYYY"', 'Default date format'),
-    ('public_social_facebook', '""', 'Facebook page URL'),
-    ('public_social_twitter', '""', 'Twitter profile URL'),
-    ('public_social_instagram', '""', 'Instagram profile URL'),
-    ('public_social_linkedin', '""', 'LinkedIn profile URL'),
-    ('public_social_youtube', '""', 'YouTube channel URL'),
-    ('email_notifications_enabled', 'true', 'Enable email notifications'),
-    ('maintenance_mode', 'false', 'Site maintenance mode'),
-    ('default_theme', '"light"', 'Default theme for new users'),
-    ('available_themes', '["light", "dark", "system"]', 'Available theme options'),
-    ('public_theme_customization_enabled', 'true', 'Allow users to customize themes')
-ON CONFLICT (key) DO UPDATE SET
-    value = EXCLUDED.value,
-    description = EXCLUDED.description,
-    updated_at = NOW();
-
--- Insert default user preference templates
-INSERT INTO system_settings (key, value, description) VALUES
-    ('default_user_theme_settings', '{
-        "theme": "light",
-        "primary_color": "#1e40af",
-        "accent_color": "#f59e0b",
-        "font_size": "medium",
-        "compact_mode": false,
-        "sidebar_collapsed": false,
-        "animations_enabled": true
-    }', 'Default theme settings for new users'),
-    ('default_user_theme_settings', '{
-        "theme": "light",
-        "primary_color": "#059669",
-        "accent_color": "#dc2626",
-        "font_size": "medium",
-        "compact_mode": false,
-        "sidebar_collapsed": false,
-        "animations_enabled": true,
-        "dashboard_layout": "grid",
-        "property_card_style": "detailed"
-    }', 'Default theme settings for new users'),
-    ('default_admin_theme_settings', '{
-        "theme": "dark",
-        "primary_color": "#7c3aed",
-        "accent_color": "#f59e0b",
-        "font_size": "medium",
-        "compact_mode": true,
-        "sidebar_collapsed": false,
-        "animations_enabled": false,
-        "dashboard_layout": "table",
-        "data_density": "compact"
-    }', 'Default theme settings for new admins')
-ON CONFLICT (key) DO UPDATE SET
-    value = EXCLUDED.value,
-    description = EXCLUDED.description,
-    updated_at = NOW();
-
--- =====================================================
--- COMPLETION MESSAGE
--- =====================================================
-
-DO $$
-BEGIN
-    RAISE NOTICE '=====================================================';
-    RAISE NOTICE '✅ CONSOLIDATED GODIRECT REALTY DATABASE SETUP COMPLETE!';
-    RAISE NOTICE '=====================================================';
-    RAISE NOTICE 'Created:';
-    RAISE NOTICE '• All tables with proper relationships';
-    RAISE NOTICE '• Performance indexes';
-    RAISE NOTICE '• Improved user signup trigger';
-    RAISE NOTICE '• Fixed Row Level Security policies (no recursion)';
-    RAISE NOTICE '• Storage buckets and policies';
-    RAISE NOTICE '• Essential configuration data';
-    RAISE NOTICE '';
-    RAISE NOTICE 'Your database is ready for use!';
-    RAISE NOTICE '';
-    RAISE NOTICE 'Next steps:';
-    RAISE NOTICE '1. Update your app with new Supabase credentials';
-    RAISE NOTICE '2. Test user signup functionality';
-    RAISE NOTICE '3. Verify all features work correctly';
-    RAISE NOTICE '=====================================================';
-END $$;
+-- Create updated_at triggers for all tables
