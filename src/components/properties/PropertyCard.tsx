@@ -120,7 +120,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
         </div>
 
         <div className="text-2xl font-heading font-semibold text-realty-800 dark:text-realty-gold mb-4">
-          {formatPrice(property.price)}
+          {formatPrice(property.price, { fromCurrency: property.currency || 'NGN' })}
         </div>
 
         {/* Property details */}

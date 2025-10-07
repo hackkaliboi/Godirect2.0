@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatPriceWithCommas } from "@/utils/data";
 import PropertyGallery from "@/components/properties/PropertyGallery";
 import PropertyCard from "@/components/properties/PropertyCard";
 import PropertyPurchase from "@/components/properties/PropertyPurchase";
@@ -19,10 +18,12 @@ import PropertyInquiryForm from "@/components/inquiries/PropertyInquiryForm";
 import { analyticsApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 const PropertyDetails = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const { formatPrice } = useCurrency();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
@@ -155,7 +156,7 @@ const PropertyDetails = () => {
 
             <div className="mt-4 md:mt-0 flex flex-col items-end">
               <div className="text-3xl font-heading font-semibold text-realty-800 dark:text-realty-gold mb-1">
-                {formatPriceWithCommas(property.price)}
+                {formatPrice(property.price, { fromCurrency: property.currency || 'NGN' })}
               </div>
               <div className="text-realty-600 dark:text-realty-400 text-sm">
                 {property.status}
@@ -435,7 +436,7 @@ const PropertyDetails = () => {
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-realty-600 dark:text-realty-300">Principal & Interest</span>
                     <span className="font-medium text-realty-900 dark:text-white">
-                      {formatPriceWithCommas(Math.round(property.price * 0.00324))}/mo
+                      {formatPrice(Math.round(property.price * 0.00324), { fromCurrency: property.currency || 'NGN' })}
                     </span>
                   </div>
                   <div className="text-xs text-realty-500 dark:text-realty-400">

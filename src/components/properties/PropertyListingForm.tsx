@@ -21,6 +21,7 @@ interface PropertyFormData {
     zip_code: string;
     country: string;
     price: string;
+    currency: string;
     bedrooms: string;
     bathrooms: string;
     square_feet: string;
@@ -48,6 +49,7 @@ const PropertyListingForm = () => {
         zip_code: "",
         country: "Nigeria",
         price: "",
+        currency: "NGN",
         bedrooms: "",
         bathrooms: "",
         square_feet: "",
@@ -242,6 +244,7 @@ const PropertyListingForm = () => {
                 zip_code: formData.zip_code,
                 country: formData.country,
                 price: parseFloat(formData.price),
+                currency: formData.currency,
                 bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
                 bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
                 square_feet: formData.square_feet ? parseInt(formData.square_feet) : null,
@@ -284,6 +287,7 @@ const PropertyListingForm = () => {
                 zip_code: "",
                 country: "Nigeria",
                 price: "",
+                currency: "NGN",
                 bedrooms: "",
                 bathrooms: "",
                 square_feet: "",
@@ -451,15 +455,32 @@ const PropertyListingForm = () => {
                                 <h3 className="text-lg font-semibold text-realty-900 dark:text-white">Property Details</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="price">Price (₦) *</Label>
-                                        <Input
-                                            id="price"
-                                            name="price"
-                                            type="number"
-                                            value={formData.price}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g., 50000000"
-                                        />
+                                        <Label htmlFor="price">Price *</Label>
+                                        <div className="flex gap-2">
+                                            <Select
+                                                value={formData.currency}
+                                                onValueChange={(value) => handleSelectChange("currency", value)}
+                                            >
+                                                <SelectTrigger className="w-24">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="NGN">₦</SelectItem>
+                                                    <SelectItem value="USD">$</SelectItem>
+                                                    <SelectItem value="EUR">€</SelectItem>
+                                                    <SelectItem value="GBP">£</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <Input
+                                                id="price"
+                                                name="price"
+                                                type="number"
+                                                value={formData.price}
+                                                onChange={handleInputChange}
+                                                placeholder="e.g., 50000000"
+                                                className="flex-1"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">

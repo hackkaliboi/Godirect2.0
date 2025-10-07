@@ -9,12 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCurrency, Currency } from "@/contexts/CurrencyContext";
-import { 
-  DollarSign, 
-  TrendingUp, 
-  RefreshCw, 
-  Globe2, 
-  Settings2, 
+import {
+  DollarSign,
+  TrendingUp,
+  RefreshCw,
+  Globe2,
+  Settings2,
   AlertCircle,
   CheckCircle,
   Loader2,
@@ -30,15 +30,16 @@ interface ExchangeRateUpdateResult {
 }
 
 export const CurrencyManagementComponent: React.FC = () => {
-  const { 
-    currencies, 
-    currentCurrency, 
-    setCurrency, 
+  const {
+    currencies,
+    currentCurrency,
+    setCurrency,
     updateExchangeRates,
+    updateCustomRates, // This is now available
     formatPrice,
-    convertPrice 
+    convertPrice
   } = useCurrency();
-  
+
   const [defaultCurrency, setDefaultCurrency] = useState(currentCurrency.code);
   const [autoUpdateRates, setAutoUpdateRates] = useState(true);
   const [updateFrequency, setUpdateFrequency] = useState('daily');
@@ -64,7 +65,7 @@ export const CurrencyManagementComponent: React.FC = () => {
     if (newCurrency) {
       setDefaultCurrency(currencyCode);
       await setCurrency(currencyCode);
-      
+
       // Here you would typically save to your backend/database
       toast.success(`Default currency changed to ${newCurrency.name}`);
     }
@@ -82,11 +83,13 @@ export const CurrencyManagementComponent: React.FC = () => {
         }
       });
 
-      await updateExchangeRates();
+      // Use the new updateCustomRates function from context
+      await updateCustomRates(numericRates);
+
       setLastRateUpdate(new Date().toISOString());
-      toast.success('Exchange rates updated successfully');
+      toast.success('Custom exchange rates applied successfully');
     } catch (error) {
-      toast.error('Failed to update exchange rates');
+      toast.error('Failed to apply custom exchange rates');
     } finally {
       setIsUpdatingRates(false);
     }
@@ -95,29 +98,9 @@ export const CurrencyManagementComponent: React.FC = () => {
   const handleAutoUpdateRatesFromAPI = async () => {
     setIsUpdatingRates(true);
     try {
-      // Simulate API call - in real implementation, you'd call your exchange rate API
-      const mockRates: Record<string, number> = {
-        'USD': 1,
-        'EUR': 0.85,
-        'GBP': 0.73,
-        'CAD': 1.35,
-        'AUD': 1.52,
-        'JPY': 110.15,
-        'CHF': 0.92,
-        'CNY': 6.45,
-        'INR': 74.85,
-        'BRL': 5.25
-      };
-
+      // Use the real updateExchangeRates function from context
       await updateExchangeRates();
-      
-      // Update custom rates display
-      const stringRates: Record<string, string> = {};
-      Object.entries(mockRates).forEach(([code, rate]) => {
-        stringRates[code] = rate.toString();
-      });
-      setCustomRates(stringRates);
-      
+
       setLastRateUpdate(new Date().toISOString());
       toast.success('Exchange rates updated from API');
     } catch (error) {
@@ -145,7 +128,7 @@ export const CurrencyManagementComponent: React.FC = () => {
         rateApiKey,
         customRates: customRates
       };
-      
+
       console.log('Saving currency settings:', settings);
       toast.success('Currency settings saved successfully');
     } catch (error) {
@@ -200,9 +183,9 @@ export const CurrencyManagementComponent: React.FC = () => {
                       Display {showMinorUnits ? formatPrice(1234.56) : formatPrice(1235, { showDecimals: false })}
                     </p>
                   </div>
-                  <Switch 
-                    checked={showMinorUnits} 
-                    onCheckedChange={setShowMinorUnits} 
+                  <Switch
+                    checked={showMinorUnits}
+                    onCheckedChange={setShowMinorUnits}
                   />
                 </div>
               </div>
@@ -247,9 +230,9 @@ export const CurrencyManagementComponent: React.FC = () => {
                     Automatically fetch current rates from API
                   </p>
                 </div>
-                <Switch 
-                  checked={autoUpdateRates} 
-                  onCheckedChange={setAutoUpdateRates} 
+                <Switch
+                  checked={autoUpdateRates}
+                  onCheckedChange={setAutoUpdateRates}
                 />
               </div>
 
@@ -295,7 +278,7 @@ export const CurrencyManagementComponent: React.FC = () => {
               </div>
 
               <div className="flex gap-2">
-                <Button 
+                <Button
                   onClick={handleAutoUpdateRatesFromAPI}
                   disabled={isUpdatingRates}
                   className="flex-1"
@@ -344,7 +327,7 @@ export const CurrencyManagementComponent: React.FC = () => {
                       {currency.code === defaultCurrency ? 'Base' : `1 ${defaultCurrency}`}
                     </Badge>
                   </div>
-                  
+
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">Exchange Rate</Label>
                     <Input
@@ -355,7 +338,7 @@ export const CurrencyManagementComponent: React.FC = () => {
                       disabled={currency.code === defaultCurrency}
                     />
                   </div>
-                  
+
                   {currency.code !== defaultCurrency && (
                     <p className="text-xs text-muted-foreground">
                       {formatPrice(1)} = {currency.symbol}{(parseFloat(customRates[currency.code] || '1')).toFixed(2)}
@@ -366,7 +349,7 @@ export const CurrencyManagementComponent: React.FC = () => {
             </div>
 
             <div className="flex gap-2 pt-2">
-              <Button 
+              <Button
                 onClick={handleManualRateUpdate}
                 disabled={isUpdatingRates}
                 variant="outline"
@@ -428,7 +411,7 @@ export const CurrencyManagementComponent: React.FC = () => {
 
           <div className="space-y-2">
             <Label>Currency Conversion Notice</Label>
-            <Textarea 
+            <Textarea
               placeholder="Enter a notice to display with converted prices..."
               defaultValue="Prices shown in currencies other than USD are estimates based on current exchange rates and may vary."
               className="min-h-[80px]"

@@ -5,6 +5,7 @@ export interface Property {
   title: string;
   description: string;
   price: number;
+  currency?: string; // Add currency field
   property_type: string;
   status: 'available' | 'pending' | 'sold' | 'rented' | 'withdrawn';
   bedrooms?: number;
