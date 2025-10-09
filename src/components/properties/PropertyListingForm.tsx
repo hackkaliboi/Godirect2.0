@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, Plus } from "lucide-react";
 import { Property } from "@/types/database";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
 interface PropertyFormData {
     title: string;
@@ -31,6 +32,8 @@ interface PropertyFormData {
     features: string[];
     status: string;
     listing_type: string;
+    latitude?: string;
+    longitude?: string;
 }
 
 const PropertyListingForm = () => {
@@ -38,6 +41,9 @@ const PropertyListingForm = () => {
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showMap, setShowMap] = useState(false);
+    const [mapCenter, setMapCenter] = useState({ lat: 6.4572, lng: 3.3925 }); // Default to Lagos
+    const [markerPosition, setMarkerPosition] = useState({ lat: 6.4572, lng: 3.3925 });
 
     const [formData, setFormData] = useState<PropertyFormData>({
         title: "",
@@ -58,7 +64,9 @@ const PropertyListingForm = () => {
         amenities: [],
         features: [],
         status: "available",
-        listing_type: "sale"
+        listing_type: "sale",
+        latitude: "6.4572",
+        longitude: "3.3925"
     });
 
     const [images, setImages] = useState<File[]>([]);
@@ -68,7 +76,7 @@ const PropertyListingForm = () => {
 
     const propertyTypes = [
         "House", "Apartment", "Condo", "Townhouse",
-        "Commercial", "Land", "Duplex", "Penthouse"
+        "Self Contain", "Land", "Duplex", "Penthouse"
     ];
 
     const states = [
@@ -313,6 +321,73 @@ const PropertyListingForm = () => {
         }
     };
 
+    const handleMapClick = (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+            const lat = e.latLng.lat();
+            const lng = e.latLng.lng();
+            setMarkerPosition({ lat, lng });
+            setFormData(prev => ({
+                ...prev,
+                latitude: lat.toString(),
+                longitude: lng.toString()
+            }));
+        }
+    };
+
+    const handleMarkerDragEnd = (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+            const lat = e.latLng.lat();
+            const lng = e.latLng.lng();
+            setMarkerPosition({ lat, lng });
+            setFormData(prev => ({
+                ...prev,
+                latitude: lat.toString(),
+                longitude: lng.toString()
+            }));
+        }
+    };
+
+    const searchAddress = () => {
+        if (!formData.street || !formData.city || !formData.state) {
+            toast({
+                title: "Address Required",
+                description: "Please fill in street, city, and state to search for location",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        const address = `${formData.street}, ${formData.city}, ${formData.state}, ${formData.country}`;
+        const geocoder = new google.maps.Geocoder();
+
+        geocoder.geocode({ address }, (results, status) => {
+            if (status === "OK" && results?.[0]) {
+                const location = results[0].geometry.location;
+                const lat = location.lat();
+                const lng = location.lng();
+
+                setMapCenter({ lat, lng });
+                setMarkerPosition({ lat, lng });
+                setFormData(prev => ({
+                    ...prev,
+                    latitude: lat.toString(),
+                    longitude: lng.toString()
+                }));
+
+                toast({
+                    title: "Location Found",
+                    description: "Map updated to property location"
+                });
+            } else {
+                toast({
+                    title: "Location Not Found",
+                    description: "Could not find the address. Please adjust and try again.",
+                    variant: "destructive"
+                });
+            }
+        });
+    };
+
     return (
         <div className="container-custom py-8">
             <div className="max-w-4xl mx-auto">
@@ -448,13 +523,92 @@ const PropertyListingForm = () => {
                                         />
                                     </div>
                                 </div>
+
+                                {/* Map Integration */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold text-realty-900 dark:text-white">Property Location</h3>
+                                        <Button type="button" onClick={searchAddress} className="bg-realty-gold hover:bg-realty-700 text-white text-sm">
+                                            Find on Map
+                                        </Button>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2 p-3 bg-realty-50 dark:bg-realty-900/20 rounded-lg">
+                                        <input
+                                            type="checkbox"
+                                            id="map-integration"
+                                            checked={showMap}
+                                            onChange={(e) => setShowMap(e.target.checked)}
+                                            className="h-4 w-4 text-realty-gold border-realty-300 rounded focus:ring-realty-gold"
+                                        />
+                                        <Label
+                                            htmlFor="map-integration"
+                                            className="text-sm font-medium text-realty-900 dark:text-white"
+                                        >
+                                            Show map for precise location
+                                        </Label>
+                                    </div>
+
+                                    {showMap && (
+                                        <div className="space-y-4">
+                                            <div className="h-80 w-full rounded-lg overflow-hidden">
+                                                <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+                                                    <GoogleMap
+                                                        mapContainerStyle={{ width: '100%', height: '100%' }}
+                                                        center={mapCenter}
+                                                        zoom={15}
+                                                        onClick={handleMapClick}
+                                                    >
+                                                        <Marker
+                                                            position={markerPosition}
+                                                            draggable={true}
+                                                            onDragEnd={handleMarkerDragEnd}
+                                                        />
+                                                    </GoogleMap>
+                                                </LoadScript>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="latitude">Latitude</Label>
+                                                    <Input
+                                                        id="latitude"
+                                                        name="latitude"
+                                                        type="number"
+                                                        step="any"
+                                                        value={formData.latitude}
+                                                        onChange={handleInputChange}
+                                                        placeholder="e.g., 6.4572"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="longitude">Longitude</Label>
+                                                    <Input
+                                                        id="longitude"
+                                                        name="longitude"
+                                                        type="number"
+                                                        step="any"
+                                                        value={formData.longitude}
+                                                        onChange={handleInputChange}
+                                                        placeholder="e.g., 3.3925"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <p className="text-sm text-realty-600 dark:text-realty-400">
+                                                Click on the map or drag the marker to set the exact location. You can also search for the address using the "Find on Map" button.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Property Details */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-realty-900 dark:text-white">Property Details</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                    <div className="space-y-2">
+                                    <div className="md:col-span-2 space-y-2">
                                         <Label htmlFor="price">Price *</Label>
                                         <div className="flex gap-2">
                                             <Select
@@ -478,8 +632,11 @@ const PropertyListingForm = () => {
                                                 value={formData.price}
                                                 onChange={handleInputChange}
                                                 placeholder="e.g., 50000000"
-                                                className="flex-1"
+                                                className="flex-1 text-xl font-bold p-6 border-2 border-realty-gold focus:border-realty-gold focus:ring-2 focus:ring-realty-gold"
                                             />
+                                        </div>
+                                        <div className="text-sm text-realty-600 dark:text-realty-400">
+                                            Enter the price without commas (e.g., 50000000 for ₦50,000,000)
                                         </div>
                                     </div>
 
@@ -507,7 +664,9 @@ const PropertyListingForm = () => {
                                             placeholder="e.g., 2.5"
                                         />
                                     </div>
+                                </div>
 
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="square_feet">Square Feet</Label>
                                         <Input
@@ -519,9 +678,7 @@ const PropertyListingForm = () => {
                                             placeholder="e.g., 1500"
                                         />
                                     </div>
-                                </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="lot_size">Lot Size (sq ft)</Label>
                                         <Input

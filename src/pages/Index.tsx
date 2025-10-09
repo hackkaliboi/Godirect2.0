@@ -29,34 +29,6 @@ const Index = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Offer data
-  const offers = [
-    {
-      id: 1,
-      title: "First-Time Buyer Special",
-      description: "Get up to 5% cashback on your first property purchase with us.",
-      icon: <Gift className="h-8 w-8 text-realty-gold" />,
-      image: "/offers/offer-1.jpg",
-      link: "/properties?offer=first-time"
-    },
-    {
-      id: 2,
-      title: "Seasonal Discounts",
-      description: "Special discounts up to 10% on selected properties this season.",
-      icon: <Percent className="h-8 w-8 text-realty-gold" />,
-      image: "/offers/offer-2.jpg",
-      link: "/properties?offer=seasonal"
-    },
-    {
-      id: 3,
-      title: "VIP Client Benefits",
-      description: "Exclusive access to premium listings and priority service.",
-      icon: <Star className="h-8 w-8 text-realty-gold" />,
-      image: "/offers/offer-3.jpg",
-      link: "/properties?offer=vip"
-    }
-  ];
-
   // Expanded locations data
   const locations = [
     {
@@ -144,79 +116,21 @@ const Index = () => {
       {/* Main hero section with search */}
       <HeroSearch />
 
-      {/* Special Offers Section */}
+      {/* Move Featured property listings to this position */}
       <section className="py-16 bg-gradient-to-r from-realty-50 to-white dark:from-realty-900/40 dark:to-realty-900/20">
         <div className="container-custom">
-          <div className="text-center mb-12 animate-fade-up">
+          <div className="text-center mb-8 animate-fade-up">
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
-              Special <span className="text-realty-gold relative inline-block">
-                <span className="relative z-10">Offers</span>
+              Featured <span className="text-realty-gold relative inline-block">
+                <span className="relative z-10">Properties</span>
                 <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
               </span>
             </h2>
             <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto">
-              Take advantage of our exclusive deals and special promotions.
+              Discover our handpicked selection of premium properties across Nigeria.
             </p>
           </div>
-
-          {/* Converted to Carousel */}
-          <div className="relative px-4 sm:px-8 md:px-12 lg:px-16">
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-                breakpoints: {
-                  640: {
-                    slidesToScroll: 1,
-                  },
-                  768: {
-                    slidesToScroll: 2,
-                  },
-                  1024: {
-                    slidesToScroll: 3,
-                  },
-                },
-              }}
-              className="w-full"
-            >
-              <CarouselContent>
-                {offers.map((offer) => (
-                  <CarouselItem key={offer.id} className="basis-full sm:basis-1/2 lg:basis-1/3">
-                    <div className="p-1">
-                      <Card className="overflow-hidden group hover:shadow-xl transition-all duration-300 h-full">
-                        <div className="relative h-48 overflow-hidden">
-                          <div
-                            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                            style={{ backgroundImage: `url(${offer.image})` }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-realty-900/80 to-realty-900/20" />
-                          <div className="absolute top-4 right-4 p-2 bg-realty-gold rounded-full">
-                            {offer.icon}
-                          </div>
-                        </div>
-                        <CardContent className="p-6">
-                          <h3 className="text-xl font-heading font-semibold text-realty-900 dark:text-white mb-2">
-                            {offer.title}
-                          </h3>
-                          <p className="text-realty-600 dark:text-realty-300 mb-4">
-                            {offer.description}
-                          </p>
-                          <Button asChild variant="outline" className="w-full">
-                            <Link to={offer.link} className="flex items-center justify-center">
-                              View Offer
-                              <ChevronRight className="h-4 w-4 ml-1" />
-                            </Link>
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 md:-translate-x-12" />
-              <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 md:translate-x-12" />
-            </Carousel>
-          </div>
+          <FeaturedListings />
         </div>
       </section>
 
@@ -278,24 +192,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured property listings */}
-      <section className="py-16">
-        <div className="container-custom">
-          <div className="text-center mb-8 animate-fade-up">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-realty-900 dark:text-white mb-4">
-              Featured <span className="text-realty-gold relative inline-block">
-                <span className="relative z-10">Properties</span>
-                <span className="absolute bottom-0 left-0 w-full h-3 bg-realty-gold/20 -rotate-1"></span>
-              </span>
-            </h2>
-            <p className="text-realty-600 dark:text-realty-300 max-w-2xl mx-auto">
-              Discover our handpicked selection of premium properties across Nigeria.
-            </p>
-          </div>
-          <FeaturedListings />
-        </div>
-      </section>
-
+      {/* Remove the duplicate Featured property listings section that was here */}
+      
       {/* Property types */}
       <section className="py-16 bg-gradient-to-r from-realty-50 to-white dark:from-realty-900/40 dark:to-realty-900/20">
         <div className="container-custom">

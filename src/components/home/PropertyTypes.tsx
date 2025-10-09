@@ -61,11 +61,11 @@ const PropertyTypes = () => {
         },
         {
           key: 4,
-          title: "Commercial Spaces",
+          title: "Self Contain",
           image: "/property-types/type-4.jpg",
           count: 0,
           url: "/properties?type=commercial",
-          type: "commercial"
+          type: "Self Contain"
         }
       ];
     }
