@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutGrid, LayoutList, ArrowUpDown } from "lucide-react";
+import { LayoutGrid, LayoutList, ArrowUpDown, Home, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PropertyCard from "@/components/properties/PropertyCard";
@@ -29,13 +29,16 @@ const PropertyListings = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const propertiesPerPage = 9; // Show 9 properties per page
   const [initialFilters, setInitialFilters] = useState<Partial<FilterState>>({});
+  
+  // New state for the property type selection
+  const [selectedPropertyCategory, setSelectedPropertyCategory] = useState<string | null>(null);
 
   // Fetch properties from Supabase with optimized query settings
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
     queryFn: fetchProperties,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    cacheTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
   });
 
@@ -54,6 +57,19 @@ const PropertyListings = () => {
     const amenitiesFilter = params.get("amenities");
 
     let results = [...properties];
+
+    // Apply property category filter (Land vs Houses)
+    if (selectedPropertyCategory) {
+      if (selectedPropertyCategory === "land") {
+        results = results.filter(property => 
+          property.property_type.toLowerCase() === "land"
+        );
+      } else if (selectedPropertyCategory === "houses") {
+        results = results.filter(property => 
+          ["house", "apartment", "condo", "townhouse"].includes(property.property_type.toLowerCase())
+        );
+      }
+    }
 
     // Filter by search term (location)
     if (locationFilter) {
@@ -116,7 +132,7 @@ const PropertyListings = () => {
     }
 
     return results;
-  }, [properties, location.search]);
+  }, [properties, location.search, selectedPropertyCategory]);
 
   const handleApplyFilters = (filters: FilterState) => {
     // Update URL with filter parameters
@@ -228,6 +244,56 @@ const PropertyListings = () => {
           <p className="text-realty-600 dark:text-realty-400 mb-8">
             Find your next home from our carefully curated property listings.
           </p>
+
+          {/* Property Category Selection */}
+          <div className="mb-8 bg-white dark:bg-realty-800 rounded-lg border border-gray-200 dark:border-realty-700 p-6 shadow-sm">
+            <h2 className="text-xl font-heading font-semibold text-realty-900 dark:text-white mb-4">
+              What are you looking for?
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button
+                variant={selectedPropertyCategory === "houses" ? "default" : "outline"}
+                className={`py-6 h-auto flex flex-col items-center justify-center ${
+                  selectedPropertyCategory === "houses" 
+                    ? "bg-realty-800 text-white hover:bg-realty-700" 
+                    : "hover:bg-realty-50 dark:hover:bg-realty-700"
+                }`}
+                onClick={() => setSelectedPropertyCategory(selectedPropertyCategory === "houses" ? null : "houses")}
+              >
+                <Home className="h-8 w-8 mb-2" />
+                <span className="text-lg font-medium">Houses & Apartments</span>
+                <span className="text-sm text-realty-600 dark:text-realty-400 mt-1">
+                  Residential properties
+                </span>
+              </Button>
+              <Button
+                variant={selectedPropertyCategory === "land" ? "default" : "outline"}
+                className={`py-6 h-auto flex flex-col items-center justify-center ${
+                  selectedPropertyCategory === "land" 
+                    ? "bg-realty-800 text-white hover:bg-realty-700" 
+                    : "hover:bg-realty-50 dark:hover:bg-realty-700"
+                }`}
+                onClick={() => setSelectedPropertyCategory(selectedPropertyCategory === "land" ? null : "land")}
+              >
+                <Map className="h-8 w-8 mb-2" />
+                <span className="text-lg font-medium">Land</span>
+                <span className="text-sm text-realty-600 dark:text-realty-400 mt-1">
+                  Plots and acreage
+                </span>
+              </Button>
+            </div>
+            {selectedPropertyCategory && (
+              <div className="mt-4 text-center">
+                <Button
+                  variant="ghost"
+                  className="text-realty-600 dark:text-realty-400 hover:text-realty-900 dark:hover:text-white"
+                  onClick={() => setSelectedPropertyCategory(null)}
+                >
+                  Clear selection
+                </Button>
+              </div>
+            )}
+          </div>
 
           <PropertyFilters
             onApplyFilters={handleApplyFilters}

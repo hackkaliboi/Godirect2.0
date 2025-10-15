@@ -26,13 +26,13 @@ const FeaturedListings = () => {
 
   // Handle navigation
   const handlePrev = () => {
-    setCurrentIndex(prev => 
+    setCurrentIndex(prev =>
       prev === 0 ? totalPages - 1 : prev - 1
     );
   };
 
   const handleNext = () => {
-    setCurrentIndex(prev => 
+    setCurrentIndex(prev =>
       prev === totalPages - 1 ? 0 : prev + 1
     );
   };
@@ -40,10 +40,10 @@ const FeaturedListings = () => {
   // Get current properties using useMemo
   const currentProperties = useMemo(() => {
     if (featuredProperties.length === 0) return [];
-    
+
     const start = (currentIndex * itemsPerPage) % featuredProperties.length;
     const end = Math.min(start + itemsPerPage, featuredProperties.length);
-    
+
     if (start < end) {
       return featuredProperties.slice(start, end);
     } else {
@@ -66,27 +66,26 @@ const FeaturedListings = () => {
               Discover our handpicked selection of properties that stand out for their quality, location, and value.
             </p>
           </div>
-          
+
           <div className="flex items-center mt-4 md:mt-0">
             <div className="hidden md:flex items-center space-x-2 mr-4">
               {Array.from({ length: totalPages }).map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentIndex(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    i === currentIndex 
-                      ? "w-6 bg-realty-800 dark:bg-realty-gold" 
+                  className={`h-2 rounded-full transition-all ${i === currentIndex
+                      ? "w-6 bg-realty-800 dark:bg-realty-gold"
                       : "w-2 bg-realty-300 dark:bg-realty-700"
-                  }`}
+                    }`}
                   aria-label={`Go to slide ${i + 1}`}
                 />
               ))}
             </div>
-            
+
             <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                size="icon" 
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={handlePrev}
                 className="rounded-full"
                 aria-label="Previous properties"
@@ -94,10 +93,10 @@ const FeaturedListings = () => {
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
-              
-              <Button 
-                variant="outline" 
-                size="icon" 
+
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={handleNext}
                 className="rounded-full"
                 aria-label="Next properties"
@@ -108,7 +107,7 @@ const FeaturedListings = () => {
             </div>
           </div>
         </div>
-        
+
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {Array.from({ length: 3 }).map((_, index) => (
@@ -139,11 +138,11 @@ const FeaturedListings = () => {
             </p>
           </div>
         )}
-        
+
         <div className="text-center mt-12">
           <Link to="/properties">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="px-8 py-2 border-realty-800 text-realty-800 hover:bg-realty-800 hover:text-white dark:border-realty-gold dark:text-realty-gold dark:hover:bg-realty-gold dark:hover:text-realty-900"
             >
               View All Properties

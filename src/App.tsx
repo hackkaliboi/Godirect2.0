@@ -16,8 +16,8 @@ const Navigation = lazy(() => import("./components/layout/Navigation"));
 const Footer = lazy(() => import("./components/layout/Footer"));
 
 // Dashboard Pages
-const AdminDashboard = lazy(() => import("./pages/dashboard/AdminDashboard"));
-const UserDashboard = lazy(() => import("./pages/dashboard/UserDashboard"));
+const AdminDashboard = lazy(() => import("./pages/dashboard/AdminDashboard").then(module => ({ default: module.AdminDashboard })));
+const UserDashboard = lazy(() => import("./pages/dashboard/UserDashboard").then(module => ({ default: module.UserDashboard })));
 
 // Admin Pages
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
@@ -56,7 +56,7 @@ const App = () => {
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 5, // 5 minutes
-        cacheTime: 1000 * 60 * 10, // 10 minutes
+        gcTime: 1000 * 60 * 10, // 10 minutes (renamed from cacheTime)
         refetchOnWindowFocus: false,
         retry: 1,
       },
