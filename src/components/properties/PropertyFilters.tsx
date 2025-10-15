@@ -60,6 +60,18 @@ const PropertyFilters = ({ onApplyFilters, initialFilters = {} }: PropertyFilter
     setIsOpen(false);
   };
 
+  // New function to handle search when Enter is pressed
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleApplyFilters();
+    }
+  };
+
+  // New function to handle search when the search icon is clicked
+  const handleSearchClick = () => {
+    handleApplyFilters();
+  };
+
   const handleClearFilters = () => {
     setSearchTerm("");
     setSelectedTypes([]);
@@ -98,11 +110,16 @@ const PropertyFilters = ({ onApplyFilters, initialFilters = {} }: PropertyFilter
       {/* Search bar and filter button */}
       <div className="relative flex items-center mb-4">
         <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-realty-400" size={18} />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-realty-400 cursor-pointer"
+            size={18}
+            onClick={handleSearchClick}
+          />
           <Input
             placeholder="Search by location, zip code, or address..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={handleSearchKeyPress}
             className="pl-10"
           />
         </div>

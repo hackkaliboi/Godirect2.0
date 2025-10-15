@@ -29,7 +29,7 @@ const PropertyListings = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const propertiesPerPage = 9; // Show 9 properties per page
   const [initialFilters, setInitialFilters] = useState<Partial<FilterState>>({});
-  
+
   // New state for the property type selection
   const [selectedPropertyCategory, setSelectedPropertyCategory] = useState<string | null>(null);
 
@@ -61,11 +61,11 @@ const PropertyListings = () => {
     // Apply property category filter (Land vs Houses)
     if (selectedPropertyCategory) {
       if (selectedPropertyCategory === "land") {
-        results = results.filter(property => 
+        results = results.filter(property =>
           property.property_type.toLowerCase() === "land"
         );
       } else if (selectedPropertyCategory === "houses") {
-        results = results.filter(property => 
+        results = results.filter(property =>
           ["house", "apartment", "condo", "townhouse"].includes(property.property_type.toLowerCase())
         );
       }
@@ -253,11 +253,10 @@ const PropertyListings = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Button
                 variant={selectedPropertyCategory === "houses" ? "default" : "outline"}
-                className={`py-6 h-auto flex flex-col items-center justify-center ${
-                  selectedPropertyCategory === "houses" 
-                    ? "bg-realty-800 text-white hover:bg-realty-700" 
+                className={`py-6 h-auto flex flex-col items-center justify-center ${selectedPropertyCategory === "houses"
+                    ? "bg-realty-800 text-white hover:bg-realty-700"
                     : "hover:bg-realty-50 dark:hover:bg-realty-700"
-                }`}
+                  }`}
                 onClick={() => setSelectedPropertyCategory(selectedPropertyCategory === "houses" ? null : "houses")}
               >
                 <Home className="h-8 w-8 mb-2" />
@@ -268,11 +267,10 @@ const PropertyListings = () => {
               </Button>
               <Button
                 variant={selectedPropertyCategory === "land" ? "default" : "outline"}
-                className={`py-6 h-auto flex flex-col items-center justify-center ${
-                  selectedPropertyCategory === "land" 
-                    ? "bg-realty-800 text-white hover:bg-realty-700" 
+                className={`py-6 h-auto flex flex-col items-center justify-center ${selectedPropertyCategory === "land"
+                    ? "bg-realty-800 text-white hover:bg-realty-700"
                     : "hover:bg-realty-50 dark:hover:bg-realty-700"
-                }`}
+                  }`}
                 onClick={() => setSelectedPropertyCategory(selectedPropertyCategory === "land" ? null : "land")}
               >
                 <Map className="h-8 w-8 mb-2" />

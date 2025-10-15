@@ -44,6 +44,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 
 // Extend the Notification interface to include priority if it's used
 interface NotificationWithDetails extends Notification {
@@ -54,14 +55,13 @@ interface NotificationWithDetails extends Notification {
 
 const NotificationCenter = () => {
   const { user, loading: authLoading } = useAuth();
-  const [notifications, setNotifications] = useState<NotificationWithDetails[]>([]);
+  const { notifications, unreadCount, loading: notificationsLoading } = useRealtimeNotifications(user?.id || null);
   const [filteredNotifications, setFilteredNotifications] = useState<NotificationWithDetails[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [selectedNotification, setSelectedNotification] = useState<NotificationWithDetails | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
-  console.log('NotificationCenter rendered with:', { user, authLoading, loading });
+  console.log('NotificationCenter rendered with:', { user, authLoading, notificationsLoading });
 
   const notificationTypes = [
     { 
@@ -109,62 +109,36 @@ const NotificationCenter = () => {
   ];
 
   useEffect(() => {
-    // Only fetch notifications when user is loaded and available
-    if (!authLoading && user) {
-      fetchNotifications();
+    // Only filter notifications when user is loaded and available
+    if (!authLoading && user && !notificationsLoading) {
+      filterNotifications();
     } else if (!authLoading && !user) {
       // If auth is done loading but there's no user, stop loading
-      setLoading(false);
+      setFilteredNotifications([]);
     }
-  }, [user, authLoading]);
+  }, [notifications, filter, user, authLoading, notificationsLoading]);
 
   useEffect(() => {
     filterNotifications();
   }, [notifications, filter]);
 
-  const fetchNotifications = async () => {
-    console.log('fetchNotifications called');
-    // Double-check that user exists
-    if (!user) {
-      console.log('No user found, setting loading to false');
-      setLoading(false);
-      return;
-    }
-    
-    console.log('Fetching notifications for user:', user.id);
-    
-    try {
-      setLoading(true);
-      const response = await notificationsApi.getUserNotifications(user.id);
-      console.log('Received notifications response:', response);
-      setNotifications(response);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      toast.error("Failed to fetch notifications");
-      // Even on error, we should stop loading to show the error state
-      setNotifications([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const filterNotifications = () => {
-    let filtered = notifications;
+    let filtered = notifications as NotificationWithDetails[];
 
     switch (filter) {
       case "unread":
-        filtered = notifications.filter(n => !n.is_read);
+        filtered = notifications.filter(n => !n.is_read) as NotificationWithDetails[];
         break;
       case "read":
-        filtered = notifications.filter(n => n.is_read);
+        filtered = notifications.filter(n => n.is_read) as NotificationWithDetails[];
         break;
       case "today":
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        filtered = notifications.filter(n => new Date(n.created_at) >= today);
+        filtered = notifications.filter(n => new Date(n.created_at) >= today) as NotificationWithDetails[];
         break;
       default:
-        filtered = notifications;
+        filtered = notifications as NotificationWithDetails[];
     }
 
     setFilteredNotifications(filtered);
@@ -173,9 +147,6 @@ const NotificationCenter = () => {
   const markAsRead = async (notificationId: string) => {
     try {
       await notificationsApi.markAsRead(notificationId);
-      setNotifications(prev =>
-        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
-      );
       toast.success("Notification marked as read");
     } catch (error) {
       console.error("Error marking notification as read:", error);
@@ -186,9 +157,6 @@ const NotificationCenter = () => {
   const markAsUnread = async (notificationId: string) => {
     try {
       await notificationsApi.markAsUnread(notificationId);
-      setNotifications(prev =>
-        prev.map(n => n.id === notificationId ? { ...n, is_read: false } : n)
-      );
       toast.success("Notification marked as unread");
     } catch (error) {
       console.error("Error marking notification as unread:", error);
@@ -202,9 +170,6 @@ const NotificationCenter = () => {
       await Promise.all(
         unreadNotifications.map(n => notificationsApi.markAsRead(n.id))
       );
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, is_read: true }))
-      );
       toast.success("All notifications marked as read");
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
@@ -215,7 +180,6 @@ const NotificationCenter = () => {
   const deleteNotification = async (notificationId: string) => {
     try {
       await notificationsApi.deleteNotification(notificationId);
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
       toast.success("Notification deleted");
     } catch (error) {
       console.error("Error deleting notification:", error);
@@ -245,10 +209,6 @@ const NotificationCenter = () => {
     );
   };
 
-  const getUnreadCount = () => {
-    return notifications.filter(n => !n.is_read).length;
-  };
-
   const getNotificationStats = () => {
     const total = notifications.length;
     const unread = notifications.filter(n => !n.is_read).length;
@@ -267,7 +227,7 @@ const NotificationCenter = () => {
   const stats = getNotificationStats();
 
   // Show loading state while auth is loading or while fetching notifications
-  if (authLoading || loading) {
+  if (authLoading || notificationsLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">

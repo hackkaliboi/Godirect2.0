@@ -15,6 +15,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Navigation = lazy(() => import("./components/layout/Navigation"));
 const Footer = lazy(() => import("./components/layout/Footer"));
 
+
 // Dashboard Pages
 const AdminDashboard = lazy(() => import("./pages/dashboard/AdminDashboard").then(module => ({ default: module.AdminDashboard })));
 const UserDashboard = lazy(() => import("./pages/dashboard/UserDashboard").then(module => ({ default: module.UserDashboard })));
