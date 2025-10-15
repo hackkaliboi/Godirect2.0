@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Bed, Bath, Move, MapPin, ArrowRight } from "lucide-react";
 import { Property } from "@/types/database";
@@ -16,6 +16,7 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Check if property is already favorited
   useEffect(() => {
@@ -64,6 +65,12 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
     }
   };
 
+  // Handle image loading errors
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    target.src = "/placeholder.svg";
+  };
+
   return (
     <Link
       to={`/properties/${property.id}`}
@@ -71,37 +78,47 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
     >
       {/* Image container */}
       <div className="relative w-full h-64 overflow-hidden">
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        )}
         <img
           src={property.images[0] || "/placeholder.svg"}
           alt={property.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${imageLoaded ? 'block' : 'hidden'}`}
+          onLoad={() => setImageLoaded(true)}
+          onError={handleImageError}
+          loading="lazy"
         />
-        <div
-          onClick={toggleFavorite}
-          className={cn(
-            "absolute top-4 right-4 p-2 rounded-full transition-all",
-            isFavorite
-              ? "bg-white/90 text-rose-500"
-              : "bg-black/20 text-white hover:bg-white/90 hover:text-rose-500"
-          )}
-        >
-          <Heart className={cn("h-5 w-5", isFavorite && "fill-rose-500")} />
-        </div>
+        {imageLoaded && (
+          <>
+            <div
+              onClick={toggleFavorite}
+              className={cn(
+                "absolute top-4 right-4 p-2 rounded-full transition-all",
+                isFavorite
+                  ? "bg-white/90 text-rose-500"
+                  : "bg-black/20 text-white hover:bg-white/90 hover:text-rose-500"
+              )}
+            >
+              <Heart className={cn("h-5 w-5", isFavorite && "fill-rose-500")} />
+            </div>
 
-        {/* Property status badge */}
-        <div className="absolute bottom-4 left-4">
-          <span className="px-3 py-1 text-xs font-medium rounded-full bg-white dark:bg-realty-900 text-realty-800 dark:text-white">
-            {property.status}
-          </span>
-        </div>
+            {/* Property status badge */}
+            <div className="absolute bottom-4 left-4">
+              <span className="px-3 py-1 text-xs font-medium rounded-full bg-white dark:bg-realty-900 text-realty-800 dark:text-white">
+                {property.status}
+              </span>
+            </div>
 
-        {/* Featured badge */}
-        {property.is_featured && (
-          <div className="absolute top-4 left-4">
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-realty-gold text-realty-900">
-              Featured
-            </span>
-          </div>
+            {/* Featured badge */}
+            {property.is_featured && (
+              <div className="absolute top-4 left-4">
+                <span className="px-2 py-1 text-xs font-medium rounded-full bg-realty-gold text-realty-900">
+                  Featured
+                </span>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -151,4 +168,5 @@ const PropertyCard = ({ property }: PropertyCardProps) => {
   );
 };
 
-export default PropertyCard;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(PropertyCard);

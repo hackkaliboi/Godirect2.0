@@ -1,31 +1,30 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PropertyCard from "../properties/PropertyCard";
 import { fetchFeaturedProperties, Property } from "@/utils/supabaseData";
+import { useQuery } from "@tanstack/react-query";
 
 const FeaturedListings = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 3;
 
-  useEffect(() => {
-    const getProperties = async () => {
-      setIsLoading(true);
-      const data = await fetchFeaturedProperties();
-      setFeaturedProperties(data);
-      setIsLoading(false);
-    };
-    
-    getProperties();
-  }, []);
+  // Fetch featured properties with optimized query settings
+  const { data: featuredProperties = [], isLoading } = useQuery({
+    queryKey: ["featuredProperties"],
+    queryFn: fetchFeaturedProperties,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes (cacheTime was renamed to gcTime in newer versions)
+    refetchOnWindowFocus: false,
+  });
 
-  const totalProperties = featuredProperties.length;
-  const totalPages = Math.max(1, Math.ceil(totalProperties / itemsPerPage));
+  // Calculate total pages using useMemo for better performance
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(featuredProperties.length / itemsPerPage));
+  }, [featuredProperties.length]);
 
+  // Handle navigation
   const handlePrev = () => {
     setCurrentIndex(prev => 
       prev === 0 ? totalPages - 1 : prev - 1
@@ -38,21 +37,22 @@ const FeaturedListings = () => {
     );
   };
 
-  const currentProperties = () => {
+  // Get current properties using useMemo
+  const currentProperties = useMemo(() => {
     if (featuredProperties.length === 0) return [];
     
-    const start = (currentIndex * itemsPerPage) % totalProperties;
-    const end = Math.min(start + itemsPerPage, totalProperties);
+    const start = (currentIndex * itemsPerPage) % featuredProperties.length;
+    const end = Math.min(start + itemsPerPage, featuredProperties.length);
     
     if (start < end) {
       return featuredProperties.slice(start, end);
     } else {
       // Handle wrap around case
       const firstPart = featuredProperties.slice(start);
-      const secondPart = featuredProperties.slice(0, end - totalProperties);
+      const secondPart = featuredProperties.slice(0, end);
       return [...firstPart, ...secondPart];
     }
-  };
+  }, [featuredProperties, currentIndex]);
 
   return (
     <section className="section-padding bg-white dark:bg-realty-900">
@@ -90,6 +90,7 @@ const FeaturedListings = () => {
                 onClick={handlePrev}
                 className="rounded-full"
                 aria-label="Previous properties"
+                disabled={featuredProperties.length === 0}
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
@@ -100,6 +101,7 @@ const FeaturedListings = () => {
                 onClick={handleNext}
                 className="rounded-full"
                 aria-label="Next properties"
+                disabled={featuredProperties.length === 0}
               >
                 <ChevronRight className="h-5 w-5" />
               </Button>
@@ -123,7 +125,7 @@ const FeaturedListings = () => {
           </div>
         ) : featuredProperties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {currentProperties().map((property) => (
+            {currentProperties.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
           </div>
