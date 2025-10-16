@@ -28,17 +28,17 @@ self.addEventListener('fetch', (event) => {
     if (!event.request.url.startsWith(self.location.origin)) {
         return;
     }
-    
+
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
                 // Return cached version or fetch from network
                 return response || fetch(event.request).then((response) => {
                     // Cache important assets
-                    if (response.status === 200 && 
-                        (event.request.destination === 'document' || 
-                         event.request.destination === 'script' || 
-                         event.request.destination === 'style')) {
+                    if (response.status === 200 &&
+                        (event.request.destination === 'document' ||
+                            event.request.destination === 'script' ||
+                            event.request.destination === 'style')) {
                         const responseToCache = response.clone();
                         caches.open(CACHE_NAME)
                             .then((cache) => {
@@ -80,7 +80,7 @@ self.addEventListener('push', (event) => {
                 url: data.url || '/'
             }
         };
-        
+
         event.waitUntil(
             self.registration.showNotification(title, options)
         );
@@ -90,7 +90,7 @@ self.addEventListener('push', (event) => {
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    
+
     event.waitUntil(
         clients.openWindow(event.notification.data.url)
     );

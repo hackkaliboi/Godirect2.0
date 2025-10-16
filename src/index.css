@@ -200,4 +200,49 @@
   .hover\:shadow-3xl:hover {
     box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
   }
+  
+  /* PWA-specific styles */
+  .pwa-mode {
+    /* Hide browser UI elements when running as PWA */
+  }
+  
+  .pwa-navigation-hidden {
+    /* Hide navigation elements in PWA mode */
+  }
+  
+  .pwa-layout {
+    /* Special layout for PWA */
+    padding-bottom: 60px; /* Space for bottom navigation */
+  }
+  
+  .pwa-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .pwa-bottom-nav {
+    height: 60px;
+    z-index: 100;
+  }
+  
+  /* Safe area insets for mobile devices */
+  .pwa-safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .pwa-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Hide scrollbar for PWA app-like experience */
+  .pwa-layout ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .pwa-layout {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
