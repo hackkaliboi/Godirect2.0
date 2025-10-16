@@ -18,7 +18,7 @@ const createPlaceholderIcon = (size, filename) => {
   
   // In a real implementation, you would convert SVG to PNG
   // For now, we'll just create a text file to indicate the placeholder
-  const placeholderPath = path.join(__dirname, '..', 'public', filename);
+  const placeholderPath = path.join(__dirname, '..', 'public', 'pwa-icons', filename);
   fs.writeFileSync(placeholderPath, `Placeholder for ${filename} - ${size}x${size} icon`);
   console.log(`Created placeholder: ${filename}`);
 };

@@ -4,6 +4,9 @@ const urlsToCache = [
     '/',
     '/index.html',
     '/manifest.json',
+    '/pwa-icons/android-chrome-192x192.png',
+    '/pwa-icons/android-chrome-512x512.png',
+    '/pwa-icons/apple-touch-icon.png',
     '/static/css/main.css',
     '/static/js/main.js',
 ];
@@ -71,8 +74,8 @@ self.addEventListener('push', (event) => {
         const title = data.title || 'GODIRECT Notification';
         const options = {
             body: data.body || 'You have a new notification',
-            icon: '/android-chrome-192x192.png',
-            badge: '/android-chrome-192x192.png',
+            icon: '/pwa-icons/android-chrome-192x192.png',
+            badge: '/pwa-icons/android-chrome-192x192.png',
             data: {
                 url: data.url || '/'
             }
