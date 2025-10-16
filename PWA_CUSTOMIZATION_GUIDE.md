@@ -19,16 +19,17 @@ The system uses multiple methods to detect if the app is running as an installed
 - `getPWARunningContext()`: Returns detailed context information
 - `usePWAStatus()`: React hook for reactive PWA status updates
 
-## Refined UI for Installed PWA
+## Enhanced UI for Installed PWA
 
 ### Distinct Interface Elements
 When running as an installed PWA, the app provides:
 
-1. **Custom Header**: Enhanced app-specific header with brand styling
+1. **Custom Header**: Brand-consistent header with proper styling
 2. **Bottom Navigation**: Mobile-friendly bottom navigation bar with active states
-3. **Hidden Browser Elements**: Automatic hiding of browser-specific UI elements
-4. **App-like Styling**: Cohesive mobile app styling and transitions
-5. **Route-based Visibility**: Conditional display of elements based on current route
+3. **Full-width Layout**: Content extends to full screen width without container constraints
+4. **Hidden Browser Elements**: Automatic hiding of browser-specific UI elements
+5. **App-like Styling**: Cohesive mobile app styling using Tailwind CSS
+6. **Route-based Visibility**: Conditional display of elements based on current route
 
 ### UI Differences
 
@@ -37,8 +38,8 @@ When running as an installed PWA, the app provides:
 | Header | Full website header with top bar | Simplified branded app header |
 | Navigation | Top navigation bar + hamburger menu | Bottom navigation bar |
 | Footer | Standard footer | Hidden in dashboard routes |
-| Layout | Standard web layout | App-optimized layout with safe areas |
-| Styling | Web-focused | Mobile-app focused with transitions |
+| Layout | Container-constrained layout | Full-width layout |
+| Styling | Mix of custom CSS and Tailwind | Pure Tailwind CSS utility classes |
 | Browser UI | Visible (hamburger, top bar, etc.) | Automatically hidden |
 
 ## Implementation Details
@@ -47,18 +48,16 @@ When running as an installed PWA, the app provides:
 The [PWALayout](file:///c:/Users/gener/Godirect-realty/src/components/layout/PWALayout.tsx#L14-L162) component is the core of the customization:
 
 1. **Detection**: Uses the `usePWAStatus` hook to detect PWA mode
-2. **Styling**: Applies CSS classes for PWA-specific styling
+2. **Styling**: Uses Tailwind CSS utility classes for consistent styling
 3. **Routing**: Conditionally shows/hides elements based on route
 4. **Navigation**: Provides app-like bottom navigation in PWA mode
+5. **Layout**: Implements full-width layout without container constraints
 
 ### CSS Customization
-Special CSS classes are applied when running as PWA:
+Special CSS classes are applied when running as PWA to hide browser elements:
 
 - `.pwa-mode`: Applied to body when running as PWA
 - `.pwa-navigation-hidden`: Hides browser navigation elements
-- `.pwa-layout`: Special layout for PWA mode
-- `.pwa-header`: Enhanced header styling with gradient
-- `.pwa-bottom-nav`: Bottom navigation with active states
 - `.top-bar`: Hidden in PWA mode
 - `.mobile-menu-button`: Hidden in PWA mode
 - `.desktop-navigation`: Hidden in PWA mode
@@ -70,9 +69,18 @@ The layout intelligently shows/hides elements based on:
 2. **PWA status** (installed vs browser)
 3. **User context** (admin vs user)
 
+## Full-width Layout Implementation
+
+The PWA implementation now uses a full-width layout that extends to cover the entire screen:
+
+1. **Removed Container Constraints**: No more fixed-width containers limiting content
+2. **Responsive Design**: Properly adapts to all screen sizes
+3. **Edge-to-Edge Content**: Content extends from edge to edge of the screen
+4. **Proper Spacing**: Uses padding instead of container constraints for spacing
+
 ## Browser UI Element Hiding
 
-The refined implementation automatically hides browser-specific UI elements in PWA mode:
+The implementation automatically hides browser-specific UI elements in PWA mode:
 
 1. **Top Bar**: Contact information and social media bar
 2. **Hamburger Menu**: Mobile menu button
@@ -84,6 +92,24 @@ This is achieved through CSS targeting classes added to the browser UI component
 - `.top-bar` class on the TopBar component
 - `.mobile-menu-button` class on the mobile menu button
 - `.desktop-navigation` class on the desktop navigation
+
+## Tailwind CSS Implementation
+
+The PWA implementation now uses pure Tailwind CSS utility classes:
+
+1. **Consistent Styling**: All styles use Tailwind utility classes
+2. **Reduced CSS**: Eliminated custom CSS classes in favor of Tailwind
+3. **Responsive Design**: Built-in responsive utilities
+4. **Theme Consistency**: Uses the same color palette as the rest of the application
+
+## Brand-consistent Design
+
+The PWA header now uses the platform's brand colors:
+
+- **Primary Color**: `realty-800` for the header background
+- **Accent Color**: Gold accents for visual elements
+- **Text**: White text for proper contrast
+- **Logo**: Consistent branding with the "GD" logo
 
 ## Customization Examples
 
@@ -106,19 +132,17 @@ const MyComponent = () => {
 ```
 
 ### Customizing Styles
-To apply PWA-specific styles:
+To apply PWA-specific styles using Tailwind:
 
-```css
-/* In your CSS file */
-.my-component {
-  /* Default styles */
-}
-
-.pwa-mode .my-component {
-  /* PWA-specific styles */
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
+```jsx
+// In your component
+const MyComponent = () => {
+  return (
+    <div className="pwa-mode:bg-realty-800 pwa-mode:text-white">
+      Content with PWA-specific styling
+    </div>
+  );
+};
 ```
 
 ## Testing PWA Mode
@@ -127,20 +151,22 @@ To apply PWA-specific styles:
 1. Open Chrome DevTools
 2. Go to Application tab
 3. Click "Install" to simulate PWA installation
-4. Check if PWA-specific UI appears and browser elements are hidden
+4. Check if PWA-specific UI appears with full-width layout
+5. Verify browser elements are hidden
 
 ### Mobile Testing
 1. Open the site in Chrome on Android or Safari on iOS
 2. Look for "Add to Home Screen" option
 3. Install the app
-4. Open the installed app to see PWA-specific UI with hidden browser elements
+4. Open the installed app to see PWA-specific UI with full-width layout
+5. Verify browser elements are hidden
 
 ## Extending the Customization
 
 ### Adding New PWA Features
 1. Use the `usePWAStatus` hook to detect PWA mode
 2. Apply conditional rendering based on PWA status
-3. Add PWA-specific CSS classes
+3. Use Tailwind CSS utility classes for styling
 4. Update the PWALayout component for new UI elements
 
 ### Customizing Navigation
@@ -149,6 +175,7 @@ To modify the bottom navigation:
 1. Edit the [PWALayout.tsx](file:///c:/Users/gener/Godirect-realty/src/components/layout/PWALayout.tsx) component
 2. Modify the navigation items in the bottom nav section
 3. Update icons and labels as needed
+4. Use Tailwind classes for consistent styling
 
 ### Route-specific Customization
 To customize behavior for specific routes:
@@ -162,9 +189,12 @@ To customize behavior for specific routes:
 1. **Enhanced User Experience**: App-like interface for installed users
 2. **Clean Separation**: Distinct experiences between browser and installed app
 3. **Automatic UI Cleanup**: Browser elements automatically hidden in PWA mode
-4. **Better Mobile Experience**: Optimized for touch interactions
-5. **Seamless Transition**: Same core functionality across both modes
-6. **Easy Maintenance**: Single codebase with conditional customization
+4. **Full-width Layout**: Content extends to full screen width
+5. **Consistent Styling**: Uses Tailwind CSS for all styling
+6. **Brand Consistency**: Matches platform branding
+7. **Better Mobile Experience**: Optimized for touch interactions
+8. **Seamless Transition**: Same core functionality across both modes
+9. **Easy Maintenance**: Single codebase with conditional customization
 
 ## Future Enhancements
 
@@ -174,5 +204,7 @@ To customize behavior for specific routes:
 4. **Performance Optimization**: Further optimization for app-like performance
 5. **Advanced Caching**: Intelligent caching strategies for PWA mode
 6. **Gesture Support**: Swipe gestures and other mobile interactions
+7. **Dark Mode**: PWA-specific dark mode implementation
+8. **Accessibility**: Enhanced accessibility features for PWA
 
-This refined PWA customization provides a distinct, app-like experience for installed users while maintaining the full website functionality for browser users, with automatic hiding of browser-specific UI elements.
+This enhanced PWA customization provides a distinct, app-like experience for installed users while maintaining the full website functionality for browser users, with automatic hiding of browser-specific UI elements, full-width layout, and consistent Tailwind CSS styling.
