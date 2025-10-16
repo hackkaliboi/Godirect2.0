@@ -14,6 +14,8 @@ const ListPropertyProtected = lazy(() => import("./pages/ListPropertyProtected")
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Navigation = lazy(() => import("./components/layout/Navigation"));
 const Footer = lazy(() => import("./components/layout/Footer"));
+// PWA Components
+const PWAInstallPrompt = lazy(() => import("./components/PWAInstallPrompt"));
 
 
 // Dashboard Pages
@@ -157,6 +159,7 @@ const App = () => {
             </ThemeProvider>
           </AuthProvider>
         </LoadingWrapper>
+        <PWAInstallPrompt />
       </TooltipProvider>
     </QueryClientProvider>
   );

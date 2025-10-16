@@ -5,6 +5,9 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 
+// Initialize PWA functionality
+import './lib/pwa';
+
 // Create a root and render the App component
 const container = document.getElementById('root');
 if (container) {

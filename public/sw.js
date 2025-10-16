@@ -1,8 +1,9 @@
 // Service Worker for caching and performance optimization
-const CACHE_NAME = 'godirect-realty-v1';
+const CACHE_NAME = 'godirect-realty-v2';
 const urlsToCache = [
     '/',
     '/index.html',
+    '/manifest.json',
     '/static/css/main.css',
     '/static/js/main.js',
 ];
@@ -20,11 +21,29 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve cached content when offline
 self.addEventListener('fetch', (event) => {
+    // Skip caching for external requests
+    if (!event.request.url.startsWith(self.location.origin)) {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
                 // Return cached version or fetch from network
-                return response || fetch(event.request);
+                return response || fetch(event.request).then((response) => {
+                    // Cache important assets
+                    if (response.status === 200 && 
+                        (event.request.destination === 'document' || 
+                         event.request.destination === 'script' || 
+                         event.request.destination === 'style')) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME)
+                            .then((cache) => {
+                                cache.put(event.request, responseToCache);
+                            });
+                    }
+                    return response;
+                });
             })
     );
 });
@@ -42,5 +61,34 @@ self.addEventListener('activate', (event) => {
                 })
             );
         })
+    );
+});
+
+// Handle push notifications
+self.addEventListener('push', (event) => {
+    if (event.data) {
+        const data = event.data.json();
+        const title = data.title || 'GODIRECT Notification';
+        const options = {
+            body: data.body || 'You have a new notification',
+            icon: '/android-chrome-192x192.png',
+            badge: '/android-chrome-192x192.png',
+            data: {
+                url: data.url || '/'
+            }
+        };
+        
+        event.waitUntil(
+            self.registration.showNotification(title, options)
+        );
+    }
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url)
     );
 });
