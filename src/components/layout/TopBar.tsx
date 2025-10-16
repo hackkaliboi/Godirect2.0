@@ -10,7 +10,7 @@ import {
 
 const TopBar = () => {
   return (
-    <div className="sticky top-0 z-50 bg-realty-900 dark:bg-realty-950 text-white py-2 border-b border-realty-800">
+    <div className="sticky top-0 z-50 bg-realty-900 dark:bg-realty-950 text-white py-2 border-b border-realty-800 top-bar">
       <div className="container-custom">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
           {/* Left Side - Contact Information */}

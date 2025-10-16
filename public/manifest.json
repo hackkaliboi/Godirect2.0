@@ -1,11 +1,11 @@
 {
-    "name": "GODIRECT Realty",
+    "name": "GODIRECT REALTY",
     "short_name": "GODIRECT",
     "description": "Find your dream home with GODIRECT. Browse thousands of properties for sale and rent across the country.",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#1e40af",
+    "theme_color": "#ffffff",
     "icons": [
         {
             "src": "/pwa-icons/android-chrome-192x192.png",

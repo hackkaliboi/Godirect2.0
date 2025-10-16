@@ -46,7 +46,7 @@ const Header = () => {
           </Link>
 
           {/* Enhanced Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8 desktop-navigation">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -129,7 +129,7 @@ const Header = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center space-x-2 md:hidden">
+          <div className="flex items-center space-x-2 md:hidden mobile-menu-button">
             <Button
               variant="ghost"
               size="icon"
@@ -203,18 +203,18 @@ const Header = () => {
                   Sign Out
                 </Button>
               ) : (
-                <>
+                <div className="flex flex-col space-y-2">
                   <Button
                     variant="outline"
-                    className="justify-center border-realty-200 dark:border-realty-700 hover:bg-realty-50 dark:hover:bg-realty-800 transition-all duration-300"
+                    className="justify-center"
                     asChild
                   >
                     <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                      <User className="h-4 w-4 mr-2 text-realty-600 dark:text-realty-300" />
                       Sign In
                     </Link>
                   </Button>
                   <Button
+                    variant="default"
                     className="justify-center bg-gradient-to-r from-realty-800 to-realty-900 hover:from-realty-700 hover:to-realty-800 text-white shadow-sm hover:shadow transition-all duration-300 dark:from-realty-gold dark:to-realty-gold/90 dark:text-realty-900"
                     asChild
                   >
@@ -222,7 +222,7 @@ const Header = () => {
                       Sign Up
                     </Link>
                   </Button>
-                </>
+                </div>
               )}
             </div>
           </div>
