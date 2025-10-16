@@ -1,11 +1,11 @@
 import { Phone, Mail, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  Linkedin, 
-  Youtube 
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Youtube
 } from "lucide-react";
 
 const TopBar = () => {
@@ -19,19 +19,19 @@ const TopBar = () => {
               <Phone className="h-3 w-3 md:h-4 md:w-4 text-realty-gold" />
               <span>+234 (0) 123 456 7890</span>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Mail className="h-3 w-3 md:h-4 md:w-4 text-realty-gold" />
               <span>info@godirectrealty.com</span>
             </div>
-            
+
 
           </div>
 
           {/* Right Side - Social Media Icons */}
           <div className="flex items-center gap-2 md:gap-3">
             <span className="text-xs hidden md:inline text-realty-300">Follow Us:</span>
-            
+
             <div className="flex items-center gap-1 md:gap-2">
               <Button
                 variant="ghost"

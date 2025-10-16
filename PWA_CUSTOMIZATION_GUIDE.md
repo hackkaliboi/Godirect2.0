@@ -52,6 +52,7 @@ The [PWALayout](file:///c:/Users/gener/Godirect-realty/src/components/layout/PWA
 3. **Routing**: Conditionally shows/hides elements based on route
 4. **Navigation**: Provides app-like bottom navigation in PWA mode
 5. **Layout**: Implements full-width layout without container constraints
+6. **Navbar Conflict Resolution**: In web mode, only renders children to avoid duplicate navbars with RouteWrapper
 
 ### CSS Customization
 Special CSS classes are applied when running as PWA to hide browser elements:
@@ -192,9 +193,10 @@ To customize behavior for specific routes:
 4. **Full-width Layout**: Content extends to full screen width
 5. **Consistent Styling**: Uses Tailwind CSS for all styling
 6. **Brand Consistency**: Matches platform branding
-7. **Better Mobile Experience**: Optimized for touch interactions
-8. **Seamless Transition**: Same core functionality across both modes
-9. **Easy Maintenance**: Single codebase with conditional customization
+7. **No Duplicate Navbars**: Fixed navbar conflict in desktop web version
+8. **Better Mobile Experience**: Optimized for touch interactions
+9. **Seamless Transition**: Same core functionality across both modes
+10. **Easy Maintenance**: Single codebase with conditional customization
 
 ## Future Enhancements
 

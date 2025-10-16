@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 import { usePWAStatus } from '@/hooks/usePWAStatus';
 import { useLocation } from 'react-router-dom';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Navigation from '@/components/layout/Navigation';
 
 interface PWALayoutProps {
   children: React.ReactNode;
@@ -152,12 +149,6 @@ export const PWALayout = ({ children }: PWALayoutProps) => {
     );
   }
 
-  // Regular web layout
-  return (
-    <div className="web-layout">
-      <Header />
-      {children}
-      <Footer />
-    </div>
-  );
+  // Regular web layout - just render children, don't add extra headers
+  return <>{children}</>;
 };
