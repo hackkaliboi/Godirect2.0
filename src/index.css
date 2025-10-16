@@ -238,6 +238,11 @@
     display: none;
   }
 
+  /* Hide RouteWrapper navigation in PWA mode */
+  .pwa-mode .route-wrapper-navigation {
+    display: none;
+  }
+
   /* Safe area insets for mobile devices */
   .pwa-safe-top {
     padding-top: env(safe-area-inset-top);

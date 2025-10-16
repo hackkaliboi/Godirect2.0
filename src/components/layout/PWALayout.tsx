@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { usePWAStatus } from '@/hooks/usePWAStatus';
 import { useLocation } from 'react-router-dom';
+import Navigation from './Navigation'; // Import the platform's Navigation component
 
 interface PWALayoutProps {
   children: React.ReactNode;
@@ -16,15 +17,40 @@ export const PWALayout = ({ children }: PWALayoutProps) => {
       document.body.classList.add('pwa-mode');
       // Hide browser navigation elements in PWA mode
       document.body.classList.add('pwa-navigation-hidden');
+      
+      // Add specific class to hide RouteWrapper navigation and footer
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .pwa-mode .route-wrapper-navigation {
+          display: none !important;
+        }
+        .pwa-mode .route-wrapper-footer {
+          display: none !important;
+        }
+      `;
+      style.id = 'pwa-elements-hide';
+      document.head.appendChild(style);
     } else {
       document.body.classList.remove('pwa-mode');
       document.body.classList.remove('pwa-navigation-hidden');
+      
+      // Remove the style element
+      const style = document.getElementById('pwa-elements-hide');
+      if (style) {
+        style.remove();
+      }
     }
 
     // Cleanup on unmount
     return () => {
       document.body.classList.remove('pwa-mode');
       document.body.classList.remove('pwa-navigation-hidden');
+      
+      // Remove the style element
+      const style = document.getElementById('pwa-elements-hide');
+      if (style) {
+        style.remove();
+      }
     };
   }, [isPWA]);
 
@@ -83,31 +109,8 @@ export const PWALayout = ({ children }: PWALayoutProps) => {
   if (isPWA) {
     return (
       <div className="flex flex-col min-h-screen w-full bg-gray-50">
-        {/* PWA-specific header for installed app */}
-        {shouldShowHeader() && (
-          <header className="sticky top-0 z-50 w-full bg-realty-800 text-white shadow-md">
-            <div className="flex justify-between items-center px-4 py-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md">
-                  <span className="text-realty-800 font-bold text-xl">GD</span>
-                </div>
-                <h1 className="text-xl font-heading font-bold tracking-tight">GODIRECT</h1>
-              </div>
-              <div className="flex space-x-4">
-                <button className="p-2 rounded-full hover:bg-white/20 transition-colors duration-200" aria-label="Notifications">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                  </svg>
-                </button>
-                <button className="p-2 rounded-full hover:bg-white/20 transition-colors duration-200" aria-label="Profile">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 005 10a6 6 0 0012 0c0-.35-.036-.687-.101-1.016A5 5 0 0010 11z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </header>
-        )}
+        {/* Use platform's own Navigation component in PWA mode */}
+        {shouldShowHeader() && <Navigation />}
 
         {/* Main content area - full width */}
         <main className="flex-grow w-full pb-16">

@@ -32,7 +32,9 @@ const RouteWrapper = ({
     return (
       <PageTransition>
         <div className="flex min-h-screen flex-col">
-          <Navigation />
+          <div className="route-wrapper-navigation">
+            <Navigation />
+          </div>
           <main className={`flex-1 ${className}`}>
             {children}
           </main>
@@ -45,11 +47,19 @@ const RouteWrapper = ({
   return (
     <PageTransition>
       <div className="flex min-h-screen flex-col">
-        {includeNavigation && <Navigation />}
+        {includeNavigation && (
+          <div className="route-wrapper-navigation">
+            <Navigation />
+          </div>
+        )}
         <main className={`flex-1 ${className}`}>
           {children}
         </main>
-        {includeFooter && <Footer />}
+        {includeFooter && (
+          <div className="route-wrapper-footer">
+            <Footer />
+          </div>
+        )}
       </div>
     </PageTransition>
   );
