@@ -16,4 +16,22 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Optimize build for better performance
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate vendor chunks for better caching
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tooltip'],
+          data: ['@tanstack/react-query', '@supabase/supabase-js'],
+          icons: ['lucide-react'],
+          charts: ['recharts'],
+          maps: ['@react-google-maps/api'],
+        },
+      },
+    },
+    // Reduce chunk size warnings
+    chunkSizeWarningLimit: 1000,
+  },
 });

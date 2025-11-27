@@ -88,6 +88,19 @@ npm run dev
 7. **Open your browser**
 Navigate to `http://localhost:5173` to see the application.
 
+## ⚡ Performance Optimizations
+
+This project includes several performance optimizations to ensure fast loading times and a smooth user experience:
+
+- **Code Splitting**: Implemented lazy loading for routes and components
+- **Image Optimization**: Added lazy loading and proper image handling
+- **Data Fetching**: Optimized React Query settings with caching strategies
+- **Component Memoization**: Used React.memo and useMemo for better rendering performance
+- **Bundle Optimization**: Configured Vite for efficient code splitting
+- **Caching**: Added service worker for offline support and caching
+
+For detailed information about the performance optimizations, see [PERFORMANCE_OPTIMIZATION_GUIDE.md](PERFORMANCE_OPTIMIZATION_GUIDE.md).
+
 ## 🛠️ Technology Stack
 
 ### Frontend
@@ -159,6 +172,7 @@ src/
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
+- `npm run build:analyze` - Build for production and show bundle visualization
 - `npm run build:dev` - Build for development environment
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint for code quality

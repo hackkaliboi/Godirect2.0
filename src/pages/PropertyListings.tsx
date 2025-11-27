@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutGrid, LayoutList, ArrowUpDown } from "lucide-react";
+import { LayoutGrid, LayoutList, ArrowUpDown, Home, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PropertyCard from "@/components/properties/PropertyCard";
@@ -26,14 +26,113 @@ const PropertyListings = () => {
   const { user } = useAuth();
   const [view, setView] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const propertiesPerPage = 9; // Show 9 properties per page
   const [initialFilters, setInitialFilters] = useState<Partial<FilterState>>({});
 
-  // Fetch properties from Supabase
+  // New state for the property type selection
+  const [selectedPropertyCategory, setSelectedPropertyCategory] = useState<string | null>(null);
+
+  // Fetch properties from Supabase with optimized query settings
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["properties"],
     queryFn: fetchProperties,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
   });
+
+  // Apply filters using useMemo for better performance
+  const filteredProperties = useMemo(() => {
+    if (!properties || properties.length === 0) return [];
+
+    // Parse URL query params
+    const params = new URLSearchParams(location.search);
+    const locationFilter = params.get("location");
+    const typeFilter = params.get("type");
+    const priceMin = params.get("price_min");
+    const priceMax = params.get("price_max");
+    const bedroomsFilter = params.get("bedrooms");
+    const bathroomsFilter = params.get("bathrooms");
+    const amenitiesFilter = params.get("amenities");
+
+    let results = [...properties];
+
+    // Apply property category filter (Land vs Houses)
+    if (selectedPropertyCategory) {
+      if (selectedPropertyCategory === "land") {
+        results = results.filter(property =>
+          property.property_type.toLowerCase() === "land"
+        );
+      } else if (selectedPropertyCategory === "houses") {
+        results = results.filter(property =>
+          ["house", "apartment", "condo", "townhouse"].includes(property.property_type.toLowerCase())
+        );
+      }
+    }
+
+    // Filter by search term (location)
+    if (locationFilter) {
+      const term = locationFilter.toLowerCase();
+      results = results.filter(
+        (property) =>
+          property.city.toLowerCase().includes(term) ||
+          property.state.toLowerCase().includes(term) ||
+          property.zip_code?.toLowerCase().includes(term) ||
+          property.title.toLowerCase().includes(term) ||
+          property.street?.toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by property type
+    if (typeFilter) {
+      const types = typeFilter.split(",").map(type => type.trim());
+      results = results.filter((property) =>
+        types.some(type =>
+          property.property_type.toLowerCase().includes(type.toLowerCase())
+        )
+      );
+    }
+
+    // Filter by bedrooms
+    if (bedroomsFilter) {
+      const bedrooms = parseInt(bedroomsFilter, 10);
+      results = results.filter(
+        (property) => property.bedrooms && property.bedrooms >= bedrooms
+      );
+    }
+
+    // Filter by bathrooms
+    if (bathroomsFilter) {
+      const bathrooms = parseInt(bathroomsFilter, 10);
+      results = results.filter(
+        (property) => property.bathrooms && property.bathrooms >= bathrooms
+      );
+    }
+
+    // Filter by price range
+    if (priceMin && priceMax) {
+      const minPrice = parseInt(priceMin, 10);
+      const maxPrice = parseInt(priceMax, 10);
+      results = results.filter(
+        (property) =>
+          property.price >= minPrice &&
+          property.price <= maxPrice
+      );
+    }
+
+    // Filter by amenities
+    if (amenitiesFilter) {
+      const amenities = amenitiesFilter.split(",").map(amenity => amenity.trim());
+      results = results.filter((property) =>
+        amenities.some((amenity: string) =>
+          property.amenities && Array.isArray(property.amenities) && property.amenities.includes(amenity)
+        )
+      );
+    }
+
+    return results;
+  }, [properties, location.search, selectedPropertyCategory]);
 
   const handleApplyFilters = (filters: FilterState) => {
     // Update URL with filter parameters
@@ -64,68 +163,12 @@ const PropertyListings = () => {
       params.set("amenities", filters.amenities.join(","));
     }
 
+    // Reset to first page when filters change
+    setCurrentPage(1);
+
     // Update browser history
     const newUrl = `/properties${params.toString() ? `?${params.toString()}` : ''}`;
     navigate(newUrl, { replace: true });
-
-    // Apply all filters to the properties
-    let results = [...properties];
-
-    // Filter by search term (location)
-    if (filters.searchTerm) {
-      const term = filters.searchTerm.toLowerCase();
-      results = results.filter(
-        (property) =>
-          property.city.toLowerCase().includes(term) ||
-          property.state.toLowerCase().includes(term) ||
-          property.zip_code?.toLowerCase().includes(term) ||
-          property.title.toLowerCase().includes(term) ||
-          property.street?.toLowerCase().includes(term)
-      );
-    }
-
-    // Filter by property type
-    if (filters.propertyTypes && filters.propertyTypes.length > 0) {
-      results = results.filter((property) =>
-        filters.propertyTypes.some(type =>
-          property.property_type.toLowerCase().includes(type.toLowerCase())
-        )
-      );
-    }
-
-    // Filter by bedrooms
-    if (filters.bedrooms !== null) {
-      results = results.filter(
-        (property) => property.bedrooms && property.bedrooms >= filters.bedrooms
-      );
-    }
-
-    // Filter by bathrooms
-    if (filters.bathrooms !== null) {
-      results = results.filter(
-        (property) => property.bathrooms && property.bathrooms >= filters.bathrooms
-      );
-    }
-
-    // Filter by price range
-    if (filters.priceRange) {
-      results = results.filter(
-        (property) =>
-          property.price >= filters.priceRange[0] &&
-          property.price <= filters.priceRange[1]
-      );
-    }
-
-    // Filter by amenities
-    if (filters.amenities && filters.amenities.length > 0) {
-      results = results.filter((property) =>
-        filters.amenities.some((amenity: string) =>
-          property.amenities && Array.isArray(property.amenities) && property.amenities.includes(amenity)
-        )
-      );
-    }
-
-    setFilteredProperties(results);
 
     // Save search to history if user is logged in
     if (user) {
@@ -140,82 +183,41 @@ const PropertyListings = () => {
       };
 
       // Save to search history (non-blocking)
-      searchHistoryApi.saveSearchToHistory(searchQuery, searchFilters, results.length);
+      searchHistoryApi.saveSearchToHistory(searchQuery, searchFilters, filteredProperties.length);
     }
   };
 
-  // Parse URL query params on initial load and set filtered properties
-  useEffect(() => {
-    if (properties.length > 0) {
-      const params = new URLSearchParams(location.search);
-      const locationFilter = params.get("location");
-      const typeFilter = params.get("type");
-      const priceMin = params.get("price_min");
-      const priceMax = params.get("price_max");
-      const bedroomsFilter = params.get("bedrooms");
-      const bathroomsFilter = params.get("bathrooms");
-      const amenitiesFilter = params.get("amenities");
-
-      const initialFilters: Partial<FilterState> = {};
-
-      if (locationFilter) initialFilters.searchTerm = locationFilter;
-
-      if (typeFilter) {
-        initialFilters.propertyTypes = typeFilter.split(",").map(type => type.trim());
-      }
-
-      if (priceMin && priceMax) {
-        initialFilters.priceRange = [
-          parseInt(priceMin, 10),
-          parseInt(priceMax, 10)
-        ];
-      }
-
-      if (bedroomsFilter) {
-        initialFilters.bedrooms = parseInt(bedroomsFilter, 10);
-      }
-
-      if (bathroomsFilter) {
-        initialFilters.bathrooms = parseInt(bathroomsFilter, 10);
-      }
-
-      if (amenitiesFilter) {
-        initialFilters.amenities = amenitiesFilter.split(",").map(amenity => amenity.trim());
-      }
-
-      setInitialFilters(initialFilters);
-      setFilteredProperties(properties);
-
-      // Apply initial filters if present
-      if (Object.keys(initialFilters).length > 0) {
-        // Use setTimeout to ensure state updates are processed
-        setTimeout(() => {
-          handleApplyFilters(initialFilters as FilterState);
-        }, 0);
-      } else {
-        setFilteredProperties(properties);
-      }
-    }
-  }, [properties, location.search, handleApplyFilters]);
-
-  // Sort properties
-  const sortProperties = (properties: Property[]) => {
+  // Sort properties using useMemo
+  const sortedProperties = useMemo(() => {
     switch (sortBy) {
       case "price_asc":
-        return [...properties].sort((a, b) => a.price - b.price);
+        return [...filteredProperties].sort((a, b) => a.price - b.price);
       case "price_desc":
-        return [...properties].sort((a, b) => b.price - a.price);
+        return [...filteredProperties].sort((a, b) => b.price - a.price);
       case "newest":
-        return [...properties].sort(
+        return [...filteredProperties].sort(
           (a, b) =>
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
       default:
-        return properties;
+        return filteredProperties;
     }
-  };
+  }, [filteredProperties, sortBy]);
 
-  const sortedProperties = sortProperties(filteredProperties);
+  // Pagination
+  const totalPages = Math.ceil(sortedProperties.length / propertiesPerPage);
+  const paginatedProperties = useMemo(() => {
+    const startIndex = (currentPage - 1) * propertiesPerPage;
+    const endIndex = startIndex + propertiesPerPage;
+    return sortedProperties.slice(startIndex, endIndex);
+  }, [sortedProperties, currentPage]);
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of property listings
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (isLoading) {
     return (
@@ -242,6 +244,54 @@ const PropertyListings = () => {
           <p className="text-realty-600 dark:text-realty-400 mb-8">
             Find your next home from our carefully curated property listings.
           </p>
+
+          {/* Property Category Selection */}
+          <div className="mb-8 bg-white dark:bg-realty-800 rounded-lg border border-gray-200 dark:border-realty-700 p-6 shadow-sm">
+            <h2 className="text-xl font-heading font-semibold text-realty-900 dark:text-white mb-4">
+              What are you looking for?
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button
+                variant={selectedPropertyCategory === "houses" ? "default" : "outline"}
+                className={`py-6 h-auto flex flex-col items-center justify-center ${selectedPropertyCategory === "houses"
+                    ? "bg-realty-800 text-white hover:bg-realty-700"
+                    : "hover:bg-realty-50 dark:hover:bg-realty-700"
+                  }`}
+                onClick={() => setSelectedPropertyCategory(selectedPropertyCategory === "houses" ? null : "houses")}
+              >
+                <Home className="h-8 w-8 mb-2" />
+                <span className="text-lg font-medium">Houses & Apartments</span>
+                <span className="text-sm text-realty-600 dark:text-realty-400 mt-1">
+                  Residential properties
+                </span>
+              </Button>
+              <Button
+                variant={selectedPropertyCategory === "land" ? "default" : "outline"}
+                className={`py-6 h-auto flex flex-col items-center justify-center ${selectedPropertyCategory === "land"
+                    ? "bg-realty-800 text-white hover:bg-realty-700"
+                    : "hover:bg-realty-50 dark:hover:bg-realty-700"
+                  }`}
+                onClick={() => setSelectedPropertyCategory(selectedPropertyCategory === "land" ? null : "land")}
+              >
+                <Map className="h-8 w-8 mb-2" />
+                <span className="text-lg font-medium">Land</span>
+                <span className="text-sm text-realty-600 dark:text-realty-400 mt-1">
+                  Plots and acreage
+                </span>
+              </Button>
+            </div>
+            {selectedPropertyCategory && (
+              <div className="mt-4 text-center">
+                <Button
+                  variant="ghost"
+                  className="text-realty-600 dark:text-realty-400 hover:text-realty-900 dark:hover:text-white"
+                  onClick={() => setSelectedPropertyCategory(null)}
+                >
+                  Clear selection
+                </Button>
+              </div>
+            )}
+          </div>
 
           <PropertyFilters
             onApplyFilters={handleApplyFilters}
@@ -289,12 +339,33 @@ const PropertyListings = () => {
             </div>
           </div>
 
-          {sortedProperties.length > 0 ? (
-            <div className={view === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col space-y-6"}>
-              {sortedProperties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
+          {paginatedProperties.length > 0 ? (
+            <>
+              <div className={view === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col space-y-6"}>
+                {paginatedProperties.map((property) => (
+                  <PropertyCard key={property.id} property={property} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-12">
+                  <div className="flex space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        variant={page === currentPage ? "default" : "outline"}
+                        className={page === currentPage ? "bg-realty-800" : ""}
+                        size="sm"
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-12 bg-white dark:bg-realty-800 rounded-lg shadow">
               <h3 className="text-xl font-heading font-semibold text-realty-900 dark:text-white mb-2">
@@ -303,24 +374,6 @@ const PropertyListings = () => {
               <p className="text-realty-600 dark:text-realty-400">
                 Try adjusting your filters to find the perfect property.
               </p>
-            </div>
-          )}
-
-          {/* Pagination placeholder */}
-          {sortedProperties.length > 0 && (
-            <div className="flex justify-center mt-12">
-              <div className="flex space-x-1">
-                {[1, 2, 3].map((page) => (
-                  <Button
-                    key={page}
-                    variant={page === 1 ? "default" : "outline"}
-                    className={page === 1 ? "bg-realty-800" : ""}
-                    size="sm"
-                  >
-                    {page}
-                  </Button>
-                ))}
-              </div>
             </div>
           )}
         </div>

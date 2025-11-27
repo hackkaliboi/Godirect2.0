@@ -1,12 +1,12 @@
 -- =====================================================
--- CONSOLIDATED GODIRECT REALTY DATABASE SETUP & FIXES
+-- MERGED GODIRECT REALTY DATABASE SETUP
 -- =====================================================
--- This file contains everything needed to set up and fix the database:
--- 1. Complete table structure
--- 2. Indexes for performance
+-- This file contains everything needed to set up the database in one go:
+-- 1. Complete table structure with all tables
+-- 2. Performance indexes for all tables
 -- 3. Improved triggers for user profile creation
 -- 4. Fixed RLS policies without recursion
--- 5. Storage bucket configuration
+-- 5. Storage bucket configuration with proper policies
 -- 6. Essential configuration data
 -- =====================================================
 
@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS properties (
     lot_size DECIMAL(10,2),
     year_built INTEGER,
     address TEXT NOT NULL,
+    street TEXT,
     city VARCHAR(100) NOT NULL,
     state VARCHAR(50) NOT NULL,
     zip_code VARCHAR(20) NOT NULL,
@@ -405,6 +406,44 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Property Applications table
+CREATE TABLE IF NOT EXISTS property_applications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    application_type VARCHAR(20) NOT NULL CHECK (application_type IN ('rental', 'purchase')),
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'declined', 'withdrawn', 'completed')),
+    applicant_name VARCHAR(255) NOT NULL,
+    applicant_email VARCHAR(255) NOT NULL,
+    applicant_phone VARCHAR(20),
+    message TEXT,
+    submitted_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    decision_date TIMESTAMP WITH TIME ZONE,
+    decision_notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Property viewings table for scheduled property viewings/appointments
+CREATE TABLE IF NOT EXISTS property_viewings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    viewing_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    viewing_type VARCHAR(20) DEFAULT 'in_person' CHECK (viewing_type IN ('in_person', 'virtual', 'group')),
+    status VARCHAR(20) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'confirmed', 'completed', 'cancelled', 'rescheduled')),
+    duration_minutes INTEGER DEFAULT 60,
+    notes TEXT,
+    attendees_count INTEGER DEFAULT 1,
+    meeting_link TEXT,
+    reminder_sent BOOLEAN DEFAULT FALSE,
+    user_notes TEXT,
+    rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+    feedback TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
@@ -522,6 +561,19 @@ CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
 CREATE INDEX IF NOT EXISTS idx_messages_sender_type ON messages(sender_type);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_read_at ON messages(read_at);
+
+-- Indexes for property applications
+CREATE INDEX IF NOT EXISTS idx_property_applications_user_id ON property_applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_property_applications_property_id ON property_applications(property_id);
+CREATE INDEX IF NOT EXISTS idx_property_applications_status ON property_applications(status);
+CREATE INDEX IF NOT EXISTS idx_property_applications_application_type ON property_applications(application_type);
+CREATE INDEX IF NOT EXISTS idx_property_applications_submitted_date ON property_applications(submitted_date);
+
+-- Indexes for property viewings
+CREATE INDEX IF NOT EXISTS idx_property_viewings_property_id ON property_viewings(property_id);
+CREATE INDEX IF NOT EXISTS idx_property_viewings_user_id ON property_viewings(user_id);
+CREATE INDEX IF NOT EXISTS idx_property_viewings_viewing_date ON property_viewings(viewing_date);
+CREATE INDEX IF NOT EXISTS idx_property_viewings_status ON property_viewings(status);
 
 -- =====================================================
 -- IMPROVED TRIGGER FUNCTIONS
@@ -692,88 +744,163 @@ CREATE TRIGGER update_messages_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Create avatars bucket for profile pictures
-CREATE BUCKET IF NOT EXISTS avatars;
+DROP TRIGGER IF EXISTS update_property_applications_updated_at ON property_applications;
+CREATE TRIGGER update_property_applications_updated_at
+    BEFORE UPDATE ON property_applications
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 
--- Create property_images bucket for property images
-CREATE BUCKET IF NOT EXISTS property_images;
-
--- Create documents bucket for various documents
-CREATE BUCKET IF NOT EXISTS documents;
-
--- Create storage policies for avatars bucket
-CREATE POLICY "User can upload avatar" ON storage.objects
-    FOR INSERT
-    WITH CHECK (
-        bucket_id = 'avatars' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
-CREATE POLICY "User can update avatar" ON storage.objects
-    FOR UPDATE
-    USING (
-        bucket_id = 'avatars' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
-CREATE POLICY "User can select avatar" ON storage.objects
-    FOR SELECT
-    USING (
-        bucket_id = 'avatars' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
--- Create storage policies for property_images bucket
-CREATE POLICY "User can upload property image" ON storage.objects
-    FOR INSERT
-    WITH CHECK (
-        bucket_id = 'property_images' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
-CREATE POLICY "User can update property image" ON storage.objects
-    FOR UPDATE
-    USING (
-        bucket_id = 'property_images' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
-CREATE POLICY "User can select property image" ON storage.objects
-    FOR SELECT
-    USING (
-        bucket_id = 'property_images' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
--- Create storage policies for documents bucket
-CREATE POLICY "User can upload document" ON storage.objects
-    FOR INSERT
-    WITH CHECK (
-        bucket_id = 'documents' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
-CREATE POLICY "User can update document" ON storage.objects
-    FOR UPDATE
-    USING (
-        bucket_id = 'documents' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
-CREATE POLICY "User can select document" ON storage.objects
-    FOR SELECT
-    USING (
-        bucket_id = 'documents' AND
-        auth.uid() = split_part(storage.objects.name, '/', 1)
-    );
-
--- Create storage policies for service role
-CREATE POLICY "Service role can manage all buckets" ON storage.objects
-    FOR ALL
-    USING (auth.role() = 'service_role');
+DROP TRIGGER IF EXISTS update_property_viewings_updated_at ON property_viewings;
+CREATE TRIGGER update_property_viewings_updated_at
+    BEFORE UPDATE ON property_viewings
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
--- FIXED ROW LEVEL SECURITY (RLS) POLICIES WITHOUT RECURSION
+-- STORAGE BUCKETS SETUP
+-- =====================================================
+
+-- 1. CREATE STORAGE BUCKETS
+-- Ensure all required buckets exist with correct settings
+
+-- Property Images Bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('property-images', 'property-images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Avatars Bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Documents Bucket (private)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('documents', 'documents', false)
+ON CONFLICT (id) DO UPDATE SET public = false;
+
+-- 2. DROP EXISTING POLICIES (if any)
+-- Clean up old policies to avoid conflicts
+
+DROP POLICY IF EXISTS "Only agents and admins can upload property images" ON storage.objects;
+DROP POLICY IF EXISTS "Users can upload property images" ON storage.objects;
+DROP POLICY IF EXISTS "Public read access to property images" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own property images" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own property images" ON storage.objects;
+
+DROP POLICY IF EXISTS "Users can upload avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Public read access to avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own avatars" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own avatars" ON storage.objects;
+
+DROP POLICY IF EXISTS "Users can upload documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can read their own documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own documents" ON storage.objects;
+
+-- 3. CREATE NEW POLICIES
+
+-- PROPERTY IMAGES POLICIES
+-- Allow authenticated users to upload property images
+CREATE POLICY "Authenticated users can upload property images"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'property-images');
+
+-- Allow public read access to property images
+CREATE POLICY "Public read access to property images"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'property-images');
+
+-- Allow users to update their own property images
+CREATE POLICY "Users can update their own property images"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'property-images' 
+  AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+);
+
+-- Allow users to delete their own property images
+CREATE POLICY "Users can delete their own property images"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'property-images' 
+  AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+);
+
+-- AVATARS POLICIES
+-- Allow authenticated users to upload avatars
+CREATE POLICY "Authenticated users can upload avatars"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'avatars');
+
+-- Allow public read access to avatars
+CREATE POLICY "Public read access to avatars"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'avatars');
+
+-- Allow users to update their own avatars
+CREATE POLICY "Users can update their own avatars"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'avatars' 
+  AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+);
+
+-- Allow users to delete their own avatars
+CREATE POLICY "Users can delete their own avatars"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'avatars' 
+  AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+);
+
+-- DOCUMENTS POLICIES
+-- Allow authenticated users to upload documents
+CREATE POLICY "Authenticated users can upload documents"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'documents');
+
+-- Allow users to read their own documents only
+CREATE POLICY "Users can read their own documents"
+ON storage.objects FOR SELECT
+TO authenticated
+USING (
+  bucket_id = 'documents' 
+  AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+);
+
+-- Allow users to update their own documents
+CREATE POLICY "Users can update their own documents"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'documents' 
+  AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+);
+
+-- Allow users to delete their own documents
+CREATE POLICY "Users can delete their own documents"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'documents' 
+  AND (storage.foldername(name))[1] = (SELECT auth.uid()::text)
+);
+
+-- 4. ENABLE RLS ON storage.objects
+-- Ensure Row Level Security is enabled for storage objects
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- =====================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
 -- =====================================================
 
 -- Enable RLS on all tables
@@ -802,6 +929,8 @@ ALTER TABLE saved_searches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE property_comparisons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE property_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE property_viewings ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing problematic policies
 DROP POLICY IF EXISTS "Users can view all profiles" ON profiles;
@@ -832,6 +961,14 @@ DROP POLICY IF EXISTS "Users can view own subscriptions" ON user_subscriptions;
 DROP POLICY IF EXISTS "Admins can manage user subscriptions" ON user_subscriptions;
 DROP POLICY IF EXISTS "Users can view property documents" ON property_documents;
 DROP POLICY IF EXISTS "Agents can manage property documents" ON property_documents;
+DROP POLICY IF EXISTS "Users can manage own applications" ON property_applications;
+DROP POLICY IF EXISTS "Users can create applications" ON property_applications;
+DROP POLICY IF EXISTS "Users can update own applications" ON property_applications;
+DROP POLICY IF EXISTS "Service role can manage all applications" ON property_applications;
+DROP POLICY IF EXISTS "Users can view own viewings" ON property_viewings;
+DROP POLICY IF EXISTS "Users can create viewings" ON property_viewings;
+DROP POLICY IF EXISTS "Users can update own viewings" ON property_viewings;
+DROP POLICY IF EXISTS "Admins can delete viewings" ON property_viewings;
 
 -- Recreate profiles policies without recursion
 -- Simple policy that allows users to view all profiles
@@ -1025,7 +1162,8 @@ CREATE POLICY "Users can manage own saved searches" ON saved_searches
     FOR ALL USING (auth.uid() = user_id);
 
 -- Property comparisons policies
-CREATE POLICY "Users can manage own comparisons" ON property_comparisons;
+CREATE POLICY "Users can manage own comparisons" ON property_comparisons
+    FOR ALL USING (auth.uid() = user_id);
 
 -- RLS policies for conversations and messages
 CREATE POLICY "Users can view own conversations" ON conversations
@@ -1064,4 +1202,169 @@ CREATE POLICY "Service role can manage all messages" ON messages
     FOR ALL
     USING (auth.jwt() ->> 'role' = 'service_role');
 
--- Create updated_at triggers for all tables
+-- RLS policies for property applications
+CREATE POLICY "Users can view own applications" ON property_applications
+    FOR SELECT
+    USING (user_id = auth.uid());
+
+CREATE POLICY "Users can create applications" ON property_applications
+    FOR INSERT
+    WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can update own applications" ON property_applications
+    FOR UPDATE
+    USING (user_id = auth.uid());
+
+CREATE POLICY "Service role can manage all applications" ON property_applications
+    FOR ALL
+    USING (auth.jwt() ->> 'role' = 'service_role');
+
+-- RLS policies for property viewings
+CREATE POLICY "Users can view own viewings" ON property_viewings
+    FOR SELECT
+    USING (
+        user_id = auth.uid() OR
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE id = auth.uid() AND user_type = 'admin'
+        )
+    );
+
+CREATE POLICY "Users can create viewings" ON property_viewings
+    FOR INSERT WITH CHECK (
+        auth.uid() = user_id OR
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE id = auth.uid() AND user_type = 'admin'
+        )
+    );
+
+CREATE POLICY "Users can update their own viewings" ON property_viewings
+    FOR UPDATE USING (
+        auth.uid() = user_id OR
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE id = auth.uid() AND user_type = 'admin'
+        )
+    );
+
+CREATE POLICY "Admins can delete viewings" ON property_viewings
+    FOR DELETE USING (
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE id = auth.uid() AND user_type = 'admin'
+        )
+    );
+
+-- =====================================================
+-- ESSENTIAL CONFIGURATION DATA
+-- =====================================================
+
+-- Insert supported currencies
+INSERT INTO supported_currencies (code, name, symbol, exchange_rate, is_default, is_active) VALUES
+    ('USD', 'US Dollar', '$', 1.0, true, true),
+    ('EUR', 'Euro', '€', 0.85, false, true),
+    ('GBP', 'British Pound', '£', 0.73, false, true),
+    ('CAD', 'Canadian Dollar', 'C$', 1.25, false, true),
+    ('AUD', 'Australian Dollar', 'A$', 1.35, false, true)
+ON CONFLICT (code) DO UPDATE SET
+    name = EXCLUDED.name,
+    symbol = EXCLUDED.symbol,
+    is_active = EXCLUDED.is_active,
+    updated_at = NOW();
+
+-- Insert system settings
+INSERT INTO system_settings (key, value, description) VALUES
+    ('site_name', '"GODIRECT Realty"', 'Name of the website'),
+    ('site_description', '"Your trusted partner in real estate"', 'Website description'),
+    ('contact_email', '"info@godirectrealty.com"', 'Main contact email'),
+    ('contact_phone', '"+1 (555) 123-4567"', 'Main contact phone'),
+    ('office_address', '"123 Real Estate Ave, City, State 12345"', 'Office address'),
+    ('public_max_properties_per_page', '12', 'Number of properties to show per page'),
+    ('public_featured_properties_count', '6', 'Number of featured properties to show on homepage'),
+    ('public_testimonials_count', '3', 'Number of testimonials to show on homepage'),
+    ('public_blog_posts_per_page', '9', 'Number of blog posts per page'),
+    ('public_enable_property_inquiry', 'true', 'Enable property inquiry form'),
+    ('public_enable_newsletter', 'true', 'Enable newsletter subscription'),
+    ('public_enable_testimonials', 'true', 'Enable testimonials feature'),
+    ('currency_default', '"USD"', 'Default currency code'),
+    ('timezone', '"America/New_York"', 'Default timezone'),
+    ('date_format', '"MM/DD/YYYY"', 'Default date format'),
+    ('public_social_facebook', '""', 'Facebook page URL'),
+    ('public_social_twitter', '""', 'Twitter profile URL'),
+    ('public_social_instagram', '""', 'Instagram profile URL'),
+    ('public_social_linkedin', '""', 'LinkedIn profile URL'),
+    ('public_social_youtube', '""', 'YouTube channel URL'),
+    ('email_notifications_enabled', 'true', 'Enable email notifications'),
+    ('maintenance_mode', 'false', 'Site maintenance mode'),
+    ('default_theme', '"light"', 'Default theme for new users'),
+    ('available_themes', '["light", "dark", "system"]', 'Available theme options'),
+    ('public_theme_customization_enabled', 'true', 'Allow users to customize themes')
+ON CONFLICT (key) DO UPDATE SET
+    value = EXCLUDED.value,
+    description = EXCLUDED.description,
+    updated_at = NOW();
+
+-- Insert default user preference templates
+INSERT INTO system_settings (key, value, description) VALUES
+    ('default_user_theme_settings', '{
+        "theme": "light",
+        "primary_color": "#1e40af",
+        "accent_color": "#f59e0b",
+        "font_size": "medium",
+        "compact_mode": false,
+        "sidebar_collapsed": false,
+        "animations_enabled": true
+    }', 'Default theme settings for new users'),
+    ('default_agent_theme_settings', '{
+        "theme": "light",
+        "primary_color": "#059669",
+        "accent_color": "#dc2626",
+        "font_size": "medium",
+        "compact_mode": false,
+        "sidebar_collapsed": false,
+        "animations_enabled": true,
+        "dashboard_layout": "grid",
+        "property_card_style": "detailed"
+    }', 'Default theme settings for new agents'),
+    ('default_admin_theme_settings', '{
+        "theme": "dark",
+        "primary_color": "#7c3aed",
+        "accent_color": "#f59e0b",
+        "font_size": "medium",
+        "compact_mode": true,
+        "sidebar_collapsed": false,
+        "animations_enabled": false,
+        "dashboard_layout": "table",
+        "data_density": "compact"
+    }', 'Default theme settings for new admins')
+ON CONFLICT (key) DO UPDATE SET
+    value = EXCLUDED.value,
+    description = EXCLUDED.description,
+    updated_at = NOW();
+
+-- =====================================================
+-- COMPLETION MESSAGE
+-- =====================================================
+
+DO $$
+BEGIN
+    RAISE NOTICE '=====================================================';
+    RAISE NOTICE '✅ GODIRECT REALTY DATABASE SETUP COMPLETE!';
+    RAISE NOTICE '=====================================================';
+    RAISE NOTICE 'Created:';
+    RAISE NOTICE '• All tables with proper relationships';
+    RAISE NOTICE '• Performance indexes';
+    RAISE NOTICE '• User signup trigger';
+    RAISE NOTICE '• Row Level Security policies';
+    RAISE NOTICE '• Storage bucket configuration';
+    RAISE NOTICE '• Essential configuration data';
+    RAISE NOTICE '';
+    RAISE NOTICE 'Your database is ready for use!';
+    RAISE NOTICE '';
+    RAISE NOTICE 'Next steps:';
+    RAISE NOTICE '1. Update your app with new Supabase credentials';
+    RAISE NOTICE '2. Test user signup functionality';
+    RAISE NOTICE '3. Verify all features work correctly';
+    RAISE NOTICE '=====================================================';
+END $$;
