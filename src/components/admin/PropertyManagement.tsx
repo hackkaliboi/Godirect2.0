@@ -342,7 +342,7 @@ export function PropertyManagement() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem onClick={() => navigate(`/property/${property.id}`)}>
+                                                <DropdownMenuItem onClick={() => navigate(`/properties/${property.id}`)}>
                                                     <Eye className="mr-2 h-4 w-4" />
                                                     View Details
                                                 </DropdownMenuItem>

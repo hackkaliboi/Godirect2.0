@@ -22,7 +22,7 @@ interface PropertyFormData {
     zip_code: string;
     country: string;
     price: string;
-    currency: string;
+    currency?: string; // Made optional since it's not in the database
     bedrooms: string;
     bathrooms: string;
     square_feet: string;
@@ -55,7 +55,7 @@ const PropertyListingForm = () => {
         zip_code: "",
         country: "Nigeria",
         price: "",
-        currency: "NGN",
+        // Removed currency from initial state since it's not in the database
         bedrooms: "",
         bathrooms: "",
         square_feet: "",
@@ -224,6 +224,60 @@ const PropertyListingForm = () => {
                 return;
             }
 
+            // Validate numeric fields
+            const priceValue = parseFloat(formData.price);
+            if (isNaN(priceValue) || priceValue <= 0) {
+                toast({
+                    title: "Error",
+                    description: "Please enter a valid price",
+                    variant: "destructive"
+                });
+                setLoading(false);
+                return;
+            }
+
+            if (formData.bathrooms && (isNaN(parseFloat(formData.bathrooms)) || parseFloat(formData.bathrooms) < 0)) {
+                toast({
+                    title: "Error",
+                    description: "Please enter a valid number of bathrooms",
+                    variant: "destructive"
+                });
+                setLoading(false);
+                return;
+            }
+
+            if (formData.lot_size && (isNaN(parseFloat(formData.lot_size)) || parseFloat(formData.lot_size) < 0)) {
+                toast({
+                    title: "Error",
+                    description: "Please enter a valid lot size",
+                    variant: "destructive"
+                });
+                setLoading(false);
+                return;
+            }
+
+            if (formData.latitude && (isNaN(parseFloat(formData.latitude)) ||
+                parseFloat(formData.latitude) > 90 || parseFloat(formData.latitude) < -90)) {
+                toast({
+                    title: "Error",
+                    description: "Please enter a valid latitude (-90 to 90)",
+                    variant: "destructive"
+                });
+                setLoading(false);
+                return;
+            }
+
+            if (formData.longitude && (isNaN(parseFloat(formData.longitude)) ||
+                parseFloat(formData.longitude) > 180 || parseFloat(formData.longitude) < -180)) {
+                toast({
+                    title: "Error",
+                    description: "Please enter a valid longitude (-180 to 180)",
+                    variant: "destructive"
+                });
+                setLoading(false);
+                return;
+            }
+
             // Upload images if any
             let imageUrls: string[] = [];
             if (images.length > 0) {
@@ -241,6 +295,21 @@ const PropertyListingForm = () => {
                 }
             }
 
+            // Validate numeric fields to prevent overflow
+            const priceVal = parseFloat(formData.price);
+            const bathroomsVal = formData.bathrooms ? parseFloat(formData.bathrooms) : null;
+            const lotSizeVal = formData.lot_size ? parseFloat(formData.lot_size) : null;
+            const latitudeVal = formData.latitude ? parseFloat(formData.latitude) : 6.4572;
+            const longitudeVal = formData.longitude ? parseFloat(formData.longitude) : 3.3925;
+
+            // Ensure values are within valid ranges for database columns
+            const validatedPrice = isNaN(priceVal) || priceVal > 9999999999.99 ? 0 : priceVal;
+            const validatedBathrooms = bathroomsVal !== null && (isNaN(bathroomsVal) || bathroomsVal > 99.9) ? 0 : bathroomsVal;
+            const validatedLotSize = lotSizeVal !== null && (isNaN(lotSizeVal) || lotSizeVal > 99999999.99) ? 0 : lotSizeVal;
+            // Latitude range: -90 to 90, Longitude range: -180 to 180
+            const validatedLatitude = isNaN(latitudeVal) || latitudeVal > 90 || latitudeVal < -90 ? 6.4572 : latitudeVal;
+            const validatedLongitude = isNaN(longitudeVal) || longitudeVal > 180 || longitudeVal < -180 ? 3.3925 : longitudeVal;
+
             // Create property listing
             const propertyData: any = {
                 title: formData.title,
@@ -251,20 +320,22 @@ const PropertyListingForm = () => {
                 state: formData.state,
                 zip_code: formData.zip_code,
                 country: formData.country,
-                price: parseFloat(formData.price),
-                currency: formData.currency,
+                price: validatedPrice,
+                // Removed currency field since it doesn't exist in the properties table
                 bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
-                bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
+                bathrooms: validatedBathrooms,
                 square_feet: formData.square_feet ? parseInt(formData.square_feet) : null,
-                lot_size: formData.lot_size ? parseFloat(formData.lot_size) : null,
+                lot_size: validatedLotSize,
                 year_built: formData.year_built ? parseInt(formData.year_built) : null,
                 amenities: formData.amenities,
                 features: formData.features,
                 images: imageUrls,
-                agent_id: user?.id,  // Set agent_id instead of owner_id
+                owner_id: user?.id,  // Changed from agent_id to owner_id to match the current schema
                 status: "pending", // Start with pending approval
                 is_featured: isFeaturedRequest, // Request featured status
-                address: `${formData.street}, ${formData.city}, ${formData.state}`
+                address: `${formData.street}, ${formData.city}, ${formData.state}`,
+                latitude: validatedLatitude,
+                longitude: validatedLongitude
             };
 
             console.log("Creating property with data:", propertyData);
@@ -295,7 +366,7 @@ const PropertyListingForm = () => {
                 zip_code: "",
                 country: "Nigeria",
                 price: "",
-                currency: "NGN",
+                // Removed currency from reset since it doesn't exist in the properties table
                 bedrooms: "",
                 bathrooms: "",
                 square_feet: "",
