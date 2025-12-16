@@ -23,7 +23,11 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
+import { useLocationStats } from "@/hooks/useLocationStats";
+
 const Index = () => {
+  const { getCountForCity, loading } = useLocationStats();
+
   // Smooth scroll effect for the page
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -34,7 +38,6 @@ const Index = () => {
     {
       id: 1,
       name: "Enugu",
-      properties: "240+ Properties",
       price: "From ₦25M",
       image: "/locations/location-1.jpg",
       link: "/properties?location=Enugu"
@@ -42,7 +45,6 @@ const Index = () => {
     {
       id: 2,
       name: "Calabar",
-      properties: "180+ Properties",
       price: "From ₦22M",
       image: "/locations/location-2.jpg",
       link: "/properties?location=Calabar"
@@ -50,7 +52,6 @@ const Index = () => {
     {
       id: 3,
       name: "Lagos",
-      properties: "320+ Properties",
       price: "From ₦35M",
       image: "/locations/location-3.jpg",
       link: "/properties?location=Lagos"
@@ -58,7 +59,6 @@ const Index = () => {
     {
       id: 4,
       name: "Abuja",
-      properties: "280+ Properties",
       price: "From ₦40M",
       image: "/locations/location-4.jpg",
       link: "/properties?location=Abuja"
@@ -66,7 +66,6 @@ const Index = () => {
     {
       id: 5,
       name: "Akwa Ibom",
-      properties: "120+ Properties",
       price: "From ₦18M",
       image: "/locations/location-5.jpg",
       link: "/properties?location=Akwa%20Ibom"
@@ -74,7 +73,6 @@ const Index = () => {
     {
       id: 6,
       name: "Anambra",
-      properties: "150+ Properties",
       price: "From ₦20M",
       image: "/locations/location-6.jpg",
       link: "/properties?location=Anambra"
@@ -82,7 +80,6 @@ const Index = () => {
     {
       id: 7,
       name: "Kano",
-      properties: "190+ Properties",
       price: "From ₦15M",
       image: "/locations/location-7.jpg",
       link: "/properties?location=Kano"
@@ -90,7 +87,6 @@ const Index = () => {
     {
       id: 8,
       name: "Kaduna",
-      properties: "130+ Properties",
       price: "From ₦17M",
       image: "/locations/location-8.jpg",
       link: "/properties?location=Kaduna"
@@ -98,7 +94,6 @@ const Index = () => {
     {
       id: 9,
       name: "Port Harcourt",
-      properties: "210+ Properties",
       price: "From ₦30M",
       image: "/locations/location-9.jpg",
       link: "/properties?location=Port%20Harcourt"
@@ -150,50 +145,55 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {locations.map((location) => (
-              <div key={location.id} className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
-                <div className="absolute inset-0 z-0">
-                  <img
-                    src={location.image}
-                    alt={location.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      // Show gradient fallback
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.innerHTML = '<div class="absolute inset-0 bg-gradient-to-br from-realty-500 to-realty-700"></div>';
-                      }
-                    }}
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-realty-900/90 to-realty-900/20 z-10"></div>
-                <div className="w-full h-80 relative"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
-                  <div className="flex items-center text-white mb-4">
-                    <MapPin className="h-5 w-5 mr-2 text-realty-gold" />
-                    <h3 className="text-xl font-semibold">{location.name}</h3>
+            {locations.map((location) => {
+              const count = getCountForCity(location.name);
+              return (
+                <div key={location.id} className="group relative overflow-hidden rounded-xl shadow-lg transition-all duration-500 hover:shadow-xl">
+                  <div className="absolute inset-0 z-0">
+                    <img
+                      src={location.image}
+                      alt={location.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        // Show gradient fallback
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<div class="absolute inset-0 bg-gradient-to-br from-realty-500 to-realty-700"></div>';
+                        }
+                      }}
+                    />
                   </div>
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">{location.properties}</span>
-                    <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">{location.price}</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-realty-900/90 to-realty-900/20 z-10"></div>
+                  <div className="w-full h-80 relative"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+                    <div className="flex items-center text-white mb-4">
+                      <MapPin className="h-5 w-5 mr-2 text-realty-gold" />
+                      <h3 className="text-xl font-semibold">{location.name}</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-3 mb-4">
+                      <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
+                        {loading ? '...' : `${count} Properties`}
+                      </span>
+                      <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">{location.price}</span>
+                    </div>
+                    <Button asChild variant="outline" className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 w-full">
+                      <Link to={location.link} className="flex items-center justify-center">
+                        Explore {location.name}
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
                   </div>
-                  <Button asChild variant="outline" className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 w-full">
-                    <Link to={location.link} className="flex items-center justify-center">
-                      Explore {location.name}
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Remove the duplicate Featured property listings section that was here */}
-      
+
       {/* Property types */}
       <section className="py-16 bg-gradient-to-r from-realty-50 to-white dark:from-realty-900/40 dark:to-realty-900/20">
         <div className="container-custom">

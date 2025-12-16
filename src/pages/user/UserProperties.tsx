@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { fetchUserProperties } from "@/utils/supabaseData";
 import { toast } from "sonner";
 import { Property } from "@/types/database";
+import { Link } from "react-router-dom";
 
 export default function UserProperties() {
   const { user } = useAuth();
@@ -79,9 +80,11 @@ export default function UserProperties() {
           <p className="text-muted-foreground mb-4">
             You haven't listed any properties yet. Start by creating your first listing!
           </p>
-          <Button variant="outline">
-            <Heart className="mr-2 h-4 w-4" />
-            List a Property
+          <Button variant="outline" asChild>
+            <Link to="/list-property-protected">
+              <Heart className="mr-2 h-4 w-4" />
+              List a Property
+            </Link>
           </Button>
         </div>
       ) : (
@@ -90,8 +93,8 @@ export default function UserProperties() {
             <Card key={property.id} className="overflow-hidden">
               <div className="relative">
                 {property.images?.[0] ? (
-                  <img 
-                    src={property.images[0]} 
+                  <img
+                    src={property.images[0]}
                     alt={property.title}
                     className="w-full h-48 object-cover"
                   />
