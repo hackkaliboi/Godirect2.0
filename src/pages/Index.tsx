@@ -106,6 +106,20 @@ const Index = () => {
         <title>GODIRECT | Find Your Dream Home in Nigeria</title>
         <meta name="description" content="Find your dream home with GODIRECT. Browse thousands of premium properties for sale and rent in Enugu and Calabar, Nigeria." />
         <meta name="keywords" content="real estate, property, Nigeria, Enugu, Calabar, buy home, rent apartment, luxury properties" />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://godirect.ng/" />
+        <meta property="og:title" content="GODIRECT | Find Your Dream Home in Nigeria" />
+        <meta property="og:description" content="Find your dream home with GODIRECT. Browse thousands of premium properties for sale and rent in Enugu and Calabar, Nigeria." />
+        <meta property="og:image" content="https://godirect.ng/og-image.jpg" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://godirect.ng/" />
+        <meta property="twitter:title" content="GODIRECT | Find Your Dream Home in Nigeria" />
+        <meta property="twitter:description" content="Find your dream home with GODIRECT. Browse thousands of premium properties for sale and rent in Enugu and Calabar, Nigeria." />
+        <meta property="twitter:image" content="https://godirect.ng/og-image.jpg" />
       </Helmet>
 
       {/* Main hero section with search */}
